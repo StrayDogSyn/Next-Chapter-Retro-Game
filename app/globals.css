@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #101820;
+  --panel: #1e2b3a;
+  --accent: #ffcc66;
+  --text: #e5e7eb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Courier New", Courier, monospace;
+  color: var(--text);
+  background: radial-gradient(circle at top, #1f3145 0%, var(--bg) 70%);
+}
+
+.game-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.game-panel {
+  width: min(900px, 100%);
+  border: 4px solid #314862;
+  border-radius: 8px;
+  padding: 1rem;
+  background: linear-gradient(180deg, #263a51 0%, var(--panel) 100%);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.game-panel h1 {
+  margin: 0 0 0.5rem;
+  color: var(--accent);
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+}
+
+.game-panel p {
+  margin-top: 0;
+  line-height: 1.4;
+}
+
+.python-status {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
