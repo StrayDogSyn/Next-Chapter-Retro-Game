@@ -25,6 +25,29 @@ Full chronological record of every AI-paired session on this project. The summar
 
 ## Entries
 
+### 2026-07-08 — Overnight architecture audit + combat-effect wiring + runtime proof pass
+
+- **Tool used:** Copilot CLI runtime in VS Code (autonomous overnight session)
+- **Goal:** Verify repo ground truth first, then harden gameplay against the current spec (20+ room world, unified keyboard+gamepad input, Python-authoritative loot), implement missing loot-effect mechanics, and produce proof-first status artifacts.
+- **Prompt summary:** Follow strict verification workflow (`project-status.py` first and repeatedly), avoid claim-only summaries, run real lint/build/runtime checks, and align docs with actual wired assets.
+- **What the agent produced:**
+  - Ran required orientation reads and `python scripts/project-status.py` before edits.
+  - Implemented all previously stubbed prefix effects in `lib/game/game.ts`:
+    - `burn`: periodic DOT tick
+    - `freeze`: temporary heavy slow
+    - `shock`: short stun/slow plus local chain splash
+    - `curse`: temporary vulnerability multiplier
+    - (existing `crit` and `lifesteal` retained)
+  - Added minimal in-combat status indicators (colored pips above affected enemies).
+  - Updated docs to match real state:
+    - `docs/ARCHITECTURE.md` open-questions now marks prefix-effect wiring complete
+    - `docs/AGENTIC_WORKFLOW.md` weapon/loot status updated to 6/6 effects wired
+    - `docs/CREDITS.md` rebuilt to include only currently wired runtime assets from `assets/wired-assets.txt` + manifests
+- **Human review/changes:** Pending morning review; all changes validated by lint/build in-session.
+- **Outcome:** 🟢 in progress (implementation + static verification complete; runtime/browser playproof and final morning report follow in same overnight run)
+- **Time saved vs. hand-writing (rough estimate):** ~3–5 hours (cross-file gameplay + docs reconciliation + verification loop)
+- **Anything worth remembering:** This repo’s safeguard is working: `project-status.py` was used as source-of-truth before and during edits; doc updates were explicitly tied to wired runtime assets, not candidate inventory.
+
 ### 2026-07-08 — Bug-fix overhaul: four review findings verified + fixed, sync-corruption repair
 
 - **Tool used:** Claude (Cowork, autonomous overnight session)

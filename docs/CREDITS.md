@@ -1,108 +1,53 @@
-# Credits & Attribution
+# Credits & Attribution (wired assets only)
 
-Full sourcing record for every third-party sprite and audio asset in this project. Nothing here is extracted or derived from Altered Beast, Warhammer Space Marine, Ghouls'n Ghosts, or any other copyrighted property — these are original open-source works chosen to match that aesthetic direction.
+This file tracks only assets currently wired into runtime output (`public/sprites`, `public/audio`) by `scripts/prepare-assets.py`.
 
-**Status legend:** 🔴 candidate (not yet downloaded) · 🟡 downloaded, not yet integrated · 🟢 in use
+Ground truth inputs used for this list:
 
----
+- `assets/wired-assets.txt`
+- `assets/manifest.csv`
+- `assets/manifest_bulk.csv`
+- `python scripts/project-status.py` on 2026-07-08
 
-## How to Use This Doc
+## Sprite/visual sources used in game
 
-<details>
-<summary><strong>Click to expand: workflow for adding an asset</strong></summary>
+| Wired source file | Runtime output usage | Source page | Manifest state |
+|---|---|---|---|
+| `assets/img/beast_boss_darksaber.zip` | `public/sprites/boss_werewolf.png` | https://opengameart.org/content/dark-saber-werewolf | downloaded |
+| `assets/img/bulk/wyrmwolf.png` | `public/sprites/wyrmwolf.png` | https://opengameart.org/content/wyrmwolf | skipped-exists |
+| `assets/img/bulk/mech_0.png` | `public/sprites/mech.png` | https://opengameart.org/content/mech-0 | skipped-exists |
+| `assets/img/bulk/hero_0.png` | `public/sprites/hero.png` | https://opengameart.org/content/hero-0 | skipped-exists |
+| `assets/img/bulk/goblin_sprite.zip` | `public/sprites/goblin.png` | https://opengameart.org/content/goblin-sprite | skipped-exists |
+| `assets/img/bulk/lpc_imp.zip` | `public/sprites/imp.png` | https://opengameart.org/content/lpc-imp | skipped-exists |
+| `assets/img/bulk/bat_sprite.png` | `public/sprites/bat.png` | https://opengameart.org/content/bat-sprite | downloaded-unverified |
+| `assets/img/bulk/demon_flower_monster_sprite_sheet.zip` | `public/sprites/flower.png` | https://opengameart.org/content/demon-flower-monster-sprite-sheet | skipped-exists |
+| `assets/img/bulk/dirt_platformer_tiles.png` | `public/sprites/tiles.png` | https://opengameart.org/content/dirt-platformer-tiles | downloaded-unverified |
+| `assets/img/bulk/mountain_at_dusk_background.zip` | `public/sprites/bg_mountain_*.png` | source not resolved in manifest (file present on disk) | not listed |
+| `assets/img/bulk/sky_background.png` | `public/sprites/bg_sky.png` | https://opengameart.org/content/sky-background | skipped-exists |
+| `assets/img/bulk/mangrove.png` | `public/sprites/bg_mangrove.png` | https://opengameart.org/content/mangrove | skipped-exists |
+| `assets/img/bulk/living_tissue_background.zip` | `public/sprites/bg_tissue.png` | https://opengameart.org/content/living-tissue-background | skipped-exists |
 
-1. Run `python scripts/asset-fetch.py` to fetch the tracked assets below automatically, or download manually from the link for any asset the scraper can't reach.
-2. Save it into `assets/img/` or `assets/sounds/` using the naming convention in the table.
-3. Flip the Status column from 🔴 to 🟡 once downloaded, then 🟢 once wired into the game.
-4. If the license requires attribution, copy the exact credit line into the **In-Game Credits Screen** section at the bottom — don't paraphrase it, use the wording the license/author specifies.
-5. Commit the raw asset file alongside this doc update so the two never drift out of sync.
+## Audio sources used in game
 
-</details>
+| Wired source file | Runtime output usage | Source page | Manifest state |
+|---|---|---|---|
+| `assets/sounds/sfx_pack_8bit_vol1.zip` | `jump.wav`, `hit.wav`, `coin.wav`, `powerup.wav`, `explosion.wav`, `select.wav`, `shoot.wav`, `wrong.wav`, `door.wav` | https://opengameart.org/content/8-bit-sound-effect-pack-vol-001 | downloaded |
+| `assets/sounds/bulk/8bit_sword_hit_sword_1_8_bit_wav.mp3` | `sword.mp3` | https://freesound.org/s/509480/ | skipped-exists |
+| `assets/sounds/bulk/8bit_sword_hit_kill_enemy_2_8_bit_wav.mp3` | `kill.mp3` | https://freesound.org/s/506587/ | skipped-exists |
+| `assets/sounds/bulk/laser_gun_retro_laser_shot_3.mp3` | `laser.mp3` | https://freesound.org/s/483508/ | skipped-exists |
+| `assets/sounds/bulk/treasure_chest_open_treasure_chest_open.mp3` | `chest.mp3` | https://freesound.org/s/771164/ | skipped-exists |
+| `assets/sounds/bulk/retro_level_up_levelup_wav.mp3` | `levelup.mp3` | https://freesound.org/s/609335/ | skipped-exists |
+| `assets/sounds/bulk/chiptune_boss_battle_super_mega_ultimate_final_boss_battle.mp3` | `boss_music.mp3` | https://freesound.org/s/530064/ | skipped-exists |
+| `assets/sounds/bulk/society_in_ruins.mp3` | `bg_music.mp3` | https://opengameart.org/content/society-in-ruins | skipped-exists |
+| `assets/sounds/bulk/game_over_jingle_j1game_over_mono_wav.mp3` | `gameover.mp3` | https://freesound.org/s/173859/ | skipped-exists |
+| `assets/sounds/bulk/victory_fanfare_8bit_victory_fanfare_8_bit_thunder_1.mp3` | `victory.mp3` | https://freesound.org/s/843043/ | skipped-exists |
+| `assets/sounds/bulk/monster_roar_monster_roar_2_mp3.mp3` | `roar.mp3` | https://freesound.org/s/505127/ | skipped-exists |
+| `assets/sounds/beast_growl_generic.mp3` | `growl.mp3` | https://freesound.org/s/366671/ | downloaded |
+| `assets/sounds/bulk/magic_spell_cast_magspel_dark_magic_wand_spell_cast_005_gmcm.mp3` | `magic.mp3` | https://freesound.org/s/855440/ | skipped-exists |
+| `assets/sounds/bulk/footstep_stone_fx_006_footstep_stone_r_wav.mp3` | `step.mp3` | https://freesound.org/s/390763/ | skipped-exists |
 
----
+## Notes
 
-## Sprites
-
-### Beast / Transformation (Altered Beast direction)
-
-| Asset | License | Attribution Required | Source | Suggested filename | Status |
-|---|---|---|---|---|---|
-| WereWolf sprite (idle/walk) | CC-BY 4.0 | Yes | [opengameart.org/content/werewolf](https://opengameart.org/content/werewolf) | `assets/img/werewolf_base.png` | 🟡 |
-| Dark Saber Werewolf (idle, walk, run, 6-hit attack combo, hit, death) | CC-BY 3.0 | Yes — "werewolf sprite by MindChamber" | [opengameart.org/content/dark-saber-werewolf](https://opengameart.org/content/dark-saber-werewolf) | `assets/img/beast_boss_darksaber.gif` | 🟡 |
-| LPC Wolfman (6 color variants, full LPC animation set) | CC-BY-SA 3.0 / OGA-BY 3.0 | Yes | [opengameart.org/content/lpc-wolfman](https://opengameart.org/content/lpc-wolfman) | `wolfman_lpc.png` | 🔴 |
-
-**Recommendation:** Dark Saber Werewolf as your primary beast-transformation boss — it's the only one with a full combat animation set (attack combo, hit, death) rather than just movement.
-
-### Armored Sci-Fi Soldier (Space Marine direction)
-
-| Asset | License | Attribution Required | Source | Suggested filename | Status |
-|---|---|---|---|---|---|
-| Sideview Sci-Fi soldier pack | Check pack page (free tier) | Check pack page | [ansimuz.itch.io/sideview-sci-fi](https://ansimuz.itch.io/sideview-sci-fi) | `soldier_sideview.png` | 🔴 |
-| CC0 sci-fi sprite browse (rotating collection) | CC0 (verify per-item) | No (CC0 items only) | [itch.io CC0 + Sci-fi tag](https://itch.io/game-assets/assets-cc0/tag-science-fiction) | varies | 🔴 |
-
-**Note:** the ansimuz pack's exact license terms should be double-checked on the pack page itself before use — "free" doesn't always mean CC0, and some of ansimuz's packs are paid tiers with a separate free sampler.
-
-### Environment / Tilesets (Metroidvania direction)
-
-| Asset | License | Attribution Required | Source | Suggested filename | Status |
-|---|---|---|---|---|---|
-| Metroidvania Dark Platformer Tileset | Verify per listing | Verify per listing | Search OpenGameArt's [platformer tileset collections](https://opengameart.org/content/tilesets-and-backgrounds-pixelart) | `tileset_dark_metroidvania.png` | 🔴 |
-| Curated Metroidvania art collection | Mixed — verify per item | Mixed | [opengameart.org/content/metroidvania-art](https://opengameart.org/content/metroidvania-art) | varies | 🔴 |
-
----
-
-## Sound Effects & Music
-
-### Monster Roars/Growls (CC0 — no attribution needed)
-
-| Asset | License | Source | Suggested filename | Status |
-|---|---|---|---|---|
-| Dragon roars/growls/snarls pack | CC0 | [freesound.org/people/Breviceps/sounds/479380](https://freesound.org/people/Breviceps/sounds/479380/) | `assets/sounds/beast_roar_dragon.mp3` | 🟡 |
-| Kraken/sea-creature layered roar | CC0 | [freesound.org/people/Bikkit99/sounds/837799](https://freesound.org/people/Bikkit99/sounds/837799/) | `assets/sounds/beast_roar_deep_kraken.mp3` | 🟡 |
-| Generic large-creature growl | CC0 | [freesound.org/people/cylon8472/sounds/366671](https://freesound.org/people/cylon8472/sounds/366671/) | `assets/sounds/beast_growl_generic.mp3` | 🟡 |
-
-### Retro/Chiptune SFX (CC0)
-
-| Asset | License | Source | Suggested filename | Status |
-|---|---|---|---|---|
-| 8-Bit Sound Effect Pack Vol. 001 (46 files — coins, explosions, jumps, powerups, shoot, hit) | CC0 | [opengameart.org/content/8-bit-sound-effect-pack-vol-001](https://opengameart.org/content/8-bit-sound-effect-pack-vol-001) | `assets/sounds/sfx_pack_8bit_vol1.png` (page cover; download actual audio pack manually) | 🟡 |
-| 512 Sound Effects (8-bit style) | CC0 | [opengameart.org/content/512-sound-effects-8-bit-style](https://opengameart.org/content/512-sound-effects-8-bit-style) | `assets/sounds/sfx_512_retro.zip` (extract before use) | 🟡 |
-| CC0 - 8Bit - Chiptune (music collection) | CC0 | [opengameart.org/content/audio-cc0-8bit-chiptune](https://opengameart.org/content/audio-cc0-8bit-chiptune) | `music_[track].ogg` | 🔴 |
-
-### Sci-Fi Ambience/Lasers (Space Marine layer)
-
-| Asset | License | Source | Suggested filename | Status |
-|---|---|---|---|---|
-| Sci-fi sound pack (lasers, alien ambience, menu SFX) | CC0/CC-BY — verify per pack | [freesound.org/people/LittleRobotSoundFactory/packs](https://freesound.org/people/LittleRobotSoundFactory/packs/) | `sfx_laser_[n].wav` | 🔴 |
-
----
-
-## In-Game Credits Screen
-
-_Populate this once assets move to 🟢 status — copy exact attribution wording as specified by each license, don't paraphrase._
-
-```
-Audio (CC0 — no attribution required):
-- Dragon roars/growls/snarls by Breviceps (freesound.org/s/479380)
-- Kraken/sea-creature layered roar by Bikkit99 (freesound.org/s/837799)
-- Generic large-creature growl by cylon8472 (freesound.org/s/366671)
-- 8-Bit Sound Effect Pack Vol. 001 via OpenGameArt
-- 512 Sound Effects (8-bit style) via OpenGameArt
-
-Sprites (attribution required — verify exact wording on source page):
-- Werewolf sprite by [author] (opengameart.org/content/werewolf)
-- Dark Saber Werewolf by MindChamber (opengameart.org/content/dark-saber-werewolf)
-```
-
----
-
-## License Quick Reference
-
-| License | What it means for this project |
-|---|---|
-| CC0 | Public domain equivalent. No attribution required, but crediting anyway is good practice and costs nothing. |
-| CC-BY | Attribution required — must credit the author, typically in exactly the wording they request. |
-| CC-BY-SA | Attribution required, AND any derivative work you distribute must carry the same license — relevant if you modify and redistribute the sprite itself, not just use it in the game. |
-| OGA-BY | OpenGameArt's own attribution license — functionally similar to CC-BY. |
-
-**Given the mix here:** the beast/transformation sprites lean CC-BY/CC-BY-SA (attribution required), while the SFX layer is entirely CC0. Plan for a visible in-game or README credits section regardless — it's standard practice and reinforces the "software diversity" narrative of the submission.
+- This project currently trusts manifest-provided links and statuses; several image entries are marked `downloaded-unverified` in `manifest_bulk.csv`.
+- `mountain_at_dusk_background.zip` is actively wired but currently lacks a matching manifest row with a filename field; keep this documented until the manifest is corrected.
+- If additional assets are wired, re-run `scripts/prepare-assets.py`, then refresh this document from `assets/wired-assets.txt`.

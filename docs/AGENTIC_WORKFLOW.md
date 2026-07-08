@@ -44,7 +44,7 @@
 | Input system (keyboard + gamepad) | 🟢 unified InputState; stuck-input fixes 2026-07-08 (blur release, disconnect handling) |
 | Level/world system | 🟢 24 single-screen rooms, 5 zones, validated exit graph |
 | Enemy AI | 🟢 4 regular kinds + 3 bosses with distinct patterns |
-| Weapon/loot system | 🟢 data-driven, Python-authoritative (280 combos; 4 of 6 effects still stubs) |
+| Weapon/loot system | 🟢 data-driven, Python-authoritative (280 combos; 6/6 prefix effects now wired) |
 | Documentation | 🟢 living doc active |
 
 ## Session Log
@@ -54,6 +54,7 @@
 
 | Date | Tool | Task | Human Role | Agent Role | Outcome | Notes |
 |---|---|---|---|---|---|---|
+| 2026-07-08 | Copilot CLI (autonomous) | Overnight architecture audit + gameplay hardening | Provided overnight requirements + verification constraints | Implemented burn/freeze/shock/curse combat effects, refreshed credits to wired-only assets, ran lint/build + ground-truth status snapshots | 🟡 in progress (runtime/browser proof pass pending) | See [SESSION_LOG.md](SESSION_LOG.md#2026-07-08--overnight-architecture-audit--combat-effect-wiring--runtime-proof-pass) |
 | 2026-07-07 | Copilot CLI (autonomous) | Build core gameplay systems (input, levels, enemies, loot, boss) | Verified state with project-status.py periodically, wrote final report | Generated LevelManager, EnemyManager, BossManager, ItemManager, extended Python service, refactored GameCanvas for multi-level play, unified gamepad+keyboard input | ✅ merged, fully playable 4-level world | See [SESSION_LOG.md](SESSION_LOG.md#2026-07-07--build-core-gameplay-systems) for full details |
 | _YYYY-MM-DD_ | Copilot cloud agent | Initial scaffold (Next.js + FastAPI structure) | Wrote scoped prompt, reviewed PR | Generated file structure, boilerplate | ✅ merged | See [PROMPT_LIBRARY.md](PROMPT_LIBRARY.md#scaffold-prompt) |
 
