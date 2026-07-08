@@ -27,8 +27,8 @@ Full sourcing record for every third-party sprite and audio asset in this projec
 
 | Asset | License | Attribution Required | Source | Suggested filename | Status |
 |---|---|---|---|---|---|
-| WereWolf sprite (idle/walk) | CC-BY 4.0 | Yes | [opengameart.org/content/werewolf](https://opengameart.org/content/werewolf) | `assets/img/werewolf_base.png` | � |
-| Dark Saber Werewolf (idle, walk, run, 6-hit attack combo, hit, death) | CC-BY 3.0 | Yes — "werewolf sprite by MindChamber" | [opengameart.org/content/dark-saber-werewolf](https://opengameart.org/content/dark-saber-werewolf) | `assets/img/beast_boss_darksaber.gif` | � |
+| WereWolf sprite (idle/walk) | CC-BY 4.0 | Yes | [opengameart.org/content/werewolf](https://opengameart.org/content/werewolf) | `assets/img/werewolf_base.png` | 🟡 |
+| Dark Saber Werewolf (idle, walk, run, 6-hit attack combo, hit, death) | CC-BY 3.0 | Yes — "werewolf sprite by MindChamber" | [opengameart.org/content/dark-saber-werewolf](https://opengameart.org/content/dark-saber-werewolf) | `assets/img/beast_boss_darksaber.gif` | 🟡 |
 | LPC Wolfman (6 color variants, full LPC animation set) | CC-BY-SA 3.0 / OGA-BY 3.0 | Yes | [opengameart.org/content/lpc-wolfman](https://opengameart.org/content/lpc-wolfman) | `wolfman_lpc.png` | 🔴 |
 
 **Recommendation:** Dark Saber Werewolf as your primary beast-transformation boss — it's the only one with a full combat animation set (attack combo, hit, death) rather than just movement.
@@ -57,15 +57,16 @@ Full sourcing record for every third-party sprite and audio asset in this projec
 
 | Asset | License | Source | Suggested filename | Status |
 |---|---|---|---|---|
-| Dragon roars/growls/snarls pack | CC0 | [freesound.org/people/Breviceps/sounds/479380](https://freesound.org/people/Breviceps/sounds/479380/) | `assets/sounds/beast_roar_dragon.mp3` | � |
-| Kraken/sea-creature layered roar | CC0 | [freesound.org/people/Bikkit99/sounds/837799](https://freesound.org/people/Bikkit99/sounds/837799/) | `assets/sounds/beast_roar_deep_kraken.mp3` | � |
+| Dragon roars/growls/snarls pack | CC0 | [freesound.org/people/Breviceps/sounds/479380](https://freesound.org/people/Breviceps/sounds/479380/) | `assets/sounds/beast_roar_dragon.mp3` | 🟡 |
+| Kraken/sea-creature layered roar | CC0 | [freesound.org/people/Bikkit99/sounds/837799](https://freesound.org/people/Bikkit99/sounds/837799/) | `assets/sounds/beast_roar_deep_kraken.mp3` | 🟡 |
+| Generic large-creature growl | CC0 | [freesound.org/people/cylon8472/sounds/366671](https://freesound.org/people/cylon8472/sounds/366671/) | `assets/sounds/beast_growl_generic.mp3` | 🟡 |
 
 ### Retro/Chiptune SFX (CC0)
 
 | Asset | License | Source | Suggested filename | Status |
 |---|---|---|---|---|
-| 8-Bit Sound Effect Pack Vol. 001 (46 files — coins, explosions, jumps, powerups, shoot, hit) | CC0 | [opengameart.org/content/8-bit-sound-effect-pack-vol-001](https://opengameart.org/content/8-bit-sound-effect-pack-vol-001) | `assets/sounds/sfx_pack_8bit_vol1.png` (page cover; download actual audio pack manually) | � |
-| 512 Sound Effects (8-bit style) | CC0 | [opengameart.org/content/512-sound-effects-8-bit-style](https://opengameart.org/content/512-sound-effects-8-bit-style) | `assets/sounds/sfx_512_retro.zip` (extract before use) | � |
+| 8-Bit Sound Effect Pack Vol. 001 (46 files — coins, explosions, jumps, powerups, shoot, hit) | CC0 | [opengameart.org/content/8-bit-sound-effect-pack-vol-001](https://opengameart.org/content/8-bit-sound-effect-pack-vol-001) | `assets/sounds/sfx_pack_8bit_vol1.png` (page cover; download actual audio pack manually) | 🟡 |
+| 512 Sound Effects (8-bit style) | CC0 | [opengameart.org/content/512-sound-effects-8-bit-style](https://opengameart.org/content/512-sound-effects-8-bit-style) | `assets/sounds/sfx_512_retro.zip` (extract before use) | 🟡 |
 | CC0 - 8Bit - Chiptune (music collection) | CC0 | [opengameart.org/content/audio-cc0-8bit-chiptune](https://opengameart.org/content/audio-cc0-8bit-chiptune) | `music_[track].ogg` | 🔴 |
 
 ### Sci-Fi Ambience/Lasers (Space Marine layer)
