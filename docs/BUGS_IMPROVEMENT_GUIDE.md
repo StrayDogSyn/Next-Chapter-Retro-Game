@@ -12,35 +12,19 @@
 
 | ID | Category | Issue / Enhancement Summary | Priority | Status |
 |---|---|---|---|---|
-| [BUG-001](#bug-001-pit-dropped-loot-persistence) | Physics / Loot | Items dropped over pits despawn or fail to persist during room transitions | High | 🟢 Fixed |
-| [UI-002](#ui-002-equipment-dashboard-highlight--swap-effects) | UI / FX | Equipment needs stronger HUD highlighting and noticeable swap feedback | Medium | 🟢 Fixed |
-| [BUG-003](#bug-003-unreachable-platform-generation--dead-ends) | Level Gen | Initial floors have unreachable platform heights causing navigation dead-ends | High | 🟢 Fixed |
-| [UX-004](#ux-004-player-respawn--self-destruct-mechanism) | Controls / UX | No self-destruct/reset mechanism when trapped in soft-locks or dead-ends | High | 🟢 Fixed |
-| [AST-005](#ast-005-underutilized-sprite--audio-assets) | Asset Pipeline | Game engine only utilizes a small fraction of available sprites and SFX | Medium | 🟢 Fixed |
-| [UX-006](#ux-006-treasure--coin-micro-interactions) | Visuals / Polish | Coins and treasure lack premium micro-interactions and sprite variety | Medium | 🟢 Fixed |
-| [UI-007](#ui-007-dashboard-mini-map-integration) | UI / Navigation | Lack of spatial orientation; mini-map needed in the dashboard | High | 🟢 Fixed |
-| [UI-008](#ui-008-fullscreen-unobtrusive-help-modal) | UI / Accessibility | Fullscreen hides instructions; persistent unobtrusive `?` modal needed | Medium | 🟢 Fixed |
-| [SYS-009](#sys-009-xp-counter--inventory-stats-modal) | Progression / UI | Missing XP counter from defeats and centralized inventory/stats modal | High | 🟢 Fixed |
-| [AST-010](#ast-010-ingestion-of-downloads-archive-assets) | Asset Pipeline | Unprocessed asset archives in `./downloads` need pipeline integration | High | 🟡 Partial (audited; extraction deferred — see notes) |
-| [SYS-011](#sys-011-persistent-checkpoints--save-states) | Persistence | No checkpoint system or persistent save data across sessions | High | 🟢 Fixed |
-| [SYS-012](#sys-012-npc-item-shop--coin-economy-sink) | Gameplay / Economy | Coins lack an economy sink; NPC shop needed for replay value | Medium | 🟢 Fixed |
-
----
-
-## Remediation Pass Verification Summary (2026-07-08)
-
-Honest accounting of what was actually verified for this pass, per this repo's own rule (`docs/AGENTIC_WORKFLOW.md`: trust `project-status.py`/real command output, not a narrated "done").
-
-**Verified with real command output:**
-- `npx tsc --noEmit` — clean after every change, checked incrementally per item, not just at the end.
-- `npm run build` (`next build`, includes lint + type check) — succeeds cleanly.
-- BUG-003's reachability claim is backed by an actual standalone run of the new validator against the real 24-room `ROOMS` data (compiled via `tsc` to CommonJS and executed with `node`, not just "should work" reasoning) — went from 27 flagged → 0 genuine dead-ends across three iterations, with the intermediate wrong results and the fixes for each shown in the session log.
-- Dev server smoke test: `npm run dev`, then `curl` against `/`, `/sprites/spritemeta.json`, `/api/procedural-level`, `/api/loot` — all respond, including the `/api/loot` degraded-mode fallback response when the Python service isn't running (expected, per ADR-003).
-
-**NOT verified — no browser automation available in this environment:**
-- `chromium-cli` and `playwright` are both absent from this sandbox and neither could be installed without adding a new dependency for a one-off check. No actual clicking, keyboard input, canvas rendering, or audio playback was observed.
-- This means: the shrine/shop UI, help/inventory overlays, mini-map rendering, particle effects, and audio cues are implemented and type-check, but have **not** been visually confirmed in a real browser. Per-item checklists below intentionally leave "captured browser screenshots" / "tested in-game" boxes unchecked for this reason — do that pass before calling any of this done for a demo or submission.
-- AST-010 (`./downloads` archive ingestion) was audited (contents listed, see session log) but not executed — extracting/cropping/chroma-keying new sprite sheets is exactly the kind of change that needs visual verification this session couldn't do, so it was deliberately left for a session with real browser access.
+| [BUG-001](#bug-001-pit-dropped-loot-persistence) | Physics / Loot | Items dropped over pits despawn or fail to persist during room transitions | High | 🔴 Untracked |
+| [UI-002](#ui-002-equipment-dashboard-highlight--swap-effects) | UI / FX | Equipment needs stronger HUD highlighting and noticeable swap feedback | Medium | 🔴 Untracked |
+| [BUG-003](#bug-003-unreachable-platform-generation--dead-ends) | Level Gen | Initial floors have unreachable platform heights causing navigation dead-ends | High | 🔴 Untracked |
+| [UX-004](#ux-004-player-respawn--self-destruct-mechanism) | Controls / UX | No self-destruct/reset mechanism when trapped in soft-locks or dead-ends | High | 🔴 Untracked |
+| [AST-005](#ast-005-underutilized-sprite--audio-assets) | Asset Pipeline | Game engine only utilizes a small fraction of available sprites and SFX | Medium | 🔴 Untracked |
+| [UX-006](#ux-006-treasure--coin-micro-interactions) | Visuals / Polish | Coins and treasure lack premium micro-interactions and sprite variety | Medium | 🔴 Untracked |
+| [UI-007](#ui-007-dashboard-mini-map-integration) | UI / Navigation | Lack of spatial orientation; mini-map needed in the dashboard | High | 🔴 Untracked |
+| [UI-008](#ui-008-fullscreen-unobtrusive-help-modal) | UI / Accessibility | Fullscreen hides instructions; persistent unobtrusive `?` modal needed | Medium | 🔴 Untracked |
+| [SYS-009](#sys-009-xp-counter--inventory-stats-modal) | Progression / UI | Missing XP counter from defeats and centralized inventory/stats modal | High | 🔴 Untracked |
+| [AST-010](#ast-010-ingestion-of-downloads-archive-assets) | Asset Pipeline | Unprocessed asset archives in `./downloads` need pipeline integration | High | 🔴 Untracked |
+| [SYS-011](#sys-011-persistent-checkpoints--save-states) | Persistence | No checkpoint system or persistent save data across sessions | High | 🔴 Untracked |
+| [SYS-012](#sys-012-npc-item-shop--coin-economy-sink) | Gameplay / Economy | Coins lack an economy sink; NPC shop needed for replay value | Medium | 🔴 Untracked |
+| [AST-013](#ast-013-suspect-thumbnail-triage--scraper-hardening) | Asset Pipeline | `project-status.py`'s size-only heuristic flagged 24 assets as suspect; most were false positives | Medium | 🟢 Triage + scraper fix done, re-fetch pending |
 
 ---
 
@@ -253,6 +237,36 @@ Honest accounting of what was actually verified for this pass, per this repo's o
 - [ ] Wired Mystery Box purchases directly to the backend Python `/api/loot` service.
 - [ ] Tested transaction edge cases (insufficient funds, full inventory, rapid double-clicking).
 - [ ] Performed full verification suite (`npx tsc --noEmit`, `npm run dev`, `project-status.py`).
+
+---
+
+### AST-013: Suspect-Thumbnail Triage & Scraper Hardening
+**Issue Description:** `project-status.py` flagged 24 images across `assets/img/bulk/` and `assets/sprites/` as `SUSPECT: small image, may be a thumbnail` using a pure byte-size heuristic (`< 20KB`). That heuristic has a high false-positive rate — indexed-palette and low-complexity pixel art compresses extremely well (e.g. `base_character.png` is a genuine 1024×1024 asset at only 17.4KB), so most of the 24 flagged files are real assets, not thumbnails.
+
+**Investigation performed (2026-07-08, remote session — no network access to opengameart.org in this environment; confirmed via the proxy status showing `connect_rejected` 403 for that host):**
+1. Read actual pixel dimensions for every flagged file (pure-stdlib PNG/GIF/JPEG header parsing — no dependency needed).
+2. Cross-referenced `assets/manifest.csv` / `assets/manifest_bulk.csv` `note` columns (which record the exact upstream URL each file was fetched from) for filenames ending in `preview.<ext>` / `prev.<ext>` — direct proof of a mis-fetched thumbnail, not a guess.
+3. Result: only **9 of 24** flagged files have real evidence of being thumbnails:
+   - **CONFIRMED** (manifest proves the source URL was itself a preview image — re-fetch the *real* attachment from the page, not this URL):
+     - `assets/img/bulk/lpc_beetle.PNG` ← fetched from `.../beetlepreview.PNG`
+     - `assets/img/bulk/lpc_goblin.png` ← fetched from `.../lpc_goblin_preview.png`
+     - `assets/img/bulk/lpc_golem.png` ← fetched from `.../golem-preview.png`
+     - `assets/img/bulk/monkey_lad_in_magical_planet.png` ← fetched from `.../monkeylad_preview.png`
+     - `assets/img/bulk/rpg_enemies_11_dragons.png` ← fetched from `.../dragonsprev.png`
+   - **LIKELY** (classic Drupal auto-thumbnail square dimensions — 64×64/100×100/128×128 — for an asset that should be a multi-frame sheet):
+     - `assets/img/bulk/bat_sprite.png` (128×128), `assets/img/bulk/bloody_mary.png` (128×128), `assets/img/bulk/lpc_wolf_animation.png` (64×64 — too small to contain the claimed animation), `assets/img/bulk/simple_character_base_16x16.png` (64×64)
+   - The remaining ~15 (e.g. `palette.png`, `oga-swm-bg-gradient-sky.png`, `swords.png`, `base_character.png`) are almost certainly fine — small file size only, with plausible real dimensions and/or indexed-palette compression explaining it.
+4. Root-caused the scraper bug: `find_oga_download_link()` in both `scripts/asset-fetch.py` and `scripts/asset-fetch-bulk.py` filtered out Drupal's `/styles/.../` derivative-thumbnail paths, but some OGA submissions attach a small `preview.png`/`prev.png` companion image directly under `/sites/default/files/` (no `/styles/` in the path at all) — the filter never caught that case.
+
+**Fixes applied this session:**
+- `scripts/project-status.py`: replaced the flat SUSPECT flag with a three-tier, evidence-based triage (`CONFIRMED` / `LIKELY` / "worth a manual look") using real image dimensions + manifest cross-reference, plus a summary count. Zero new dependencies (stdlib-only PNG/GIF/JPEG header parser).
+- `scripts/asset-fetch.py` and `scripts/asset-fetch-bulk.py`: `find_oga_download_link()` now deprioritizes any candidate URL matching `prev(iew)?\.<ext>` in favor of other same-page candidates, and downloads matching that pattern are tagged `downloaded-preview-only` (definitive) instead of the old ambiguous `downloaded-unverified` (size guess).
+
+**Still required (needs a machine with real network access — this sandboxed session cannot reach opengameart.org):**
+- [ ] Re-fetch the 5 CONFIRMED files from their OGA pages directly (manual download of the actual attachment, not the preview link).
+- [ ] Manually verify the 4 LIKELY files in a browser and re-fetch if they are indeed thumbnails.
+- [ ] Re-run `python scripts/prepare-assets.py` after any replacement, then `npx tsc --noEmit` and `npm run dev`.
+- [ ] Re-run `python scripts/project-status.py` and confirm the CONFIRMED/LIKELY counts drop to 0.
 
 ---
 

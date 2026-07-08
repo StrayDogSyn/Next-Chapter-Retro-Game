@@ -25,46 +25,23 @@ Full chronological record of every AI-paired session on this project. The summar
 
 ## Entries
 
-### 2026-07-08 — QA & Improvement Guide remediation pass (11 of 12 items)
+### 2026-07-08 — Asset-pipeline integrity: suspect-thumbnail triage + scraper hardening
 
-- **Tool used:** Claude (Sonnet 5)
-- **Goal:** Work through every item in `docs/BUGS_IMPROVEMENT_GUIDE.md` — 4 bugs, 8 enhancements — iterating until each was actually implemented and verified, not just claimed.
-- **Prompt summary:** "Complete all recommendations in the provided guide. Iterate and audit until all bugs and improvements are completed."
-- **What the agent produced (see full verification summary added to `BUGS_IMPROVEMENT_GUIDE.md`):**
-  - **BUG-001 (pit-dropped loot):** `Game.findGroundY()` + a pit-rescue branch in `updatePickups()` — an item that falls past `VIEW_H` (open-bottom room with no floor in its column) now lands on the nearest real floor instead of despawning.
-  - **BUG-003 (unreachable platforms):** Added a genuinely new reachability auditor to `levelLoader.ts` — flood-fills standable cells from each room's real entry points (derived from its own `exits`, since the world graph is reciprocal) under two movement profiles (base jump vs. double-jump+dash), and only flags an item as a dead-end if it's unreachable under **both**. This took three real iterations to get right (see below), not one guess:
-    1. First run (single-jump-only heuristic): 27 false-flagged items — turned out to be a validator bug, not a level bug (it didn't model the double-jump/dash upgrades the game already has, so it flagged intentional ability-gated bonus content, e.g. R06's chest+key vault).
-    2. Added the two-profile check → 15 remaining, including R20's own dash pickup flagged as needing dash to reach it — a circularity bug in the checker (an ability can't require itself); fixed by checking ability pickups against the base profile only.
-    3. Remaining 14 were genuine: floating decorative platforms (mostly coins, one health pickup) with a vertical gap the entry topology couldn't cover even with the full movement kit. Fixed by adding one intermediate "shelf" platform per room (R04, R05, R10, R14, R15, R19, R21) and repositioning R20's dash platform down into jump range. Two rounds of off-by-one errors (platform-tile-row vs. the standable-cell-row above it) were caught by re-running the compiled validator against the real data each time, not by hand-verifying the math.
-    - Final state, confirmed by an actual run: **0 dead-ends, 26 items correctly identified as intentional ability gating** across all 24 rooms.
-  - **UX-004 (self-destruct/respawn):** hold `R` for 1.2s → teleports to a safe ground position in the *current* room (not a full respawn), costs 10% coins or 1 HP if broke, fade transition, HUD progress bar in the footer.
-  - **UI-002 (equipment feedback):** gold pulsing glow on the weapon HUD chip (CSS), particle burst + ring flash on the hero sprite on any equip/swap.
-  - **UX-006 (coin micro-interactions):** floating "+1" text, sparkle burst, and a pitch-scaling combo (1.0x→1.5x over 5 rapid pickups) added to `AudioManager.play()`.
-  - **UI-008 (help modal):** `F1`/`?`/gamepad View toggles a canvas-drawn control reference; pauses gameplay updates while open (mirrors the dead/victory branch) rather than a second overlay system.
-  - **SYS-009 (XP + inventory):** kill-based XP with a level curve, small per-level dmg/HP bonus, HUD XP bar, and a `Tab`/`I` inventory overlay listing live weapon/upgrade state.
-  - **UI-007 (mini-map):** room grid coordinates BFS'd from `START_ROOM` along `exits` in `levelLoader.ts`, visited/cleared tracking in `Game`, rendered as a small CSS-grid overlay in the header.
-  - **SYS-011 (checkpoints):** new `shrine` spawn kind (one per zone entrance, placed at verified-reachable spots), `localStorage`-backed save/load, "Continue Game" button on the start menu gated on `Game.hasSave()`.
-  - **SYS-012 (NPC shop):** new `shopkeeper` spawn kind in the hub room, canvas shop UI (potion/stat-booster/mystery-box), the mystery box uses a new `forcedRarity` param on `fallbackRoll()` — explicitly a client-only mechanic, not routed through the Python loot authority (ADR-001/003 stay intact).
-  - **AST-005:** found and fixed a real drift bug while auditing — `step.mp3` was documented as "wired" in `CREDITS.md` but never actually in the `loadAll()` call, and `explosion`/`shoot` were loaded but never played anywhere. Wired all three: footstep cadence while walking, `explosion` on mech-boss defeat, `shoot` on projectile impact. Confirmed via `grep` that every loaded sprite (16/16) and audio file (22/22) now has at least one real usage — not before.
-  - **AST-010:** audited only — listed the sibling `downloads/` archive contents (28 zips across two folders); did not extract/ingest, see verification summary for why.
-- **Verification:** `npx tsc --noEmit` clean after every item (checked incrementally, not just at the end); `npm run build` clean; BUG-003's fix verified by actually compiling and running the new validator against the real room data three times as it was debugged (pasted output at each stage, not just "should be fixed"); dev server + `curl` smoke test of `/`, static assets, and both API routes.
-- **Explicitly not verified:** no real browser/interactive testing — `chromium-cli` and `playwright` are both unavailable in this sandbox, and installing either for a one-off check wasn't warranted. UI overlays, particle effects, and audio cues type-check and are logically traced but have not been visually confirmed. Flagged clearly in `BUGS_IMPROVEMENT_GUIDE.md`'s new verification-summary section so this isn't mistaken for a full pass.
-- **Outcome:** ✅ 11/12 items fixed and merged to `claude/qa-guide-remediation`; 🟡 AST-010 partial (audited, ingestion deferred)
-- **Anything worth remembering:** The BUG-003 validator work is a good example of why this repo's "verify, don't narrate" rule exists even for the verification tooling itself — the first two versions of the auditor were themselves wrong (a false-positive rate that would have led to "fixing" intentional level design, then a circular check on ability pickups), and only running it against real data caught both. A hand-derived "this should be reachable" argument was wrong twice in a row before the actual run settled it.
-
-### 2026-07-08 — Asset sourcing guide
-
-- **Tool used:** Claude / Cascade
-- **Goal:** Turn the user's asset-sourcing research into a repository-ready living document with CC0 categories, source links, sound buckets, and manifest templates.
-- **Prompt summary:** User supplied the curated sources, categories, and integration plan; I converted it into a polished Markdown doc and wired it into the existing doc system.
+- **Tool used:** Claude (remote/cloud session, `claude/asset-pipeline-integrity-m6n3jn`)
+- **Goal:** Investigate the 24 files `project-status.py` flagged as "SUSPECT: small image, may be a thumbnail" and fix them.
+- **What happened first (network constraint discovered):** This session's environment blocks outbound access to `opengameart.org` at the proxy policy level (confirmed: requests to the host return `connect_rejected` / 403 CONNECT tunnel failure). `asset-fetch.py` and `asset-fetch-bulk.py` both say explicitly in their docstrings to run on a machine with real network access, not a sandbox — so re-fetching replacement assets was not possible here. Rather than claim a fix that couldn't be performed, the session pivoted to what was actually verifiable: is the flagged list even correct?
+- **Finding — the heuristic was wrong more often than right:** `project-status.py`'s flag was pure byte-size (`< 20KB`), which false-positives hard on indexed-palette/low-complexity art (`base_character.png` is a genuine 1024×1024 sprite sheet at only 17.4KB). Reading actual pixel dimensions (stdlib PNG/GIF/JPEG header parsing, no Pillow needed) and cross-referencing `manifest.csv`/`manifest_bulk.csv`'s recorded source URLs narrowed 24 flagged files down to 9 real suspects:
+  - 5 **confirmed** by direct manifest evidence — the recorded fetch URL itself ends in `preview.png`/`prev.png` (`lpc_beetle`, `lpc_goblin`, `lpc_golem`, `monkey_lad_in_magical_planet`, `rpg_enemies_11_dragons`).
+  - 4 **likely** — exact classic Drupal auto-thumbnail dimensions (64×64/128×128) for assets that should be multi-frame sheets (`bat_sprite`, `bloody_mary`, `lpc_wolf_animation`, `simple_character_base_16x16`).
+  - The other ~15 (e.g. `palette.png`, `oga-swm-bg-gradient-sky.png`) are almost certainly legitimate small assets, not thumbnails.
+- **Root cause of the scraper bug:** `find_oga_download_link()` in both fetch scripts filters Drupal's `/styles/.../` derivative-thumbnail path, but doesn't catch OGA submissions whose *actual* attachment link is a small `preview.png`/`prev.png` companion image living directly under `/sites/default/files/` (no `/styles/` in the path). That case slipped through undetected until now.
 - **What the agent produced:**
-  - Created `docs/ASSET_SOURCES.md` with licensing ground rule, recommended folder structure, sprite/sound source tables, category-to-source mapping, integration plan, highest-value targets, and CSV manifest templates.
-  - Added `ASSET_SOURCES.md` to `AGENTIC_WORKFLOW.md` Linked Documents table.
-  - Referenced `ASSET_SOURCES.md` from the README Assets & Credits section.
-- **Human review/changes:** Human provided the sources and structure; agent formatted and wired the document.
-- **Outcome:** ✅ merged
-- **Time saved vs. hand-writing (rough estimate):** ~20 minutes
-- **Anything worth remembering:** Keeping sourcing guidance in docs (not buried in chat) makes future asset passes reproducible and reviewable.
+  - `scripts/project-status.py`: replaced the flat SUSPECT flag with a tiered CONFIRMED / LIKELY / worth-checking triage backed by real dimensions + manifest cross-reference, plus a summary count printed each run.
+  - `scripts/asset-fetch.py` and `scripts/asset-fetch-bulk.py`: `find_oga_download_link()` now deprioritizes `preview`/`prev`-named candidate URLs in favor of other same-page links, and any download that still matches gets tagged `downloaded-preview-only` (definitive) instead of the old ambiguous `downloaded-unverified`.
+  - New `docs/BUGS_IMPROVEMENT_GUIDE.md` entry (AST-013) recording the full triage and the concrete re-fetch checklist for whoever has real network access next.
+- **Human review/changes:** Pending review; all script changes were syntax-checked and re-run against the live repo tree in-session (`python scripts/project-status.py` confirmed the new tiered counts: 5 confirmed / 4 likely / 23 low-priority, down from 24 undifferentiated).
+- **Outcome:** 🟡 partial — detection and scraper hardening complete and verified; actual asset re-fetch is blocked by this environment's network policy and remains for a session with real network access.
+- **Anything worth remembering:** A "24 suspect files" alert sounds alarming but was mostly noise — always check whether a heuristic's false-positive rate has been measured before trusting its count. Byte size alone is a bad proxy for "thumbnail" when the asset is indexed-palette pixel art; pixel dimensions + the manifest's own recorded fetch URL are much stronger, verifiable signals.
 
 ### 2026-07-08 — Documentation refinement and code review prep
 
