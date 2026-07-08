@@ -14,10 +14,10 @@ export function GameFooter({ snapshot }: GameFooterProps) {
     <footer className="game-footer">
       <div className="hud-line controls">
         <span className="hud-chip">
-          Keyboard: LEFT/RIGHT or A/D move, SPACE/W/Z jump, X/J attack, C/K dodge, V/L swap, S/DOWN drop
+          Keyboard: LEFT/RIGHT or A/D move, SPACE/W/Z jump, X/J attack, C/K dodge, V/L swap, S/DOWN drop, E interact, hold R to reset position, F1/? help, TAB/I inventory
         </span>
         <span className="hud-chip">
-          Xbox: left stick or D-pad move, A jump, X attack, B dodge, Y swap
+          Xbox: left stick or D-pad move, A jump, X attack, B dodge, Y swap, View help
         </span>
       </div>
       <div className="hud-line">
@@ -29,6 +29,22 @@ export function GameFooter({ snapshot }: GameFooterProps) {
         </span>
         <span className="hud-chip">State: {snapshot?.phase ?? "loading"}</span>
       </div>
+      {snapshot && snapshot.respawnHoldPct > 0 ? (
+        <div className="hud-line">
+          <span className="hud-chip" style={{ color: "#fbbf24" }}>
+            Resetting position...
+          </span>
+          <div style={{ height: 8, width: 140, border: "1px solid #47627d", background: "#122030", borderRadius: 3, overflow: "hidden" }}>
+            <div
+              style={{
+                height: "100%",
+                width: `${snapshot.respawnHoldPct * 100}%`,
+                background: "#fbbf24",
+              }}
+            />
+          </div>
+        </div>
+      ) : null}
       <div className="hud-line message" role="status" aria-live="polite">
         {snapshot?.message ? snapshot.message : " "}
       </div>

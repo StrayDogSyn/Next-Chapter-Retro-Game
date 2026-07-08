@@ -5,11 +5,13 @@ import { Game, VIEW_W, VIEW_H, type HudSnapshot } from "@/lib/game/game";
 
 type GameCanvasProps = {
   onSnapshot: (snapshot: HudSnapshot) => void;
+  continueFromSave?: boolean;
 };
 
-export function GameCanvas({ onSnapshot }: GameCanvasProps) {
+export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const shellRef = useRef<HTMLDivElement | null>(null);
+  const gameRef = useRef<Game | null>(null);
   const [displaySize, setDisplaySize] = useState<{ width: number; height: number }>({
     width: VIEW_W,
     height: VIEW_H,
@@ -48,14 +50,16 @@ export function GameCanvas({ onSnapshot }: GameCanvasProps) {
     if (!canvas) return;
 
     const game = new Game(canvas);
+    gameRef.current = game;
     game.onSnapshot = (snap) => onSnapshot(snap);
-    void game.start();
+    void game.start(continueFromSave);
     handleFocus();
 
     return () => {
       game.destroy();
+      gameRef.current = null;
     };
-  }, [onSnapshot]);
+  }, [onSnapshot, continueFromSave]);
 
   const handleFocus = () => {
     shellRef.current?.focus();
@@ -80,9 +84,19 @@ export function GameCanvas({ onSnapshot }: GameCanvasProps) {
       onMouseDown={handleFocus}
       onTouchStart={handleFocus}
     >
-      <button type="button" className="fullscreen-toggle" onClick={toggleFullscreen}>
-        fullscreen
-      </button>
+      <div className="stage-toolbar">
+        <button
+          type="button"
+          className="help-toggle"
+          title="Controls & help (F1)"
+          onClick={() => gameRef.current?.toggleHelp()}
+        >
+          ?
+        </button>
+        <button type="button" className="fullscreen-toggle" onClick={toggleFullscreen}>
+          fullscreen
+        </button>
+      </div>
       <div className="game-canvas-stage">
         <canvas
           ref={canvasRef}
