@@ -2,6 +2,8 @@
 
 A retro-inspired full-stack showcase blending SNES-style 2D sprite art, open-source chiptune SFX, and Python-powered game logic inside a TypeScript/Next.js app — built in collaboration with AI coding agents to demonstrate agentic development workflows alongside core software engineering fundamentals.
 
+![Game menu](assets/img/screenshots/game-menu.png)
+
 ![Status](https://img.shields.io/badge/status-in--progress-yellow)
 ![Stack](https://img.shields.io/badge/stack-Next.js%20%2B%20FastAPI-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
@@ -18,6 +20,7 @@ A retro-inspired full-stack showcase blending SNES-style 2D sprite art, open-sou
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [Project Structure](#project-structure)
+- [Screenshots](#screenshots)
 - [AI Collaboration](#ai-collaboration)
 - [Assets & Credits](#assets--credits)
 - [Roadmap](#roadmap)
@@ -29,10 +32,12 @@ A retro-inspired full-stack showcase blending SNES-style 2D sprite art, open-sou
 
 This project is two things at once, on purpose:
 
-1. **A playable retro game** — SNES-era pixel aesthetics, hand-rolled canvas rendering, chiptune SFX.
-2. **A demonstration of agentic pairing** — every major build phase was worked through with an AI coding agent (GitHub Copilot's cloud agent), and that process is documented as a first-class part of the submission, not an afterthought.
+1. **A playable retro game** — SNES-era pixel aesthetics, hand-rolled canvas rendering, chiptune SFX, and a 24-room Metroidvania-style world with three bosses.
+2. **A demonstration of agentic pairing** — every major build phase was worked through with an AI coding agent, and that process is documented as a first-class part of the submission, not an afterthought.
 
-The Python backend isn't decorative — it exists to prove a specific architectural point. See [Architecture](#architecture) for why.
+The Python backend isn't decorative — it owns procedural loot and level generation, while the Next.js frontend owns rendering, input, and UI. See [Architecture](#architecture) for the full rationale.
+
+![Working prototype](assets/img/screenshots/working-prototype00.png)
 
 ## Tech Stack
 
@@ -62,23 +67,31 @@ The Next.js app owns rendering, input, and UI. The Python service owns logic tha
 
 </details>
 
+### Architecture diagram
+
+![Phase one framework](assets/img/screenshots/phase-one-framework.png)
+
 ## Features
 
 <details>
 <summary><strong>Core gameplay loop</strong></summary>
 
 - `requestAnimationFrame`-based game loop with delta-time movement
-- Sprite animation state machine (idle / walk / jump)
-- Keyboard input handler
-- HUD overlay (score/lives) rendered as React components layered over the canvas
+- 24 single-screen rooms across 5 zones, validated at load by `lib/game/levelLoader.ts`
+- Sprite animation state machine (idle / walk / jump / attack)
+- Unified keyboard + Xbox gamepad input handler
+- React HUD header and footer layered outside the canvas (HP, coins, weapon, loot source, control hints)
+- 4 regular enemy types + 3 bosses with distinct AI patterns
 
 </details>
 
 <details>
 <summary><strong>Frontend ↔ backend integration</strong></summary>
 
-- Working fetch call from Next.js to the Python service, proving the two halves communicate
-- Python service returns game-logic data (procedural generation / scoring / AI opponent — see architecture doc for which)
+- Next.js API routes proxy requests to the Python FastAPI service
+- `/api/procedural-level` fetches platform layouts from the Python level generator
+- `/api/loot` rolls rarity-weighted weapon drops from the Python loot service
+- Client-side fallback mirrors the loot tables for offline resilience; every drop is tagged `python-service` or `client-fallback`
 
 </details>
 
@@ -104,15 +117,35 @@ uvicorn main:app --reload  # http://localhost:8000
 ## Project Structure
 
 ```
-├── app/                # Next.js routes and pages
-├── components/         # Canvas renderer, HUD, menu components
-├── lib/                # Game loop, sprite animation controller, audio manager
-├── python-service/     # FastAPI app + its own README
+├── app/                # Next.js routes and API routes
+├── components/         # Canvas renderer, header/footer HUD, menu components
+├── lib/                # Game loop, input, world, items, audio manager
+├── python-service/     # FastAPI app for procedural generation and loot
 ├── public/
-│   ├── sprites/         # Spritesheet assets
-│   └── audio/           # CC0/open-source SFX
+│   ├── sprites/         # Packed spritesheets + spritemeta.json
+│   └── audio/           # CC0/open-source SFX and music
+├── assets/              # Source assets, manifests, and screenshots
+├── scripts/             # Asset pipeline and ground-truth status tools
 └── docs/                # Living documentation (see below)
 ```
+
+## Screenshots
+
+| Game menu | Prototype gameplay |
+| --- | --- |
+| ![Main menu](assets/img/screenshots/game-menu.png) | ![Working prototype](assets/img/screenshots/working-prototype00.png) |
+
+### Responsive canvas scaling
+
+The canvas keeps its internal 640×352 resolution but scales to fit the viewport while preserving aspect ratio and crisp pixel art.
+
+| 800 px window | 2560 px window |
+| --- | --- |
+| ![800px](assets/img/screenshots/task1-resize-800.png) | ![2560px](assets/img/screenshots/task1-resize-2560.png) |
+
+### Playtest
+
+![Playtest](assets/img/screenshots/playtest01.png)
 
 ## AI Collaboration
 
@@ -125,18 +158,21 @@ This project was built through paired programming with an AI coding agent. Every
 <details>
 <summary><strong>Sprite & audio sourcing</strong></summary>
 
-- Sprites: *[fill in — e.g. opengameart.org, itch.io CC0 packs, hand-authored]*
-- SFX: *[fill in — e.g. freesound.org, CC0 chiptune packs]*
-- All third-party assets are CC0 or explicitly licensed for reuse; attributions listed here as sourced.
+All third-party assets are CC0 or explicitly licensed for reuse. The runtime assets wired into the game are documented in [docs/CREDITS.md](docs/CREDITS.md), which is regenerated from the asset pipeline's ground-truth output (`assets/wired-assets.txt`) and the download manifests.
+
+- **Sprites:** OpenGameArt.org CC0 packs plus hand-authored edits (werewolf boss, wyrmwolf, mech, hero, goblin, imp, bat, flower, tilesets, backgrounds)
+- **SFX / music:** Freesound and OpenGameArt CC0 chiptune packs (jump, hit, coin, shoot, sword, laser, boss music, etc.)
 
 </details>
 
 ## Roadmap
 
-- [ ] Core render loop + sprite state machine
-- [ ] Python service wired to at least one gameplay mechanic
-- [ ] Real sprite/audio assets swapped in
-- [ ] Living documentation fully backfilled
+- [x] Core render loop + sprite animation state machine
+- [x] Python service wired to loot and procedural level generation
+- [x] Real sprite/audio assets swapped in via `scripts/prepare-assets.py`
+- [x] Living documentation structure and ADRs
+- [x] Responsive canvas + header/footer HUD refactor
+- [ ] Level progression save state and inventory persistence
 - [ ] Bootcamp submission polish pass
 
 ## License
