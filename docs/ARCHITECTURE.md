@@ -71,7 +71,7 @@ The service runs independently from Next.js and returns plain JSON consumed by N
 
 - [x] Real spritesheet integration (via `scripts/prepare-assets.py` + `spritemeta.json`)
 - [x] Audio event wiring (jump/combat SFX, zone + boss music)
+- [x] Prefix weapon effects wired in combat (burn/freeze/shock/curse + crit/lifesteal)
 - [ ] Level progression save state (tracking which levels cleared, inventory persistence)
-- [ ] Implement the 4 stubbed weapon effects (burn, freeze, shock, curse) — see 2026-07-08 inventory
 - [ ] Determine if more than 4 levels needed, or if reusing/recombining level sections more is better for scope
 - [ ] Evaluate whether WebSocket communication is worth adding for real-time state sync (probably not needed for single-player local game)

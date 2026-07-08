@@ -67,6 +67,11 @@ type Enemy = {
   touchDamage: number;
   level: number;
   boss: boolean;
+  burnT: number;
+  burnTickT: number;
+  freezeT: number;
+  shockT: number;
+  curseT: number;
 };
 
 type PickupKind =
@@ -100,9 +105,16 @@ type Projectile = {
   ttl: number;
   color: string;
   r: number;
+  effect?: WeaponInstance["effect"];
 };
 
 type RoomState = { enemies: Enemy[]; pickups: Pickup[] };
+
+type DamageOptions = {
+  effect?: WeaponInstance["effect"];
+  bypassStatusMult?: boolean;
+  applyOnHitEffects?: boolean;
+};
 
 export type HudSnapshot = {
   hp: number;
@@ -368,6 +380,11 @@ export class Game {
             touchDamage: def.touchDamage,
             level: def.level,
             boss: def.boss ?? false,
+            burnT: 0,
+            burnTickT: 0,
+            freezeT: 0,
+            shockT: 0,
+            curseT: 0,
           });
         }
       }
@@ -634,6 +651,7 @@ export class Game {
           ttl: this.weapon.range / speed,
           color: this.weapon.kind === "magic" ? "#c084fc" : "#f87171",
           r: this.weapon.kind === "magic" ? 4 : 2.5,
+          effect: this.weapon.effect,
         });
       }
     }
@@ -667,17 +685,57 @@ export class Game {
     for (const enemy of enemies) {
       if (enemy.hp <= 0) continue;
       if (rectsOverlap(hitbox, enemy)) {
-        this.damageEnemy(enemy, this.weaponDamage());
+        this.damageEnemy(enemy, this.weaponDamage(), { effect: this.weapon.effect });
       }
     }
   }
 
-  private damageEnemy(enemy: Enemy, amount: number) {
-    enemy.hp -= amount;
+  private applyStatus(effect: WeaponInstance["effect"], enemy: Enemy, amount: number) {
+    if (!effect) return;
+    if (effect === "burn") {
+      enemy.burnT = Math.max(enemy.burnT, 3.5);
+      return;
+    }
+    if (effect === "freeze") {
+      enemy.freezeT = Math.max(enemy.freezeT, 1.75);
+      return;
+    }
+    if (effect === "shock") {
+      enemy.shockT = Math.max(enemy.shockT, 0.6);
+      const splash = amount * 0.35;
+      if (splash > 0) {
+        const enemies = this.roomState(this.roomId).enemies;
+        for (const other of enemies) {
+          if (other === enemy || other.hp <= 0) continue;
+          if (Math.abs(other.x - enemy.x) <= 42 && Math.abs(other.y - enemy.y) <= 32) {
+            this.damageEnemy(other, splash, {
+              bypassStatusMult: true,
+              applyOnHitEffects: false,
+            });
+          }
+        }
+      }
+      return;
+    }
+    if (effect === "curse") {
+      enemy.curseT = Math.max(enemy.curseT, 4.5);
+    }
+  }
+
+  private damageEnemy(enemy: Enemy, amount: number, options: DamageOptions = {}) {
+    const scaled =
+      !options.bypassStatusMult && enemy.curseT > 0 ? amount * 1.22 : amount;
+    enemy.hp -= scaled;
     enemy.animTime = 0;
-    if (this.weapon.effect === "lifesteal" || this.stat("lifeSteal") > 0) {
+    if (
+      options.applyOnHitEffects !== false &&
+      (this.weapon.effect === "lifesteal" || this.stat("lifeSteal") > 0)
+    ) {
       const pct = (this.weapon.effect === "lifesteal" ? 8 : 0) + this.stat("lifeSteal");
-      this.hp = Math.min(this.maxHp(), this.hp + (amount * pct) / 100);
+      this.hp = Math.min(this.maxHp(), this.hp + (scaled * pct) / 100);
+    }
+    if (enemy.hp > 0 && options.effect) {
+      this.applyStatus(options.effect, enemy, scaled);
     }
     if (enemy.hp <= 0) {
       this.onEnemyKilled(enemy);
@@ -757,21 +815,46 @@ export class Game {
 
     for (const enemy of state.enemies) {
       if (enemy.hp <= 0) continue;
+      // Prefix effects on weapons are resolved here so they work for any enemy.
+      // Burn deals periodic DOT; freeze/shock slow behavior; curse amplifies damage.
+      if (enemy.burnT > 0) {
+        enemy.burnT = Math.max(0, enemy.burnT - dt);
+        enemy.burnTickT -= dt;
+        if (enemy.burnTickT <= 0) {
+          enemy.burnTickT = 0.45;
+          this.damageEnemy(enemy, 3 + enemy.level * 0.7, {
+            bypassStatusMult: true,
+            applyOnHitEffects: false,
+          });
+          if (enemy.hp <= 0) continue;
+        }
+      } else {
+        enemy.burnTickT = 0;
+      }
+      if (enemy.freezeT > 0) enemy.freezeT = Math.max(0, enemy.freezeT - dt);
+      if (enemy.shockT > 0) enemy.shockT = Math.max(0, enemy.shockT - dt);
+      if (enemy.curseT > 0) enemy.curseT = Math.max(0, enemy.curseT - dt);
+
       enemy.animTime += dt;
       enemy.stateTime += dt;
       const distX = pcx - (enemy.x + enemy.w / 2);
       const distY = pcy - (enemy.y + enemy.h / 2);
       const dist = Math.hypot(distX, distY);
+      const speedScale =
+        enemy.freezeT > 0 ? 0.42 : enemy.shockT > 0 ? 0.7 : 1;
+      const stunned = enemy.shockT > 0;
 
       switch (enemy.kind) {
         case "bat": {
           enemy.anim = "fly";
           if (dist < 140) {
-            enemy.vx = Math.sign(distX) * 60;
-            enemy.vy = Math.sign(distY) * 45 + Math.sin(this.animT * 6 + enemy.homeX) * 25;
+            enemy.vx = Math.sign(distX) * 60 * speedScale;
+            enemy.vy =
+              (Math.sign(distY) * 45 + Math.sin(this.animT * 6 + enemy.homeX) * 25) *
+              speedScale;
           } else {
-            enemy.vx = Math.sin(this.animT * 2 + enemy.homeX) * 30;
-            enemy.vy = Math.cos(this.animT * 2.4 + enemy.homeY) * 20;
+            enemy.vx = Math.sin(this.animT * 2 + enemy.homeX) * 30 * speedScale;
+            enemy.vy = Math.cos(this.animT * 2.4 + enemy.homeY) * 20 * speedScale;
           }
           enemy.x += enemy.vx * dt;
           enemy.y += enemy.vy * dt;
@@ -782,7 +865,7 @@ export class Game {
           // patrol; lunge when player near on similar height
           const near = Math.abs(distX) < 120 && Math.abs(distY) < 40;
           enemy.anim = near ? "attack" : "walk";
-          const speed = near ? 70 : 35;
+          const speed = (near ? 70 : 35) * speedScale;
           if (enemy.state === "idle") {
             enemy.state = "patrol";
             enemy.vx = -speed;
@@ -795,7 +878,9 @@ export class Game {
         case "imp": {
           const near = Math.abs(distX) < 180 && Math.abs(distY) < 60;
           enemy.anim = enemy.vx < 0 ? "walkLeft" : "walkRight";
-          enemy.vx = near ? Math.sign(distX) * 80 : Math.sin(this.animT + enemy.homeX) * 30;
+          enemy.vx = near
+            ? Math.sign(distX) * 80 * speedScale
+            : Math.sin(this.animT + enemy.homeX) * 30 * speedScale;
           enemy.facing = enemy.vx < 0 ? -1 : 1;
           this.enemyWalk(enemy, dt);
           break;
@@ -803,7 +888,7 @@ export class Game {
         case "flower": {
           const near = dist < 210;
           enemy.anim = near ? "attack" : "idle";
-          if (near && enemy.stateTime > 2.2) {
+          if (!stunned && near && enemy.stateTime > 2.2) {
             enemy.stateTime = 0;
             const angle = Math.atan2(distY, distX);
             this.projectiles.push({
@@ -827,7 +912,7 @@ export class Game {
           if (enemy.state === "idle" && dist < 260) {
             enemy.state = "charge";
             enemy.stateTime = 0;
-            enemy.vx = Math.sign(distX) * 150;
+            enemy.vx = Math.sign(distX) * 150 * speedScale;
             this.audio.play("growl", 0.9);
           }
           if (enemy.state === "charge") {
@@ -841,7 +926,10 @@ export class Game {
           } else if (enemy.state === "rest" && enemy.stateTime > 0.9) {
             enemy.state = "charge";
             enemy.stateTime = 0;
-            enemy.vx = Math.sign(distX) * (enemy.hp < enemy.maxHp / 2 ? 200 : 150);
+            enemy.vx =
+              Math.sign(distX) *
+              (enemy.hp < enemy.maxHp / 2 ? 200 : 150) *
+              speedScale;
           } else if (enemy.state !== "charge") {
             this.enemyWalk(enemy, dt);
           }
@@ -851,10 +939,10 @@ export class Game {
           // hovers in a slow sine, volleys lasers
           enemy.anim = "idle";
           enemy.y = enemy.homeY - enemy.h - 30 + Math.sin(this.animT * 1.4) * 22;
-          enemy.x += Math.sign(distX) * 22 * dt;
+          enemy.x += Math.sign(distX) * 22 * speedScale * dt;
           enemy.facing = distX < 0 ? -1 : 1;
           const volleyEvery = enemy.hp < enemy.maxHp / 2 ? 1.6 : 2.4;
-          if (dist < 320 && enemy.stateTime > volleyEvery) {
+          if (!stunned && dist < 320 && enemy.stateTime > volleyEvery) {
             enemy.stateTime = 0;
             for (const spread of [-0.15, 0, 0.15]) {
               const angle = Math.atan2(distY, distX) + spread;
@@ -884,15 +972,15 @@ export class Game {
             enemy.anim = "idle";
           } else if (enemy.state === "chase") {
             enemy.anim = enraged ? "run" : "walk";
-            enemy.vx = Math.sign(distX) * (enraged ? 130 : 70);
+            enemy.vx = Math.sign(distX) * (enraged ? 130 : 70) * speedScale;
             enemy.facing = enemy.vx < 0 ? -1 : 1;
             this.enemyWalk(enemy, dt);
-            if (Math.abs(distX) < 60 && Math.abs(distY) < 60) {
+            if (!stunned && Math.abs(distX) < 60 && Math.abs(distY) < 60) {
               enemy.state = "attack";
               enemy.stateTime = 0;
               enemy.anim = "attack";
               enemy.animTime = 0;
-            } else if (enraged && enemy.stateTime > 6) {
+            } else if (!stunned && enraged && enemy.stateTime > 6) {
               enemy.state = "howl";
               enemy.stateTime = 0;
               enemy.animTime = 0;
@@ -945,6 +1033,11 @@ export class Game {
                   touchDamage: def.touchDamage,
                   level: def.level,
                   boss: false,
+                  burnT: 0,
+                  burnTickT: 0,
+                  freezeT: 0,
+                  shockT: 0,
+                  curseT: 0,
                 });
               }
             }
@@ -1005,7 +1098,7 @@ export class Game {
       if (p.friendly) {
         for (const enemy of enemies) {
           if (enemy.hp > 0 && pointInRect(p.x, p.y, enemy)) {
-            this.damageEnemy(enemy, p.damage);
+            this.damageEnemy(enemy, p.damage, { effect: p.effect });
             return false;
           }
         }
@@ -1430,6 +1523,18 @@ export class Game {
       // Imp uses explicit left/right animation rows, so it should not be mirrored.
       const flip = enemy.kind === "imp" ? false : enemy.facing !== def.nativeFacing;
       this.drawSheetAnim(def.sheet, enemy.anim, enemy.animTime, dx, dy, def.drawW, def.drawH, flip);
+      // Lightweight status readout so roll effects are visible in moment-to-moment play.
+      let pipX = dx + 2;
+      const pipY = dy - 12;
+      const drawPip = (color: string) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(pipX, pipY, 6, 6);
+        pipX += 8;
+      };
+      if (enemy.burnT > 0) drawPip("#fb923c");
+      if (enemy.freezeT > 0) drawPip("#67e8f9");
+      if (enemy.shockT > 0) drawPip("#fde047");
+      if (enemy.curseT > 0) drawPip("#c084fc");
       // small health bar for damaged non-bosses
       if (!enemy.boss && enemy.hp < enemy.maxHp) {
         ctx.fillStyle = "#111";
