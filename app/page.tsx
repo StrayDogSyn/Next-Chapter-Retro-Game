@@ -35,12 +35,24 @@ export default function Home() {
       <section className="game-panel">
         <h1>Next Chapter Retro Game</h1>
         <p>
-          A beginner-friendly SNES-styled platformer scaffold with a custom
-          canvas loop and a Python-powered level endpoint.
+          A SNES-styled Metroidvania platformer — 24 interconnected rooms,
+          Diablo-style loot rolled by a Python service, and boss fights.
+          Hand-rolled canvas engine, no game library.
         </p>
 
         {!gameStarted ? (
-          <StartMenu onStart={() => setGameStarted(true)} />
+          <>
+            <StartMenu onStart={() => setGameStarted(true)} />
+            <div style={{ fontFamily: "monospace", fontSize: 13, lineHeight: 1.7 }}>
+              <strong>Keyboard:</strong> ←→/AD move · Space/W/Z jump (air-jump
+              with Aether Wings) · X/J attack · C/K dodge · V/L swap weapon ·
+              S/↓ drop through platforms
+              <br />
+              <strong>Xbox controller:</strong> left stick / D-pad move · A
+              jump · X attack · B dodge · Y swap weapon (plug in any time —
+              detected automatically)
+            </div>
+          </>
         ) : (
           <GameCanvas />
         )}
@@ -50,6 +62,7 @@ export default function Home() {
           {levelData
             ? `${levelData.source} (${levelData.level.platforms.length} platforms)`
             : "Waiting for response..."}
+          {" · loot rolling: see HUD indicator in-game"}
         </div>
       </section>
     </main>
