@@ -21,8 +21,10 @@ of prior runs — nothing gets silently overwritten, so you can see drift
 over time instead of just the current moment.
 """
 
+import csv
 import hashlib
 import os
+import re
 import subprocess
 import sys
 from datetime import datetime
@@ -31,6 +33,16 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 STATUS_PATH = REPO_ROOT / "STATUS.txt"
 HISTORY_MARKER = "=== PRIOR RUNS (most recent snapshot is always at the top) ==="
+
+# Matches a manifest "note" that records the actual upstream URL a file was
+# fetched from. A URL basename ending in "preview.<ext>" or "prev.<ext>"
+# (e.g. golem-preview.png, dragonsprev.png) is direct evidence the scraper
+# grabbed OpenGameArt's small companion preview image instead of the real
+# attachment — not a size-based guess, an actual recorded fact.
+PREVIEW_URL_RE = re.compile(r"prev(?:iew)?\.[a-zA-Z0-9]+", re.IGNORECASE)
+
+# Classic Drupal auto-generated thumbnail/derivative square dimensions.
+CLASSIC_THUMBNAIL_DIMS = {(100, 100), (64, 64), (128, 128)}
 
 
 def sh(cmd: list[str]) -> str:
@@ -41,17 +53,92 @@ def sh(cmd: list[str]) -> str:
         return f"(command unavailable: {e})"
 
 
-def file_tree_with_sizes(base: Path) -> list[str]:
+def image_dimensions(path: Path) -> tuple[int, int] | None:
+    """Pure-stdlib PNG/GIF/JPEG dimension reader (no Pillow dependency —
+    this script is meant to run with zero setup, anywhere, always)."""
+    try:
+        with path.open("rb") as f:
+            head = f.read(32)
+    except OSError:
+        return None
+
+    if head[:8] == b"\x89PNG\r\n\x1a\n" and len(head) >= 24:
+        return int.from_bytes(head[16:20], "big"), int.from_bytes(head[20:24], "big")
+
+    if head[:6] in (b"GIF87a", b"GIF89a") and len(head) >= 10:
+        return int.from_bytes(head[6:8], "little"), int.from_bytes(head[8:10], "little")
+
+    if head[:2] == b"\xff\xd8":
+        try:
+            data = path.read_bytes()
+        except OSError:
+            return None
+        i = 2
+        while i + 9 < len(data):
+            if data[i] != 0xFF:
+                i += 1
+                continue
+            marker = data[i + 1]
+            if marker in (0xC0, 0xC1, 0xC2, 0xC3):
+                return int.from_bytes(data[i + 7:i + 9], "big"), int.from_bytes(data[i + 5:i + 7], "big")
+            if marker in (0xD8, 0x01) or 0xD0 <= marker <= 0xD7:
+                i += 2
+                continue
+            seg_len = int.from_bytes(data[i + 2:i + 4], "big")
+            i += 2 + seg_len
+        return None
+
+    return None
+
+
+def load_confirmed_preview_filenames(manifest_paths: list[Path]) -> dict[str, str]:
+    """Cross-reference manifest CSVs: return {filename: source_url} for
+    every entry whose recorded upstream URL is itself a preview/prev image
+    — i.e. confirmed by the manifest's own data, not inferred from size."""
+    hits: dict[str, str] = {}
+    for manifest_path in manifest_paths:
+        if not manifest_path.exists():
+            continue
+        try:
+            with manifest_path.open(newline="", encoding="utf-8") as f:
+                for row in csv.DictReader(f):
+                    filename = (row.get("filename") or "").strip()
+                    note = row.get("note") or ""
+                    if filename and PREVIEW_URL_RE.search(note):
+                        hits[filename] = note.split()[0]
+        except (OSError, csv.Error):
+            continue
+    return hits
+
+
+def file_tree_with_sizes(base: Path, confirmed_previews: dict[str, str], counts: dict[str, int]) -> list[str]:
     if not base.exists():
         return [f"  (directory does not exist: {base})"]
     lines = []
     for path in sorted(base.rglob("*")):
-        if path.is_file():
-            size_kb = path.stat().st_size / 1024
-            flag = ""
-            if size_kb < 20 and path.suffix.lower() in (".png", ".jpg", ".jpeg", ".gif"):
-                flag = "   <-- SUSPECT: small image, may be a thumbnail, not the real asset"
-            lines.append(f"  {path.relative_to(REPO_ROOT)}  ({size_kb:.1f} KB){flag}")
+        if not path.is_file():
+            continue
+        size_kb = path.stat().st_size / 1024
+        is_image = path.suffix.lower() in (".png", ".jpg", ".jpeg", ".gif")
+        flag = ""
+
+        if path.name in confirmed_previews:
+            flag = (
+                f"   <-- CONFIRMED THUMBNAIL: manifest shows this was fetched from "
+                f"'{confirmed_previews[path.name]}' — a preview image, not the real asset. Re-fetch needed."
+            )
+            counts["confirmed"] += 1
+        elif size_kb < 20 and is_image:
+            dims = image_dimensions(path)
+            if dims and dims in CLASSIC_THUMBNAIL_DIMS:
+                flag = f"   <-- LIKELY THUMBNAIL: {dims[0]}x{dims[1]} matches classic auto-thumbnail dimensions"
+                counts["likely"] += 1
+            else:
+                dim_note = f"{dims[0]}x{dims[1]}" if dims else "dimensions unreadable"
+                flag = f"   <-- worth a manual look: small file ({dim_note}) — may just be simple/indexed-palette art"
+                counts["worth_checking"] += 1
+
+        lines.append(f"  {path.relative_to(REPO_ROOT)}  ({size_kb:.1f} KB){flag}")
     return lines or ["  (empty)"]
 
 
@@ -89,12 +176,25 @@ def build_snapshot() -> str:
     lines.append(f"Thumbnail-filter fix present ('/styles/' check): {contains_marker(script_path, '/styles/')}")
     lines.append("")
 
+    confirmed_previews = load_confirmed_preview_filenames(
+        [REPO_ROOT / "assets" / "manifest.csv", REPO_ROOT / "assets" / "manifest_bulk.csv"]
+    )
+    counts = {"confirmed": 0, "likely": 0, "worth_checking": 0}
+
     lines.append("--- assets/ TREE (actual sizes on disk) ---")
-    lines.extend(file_tree_with_sizes(REPO_ROOT / "assets"))
+    lines.extend(file_tree_with_sizes(REPO_ROOT / "assets", confirmed_previews, counts))
     lines.append("")
 
     lines.append("--- docs/ TREE ---")
-    lines.extend(file_tree_with_sizes(REPO_ROOT / "docs"))
+    lines.extend(file_tree_with_sizes(REPO_ROOT / "docs", confirmed_previews, counts))
+    lines.append("")
+
+    lines.append("--- SUSPECT-ASSET TRIAGE SUMMARY ---")
+    lines.append(
+        f"  CONFIRMED thumbnail (manifest proves preview URL): {counts['confirmed']} — re-fetch on a machine with network access"
+    )
+    lines.append(f"  LIKELY thumbnail (classic auto-thumbnail dimensions): {counts['likely']} — probably needs re-fetch")
+    lines.append(f"  Worth a manual look (small file, plausible real dims): {counts['worth_checking']} — low priority, may be fine")
     lines.append("")
 
     manifest_path = REPO_ROOT / "assets" / "manifest.csv"
