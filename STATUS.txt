@@ -1,4 +1,4 @@
-PROJECT STATUS SNAPSHOT — 2026-07-07T21:05:08
+PROJECT STATUS SNAPSHOT — 2026-07-07T21:14:20
 Repo root: C:\Users\Petro\repos\Next_Chapter\Next-Chapter-Retro-Game
 
 --- GIT STATUS (uncommitted changes) ---
@@ -13,13 +13,58 @@ SHA256 (first 12 chars): f6919e4ae181
 Thumbnail-filter fix present ('/styles/' check): YES
 
 --- assets/ TREE (actual sizes on disk) ---
+  assets\img\beast_boss_darksaber.zip  (19445.1 KB)
+  assets\img\bulk\24x32_characters_with_faces_big_pack.zip  (235.0 KB)
+  assets\img\bulk\2d_sprite_skins_walking_animation.jpg  (47.1 KB)
+  assets\img\bulk\animated_ocean_water_tile.gif  (25.6 KB)
+  assets\img\bulk\base_character.png  (17.4 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
+  assets\img\bulk\bat_sprite.png  (2.6 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
+  assets\img\bulk\biomech_dragon_splice.png  (20.9 KB)
+  assets\img\bulk\bloody_mary.png  (2.7 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
+  assets\img\bulk\dead_tree_1.png  (4.5 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
+  assets\img\bulk\demon_flower_monster_sprite_sheet.zip  (201.8 KB)
+  assets\img\bulk\dirt_platformer_tiles.png  (5.2 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
+  assets\img\bulk\goblin_sprite.zip  (270.8 KB)
+  assets\img\bulk\hero_0.png  (151.3 KB)
+  assets\img\bulk\living_tissue_background.zip  (23.4 KB)
+  assets\img\bulk\lpc_beetle.PNG  (1.8 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
+  assets\img\bulk\lpc_goblin.png  (2.1 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
+  assets\img\bulk\lpc_golem.png  (2.3 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
+  assets\img\bulk\lpc_imp.zip  (145.7 KB)
+  assets\img\bulk\lpc_wolf_animation.png  (1.8 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
+  assets\img\bulk\mangrove.png  (29.8 KB)
+  assets\img\bulk\mech_0.png  (5.1 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
+  assets\img\bulk\minimalist_pixel_tileset.png  (23.5 KB)
+  assets\img\bulk\monkey_lad_in_magical_planet.png  (2.2 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
+  assets\img\bulk\mountain_at_dusk_background.zip  (119.7 KB)
+  assets\img\bulk\nature_tileset.png  (50.1 KB)
+  assets\img\bulk\outdoor_tiles_again.png  (21.0 KB)
+  assets\img\bulk\plattoon.png  (1.7 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
+  assets\img\bulk\rpg_enemies_11_dragons.png  (12.1 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
+  assets\img\bulk\rpg_village_isometric.png  (1020.8 KB)
+  assets\img\bulk\simple_character_base_16x16.png  (0.7 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
+  assets\img\bulk\sky_background.png  (28.1 KB)
+  assets\img\bulk\wyrmwolf.png  (834.6 KB)
   assets\img\screenshots\phase-one-framework.png  (685.5 KB)
+  assets\img\werewolf_base.png  (6.8 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
   assets\loading-page.gif  (3673.3 KB)
-  assets\manifest.csv  (1.3 KB)
+  assets\manifest.csv  (1.4 KB)
+  assets\manifest_bulk.csv  (14.0 KB)
   assets\sounds\beast_growl_generic.mp3  (172.6 KB)
   assets\sounds\beast_roar_deep_kraken.mp3  (239.2 KB)
   assets\sounds\beast_roar_dragon.mp3  (1378.5 KB)
+  assets\sounds\bulk\100_cc0_sfx.zip  (2853.4 KB)
+  assets\sounds\bulk\8_bit_sound_effect_pack.zip  (3947.1 KB)
+  assets\sounds\bulk\jay_the_doggo_sound_effects.wav  (24.2 KB)
+  assets\sounds\bulk\monster_5.wav  (618.6 KB)
+  assets\sounds\bulk\nes_shooter_music_5_tracks_3_jingles.zip  (48.0 KB)
+  assets\sounds\bulk\reversing_time_stuck_in_time.ogg  (861.4 KB)
+  assets\sounds\bulk\society_in_ruins.mp3  (482.0 KB)
+  assets\sounds\bulk\some_animal_noise.wav  (240.2 KB)
+  assets\sounds\bulk\time_slow.mp3  (731.7 KB)
+  assets\sounds\bulk\we_are_prophet_happy_energetic_tune.mp3  (322.0 KB)
   assets\sounds\sfx_512_retro.zip  (20100.4 KB)
+  assets\sounds\sfx_pack_8bit_vol1.zip  (1128.7 KB)
 
 --- docs/ TREE ---
   docs\AGENTIC_WORKFLOW.md  (6.0 KB)
@@ -31,9 +76,9 @@ Thumbnail-filter fix present ('/styles/' check): YES
 
 --- assets/manifest.csv CONTENTS ---
 source,page_url,filename,status,note
-opengameart,https://opengameart.org/content/dark-saber-werewolf,beast_boss_darksaber.gif,downloaded,https://opengameart.org/sites/default/files/Saber_preview2.gif
-opengameart,https://opengameart.org/content/werewolf,werewolf_base.png,downloaded,https://opengameart.org/sites/default/files/1536892116312Instagram_last_0.png
-opengameart,https://opengameart.org/content/8-bit-sound-effect-pack-vol-001,sfx_pack_8bit_vol1.png,downloaded,https://opengameart.org/sites/default/files/SoundFXPack.png
+opengameart,https://opengameart.org/content/dark-saber-werewolf,beast_boss_darksaber.zip,downloaded,https://opengameart.org/sites/default/files/DarkSaber_0.zip
+opengameart,https://opengameart.org/content/werewolf,werewolf_base.png,downloaded-unverified,"https://opengameart.org/sites/default/files/1536892116312Instagram_last_0.png  [WARNING: only 6.8KB — likely a thumbnail, verify manually]"
+opengameart,https://opengameart.org/content/8-bit-sound-effect-pack-vol-001,sfx_pack_8bit_vol1.zip,downloaded,https://opengameart.org/sites/default/files/8-bit%20Sound%20Effects%20Pack%20001.zip
 opengameart,https://opengameart.org/content/audio-cc0-8bit-chiptune,,failed,No direct file link found — check page manually
 opengameart,https://opengameart.org/content/512-sound-effects-8-bit-style,sfx_512_retro.zip,downloaded,https://opengameart.org/sites/default/files/The%20Essential%20Retro%20Video%20Game%20Sound%20Effects%20Collection%20%5B512%20sounds%5D.zip
 freesound,https://freesound.org/s/479380/,beast_roar_dragon.mp3,downloaded,license: http://creativecommons.org/publicdomain/zero/1.0/

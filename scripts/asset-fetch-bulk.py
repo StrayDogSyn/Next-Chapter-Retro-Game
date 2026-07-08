@@ -29,7 +29,7 @@ FREESOUND SETUP (required for the Freesound portion)
     Set FREESOUND_API_KEY as an environment variable before running.
 
 USAGE
-    python asset_fetch_bulk.py
+    python scripts/asset-fetch-bulk.py
 
 CAPS
 Both sources are capped (see CONFIG below) to stay polite to these free
@@ -52,7 +52,8 @@ from bs4 import BeautifulSoup
 # CONFIG
 # ---------------------------------------------------------------------------
 
-OUTPUT_DIR = Path("assets")
+REPO_ROOT = Path(__file__).resolve().parent.parent
+OUTPUT_DIR = REPO_ROOT / "assets"
 SPRITES_DIR = OUTPUT_DIR / "img" / "bulk"
 AUDIO_DIR = OUTPUT_DIR / "sounds" / "bulk"
 MANIFEST_PATH = OUTPUT_DIR / "manifest_bulk.csv"
@@ -364,7 +365,7 @@ def main() -> None:
     print(f"  Skipped (already existed):    {skipped}")
     print(f"  Failed:                       {failed}")
     print(f"Manifest written to: {MANIFEST_PATH.resolve()}")
-    print("Run project_status.py next to confirm actual file sizes on disk.")
+    print("Run `python scripts/project-status.py` next to confirm actual file sizes on disk.")
 
 
 if __name__ == "__main__":

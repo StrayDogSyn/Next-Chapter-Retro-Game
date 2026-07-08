@@ -13,7 +13,7 @@ and git state directly — no agent self-reporting involved — so any
 status claim can be checked against ground truth in one command.
 
 USAGE
-    python scripts/project_status.py
+    python scripts/project-status.py
 
 Writes STATUS.txt to the repo root AND prints it to the terminal.
 Each run prepends a fresh, timestamped snapshot above a preserved history
