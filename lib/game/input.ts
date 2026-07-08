@@ -111,7 +111,10 @@ export class InputManager {
   private keyboardHeld = blankRecord();
   private previousHeld = blankRecord();
   private gamepadIndex: number | null = null;
-  private target: Window;
+  private windowTarget: Window;
+  private documentTarget: Document;
+  private debug = false;
+  private lastDebugFrame = "";
 
   private onKeyDown = (event: KeyboardEvent) => {
     const action = KEY_BINDINGS[event.code];
@@ -119,20 +122,48 @@ export class InputManager {
     // Keep the page from scrolling on arrows/space while playing.
     event.preventDefault();
     this.keyboardHeld[action] = true;
+    if (this.debug) {
+      const active = this.documentTarget.activeElement?.tagName ?? "none";
+      console.info(
+        `[input/debug] keydown code=${event.code} action=${action} hasFocus=${this.documentTarget.hasFocus()} active=${active}`,
+      );
+    }
   };
 
   private onKeyUp = (event: KeyboardEvent) => {
     const action = KEY_BINDINGS[event.code];
     if (!action) return;
     this.keyboardHeld[action] = false;
+    if (this.debug) {
+      console.info(`[input/debug] keyup code=${event.code} action=${action}`);
+    }
   };
 
-  private onBlur = () => {
+  private releaseAllKeys = () => {
     // If the window loses focus while keys are held, their keyup events are
     // lost (alt-tab, clicking outside) and the key would stay "held" forever —
     // the exact stuck-input bug found in the deleted lib/inputHandler.ts.
     // Releasing everything on blur is the standard fix.
-    for (const action of ACTIONS) this.keyboardHeld[action] = false;
+    for (const action of ACTIONS) {
+      this.keyboardHeld[action] = false;
+      this.state.held[action] = false;
+      this.state.pressed[action] = false;
+      this.previousHeld[action] = false;
+    }
+    this.state.axisX = 0;
+    if (this.debug) {
+      console.info("[input/debug] released all keys due to focus loss/visibility change");
+    }
+  };
+
+  private onBlur = () => {
+    this.releaseAllKeys();
+  };
+
+  private onVisibilityChange = () => {
+    if (this.documentTarget.visibilityState !== "visible") {
+      this.releaseAllKeys();
+    }
   };
 
   private onGamepadConnected = (event: GamepadEvent) => {
@@ -155,9 +186,16 @@ export class InputManager {
   };
 
   constructor(target: Window) {
-    this.target = target;
-    target.addEventListener("keydown", this.onKeyDown);
-    target.addEventListener("keyup", this.onKeyUp);
+    this.windowTarget = target;
+    this.documentTarget = target.document;
+    this.debug = this.documentTarget.location.search.includes("inputDebug=1");
+
+    // Keyboard listeners on document are more reliable than window for focus
+    // transitions inside the page (controls, overlays, fullscreen changes).
+    this.documentTarget.addEventListener("keydown", this.onKeyDown, { capture: true });
+    this.documentTarget.addEventListener("keyup", this.onKeyUp, { capture: true });
+    this.documentTarget.addEventListener("visibilitychange", this.onVisibilityChange);
+
     target.addEventListener("blur", this.onBlur);
     target.addEventListener("gamepadconnected", this.onGamepadConnected);
     target.addEventListener("gamepaddisconnected", this.onGamepadDisconnected);
@@ -200,6 +238,14 @@ export class InputManager {
       this.previousHeld[action] = merged[action];
     }
     this.state.axisX = axisX;
+
+    if (this.debug) {
+      const debugFrame = `L${Number(this.state.held.left)} R${Number(this.state.held.right)} U${Number(this.state.held.up)} D${Number(this.state.held.down)}|pL${Number(this.state.pressed.left)} pR${Number(this.state.pressed.right)} pU${Number(this.state.pressed.up)} pD${Number(this.state.pressed.down)}|ax=${this.state.axisX.toFixed(2)}`;
+      if (debugFrame !== this.lastDebugFrame) {
+        this.lastDebugFrame = debugFrame;
+        console.info(`[input/debug] frame ${debugFrame}`);
+      }
+    }
   }
 
   /** Poll-based read — required because gamepads have no per-button events. */
@@ -235,10 +281,11 @@ export class InputManager {
   }
 
   destroy() {
-    this.target.removeEventListener("keydown", this.onKeyDown);
-    this.target.removeEventListener("keyup", this.onKeyUp);
-    this.target.removeEventListener("blur", this.onBlur);
-    this.target.removeEventListener("gamepadconnected", this.onGamepadConnected);
-    this.target.removeEventListener("gamepaddisconnected", this.onGamepadDisconnected);
+    this.documentTarget.removeEventListener("keydown", this.onKeyDown, { capture: true });
+    this.documentTarget.removeEventListener("keyup", this.onKeyUp, { capture: true });
+    this.documentTarget.removeEventListener("visibilitychange", this.onVisibilityChange);
+    this.windowTarget.removeEventListener("blur", this.onBlur);
+    this.windowTarget.removeEventListener("gamepadconnected", this.onGamepadConnected);
+    this.windowTarget.removeEventListener("gamepaddisconnected", this.onGamepadDisconnected);
   }
 }

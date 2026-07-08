@@ -39,3 +39,13 @@ Reusable, effective prompts from this project's agentic workflow, with notes on 
 ---
 
 _Add new prompts below as they prove reusable. Prompts that failed are just as valuable to log — note them under a "Didn't Work" subsection if a pattern emerges._
+
+## UI refactor handoff brief (2026-07-08)
+
+Full brief: [UI_REFACTOR_BRIEF.md](UI_REFACTOR_BRIEF.md) — responsive canvas
+scaling, header/footer HUD chrome, arrow-key reliability investigation, GIF
+transparency fix in the asset pipeline. Written for a VS Code agent session
+after the first human playtest; includes per-task root-cause pointers into the
+actual files, the no-parallel-systems ground rule, and evidence-required
+verification steps. Reusable pattern: diagnose to the file/function level
+BEFORE handing off, so the receiving agent starts from causes, not symptoms.

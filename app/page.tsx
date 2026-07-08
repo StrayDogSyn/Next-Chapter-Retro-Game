@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { GameFooter } from "@/components/GameFooter";
+import { GameHeader } from "@/components/GameHeader";
 import { GameCanvas } from "@/components/GameCanvas";
 import { StartMenu } from "@/components/StartMenu";
+import type { HudSnapshot } from "@/lib/game/game";
 
 type LevelPayload = {
   ok: boolean;
@@ -17,6 +20,7 @@ type LevelPayload = {
 export default function Home() {
   const [gameStarted, setGameStarted] = useState(false);
   const [levelData, setLevelData] = useState<LevelPayload | null>(null);
+  const [snapshot, setSnapshot] = useState<HudSnapshot | null>(null);
 
   useEffect(() => {
     async function loadLevelData() {
@@ -44,18 +48,26 @@ export default function Home() {
           <>
             <StartMenu onStart={() => setGameStarted(true)} />
             <div style={{ fontFamily: "monospace", fontSize: 13, lineHeight: 1.7 }}>
-              <strong>Keyboard:</strong> ←→/AD move · Space/W/Z jump (air-jump
-              with Aether Wings) · X/J attack · C/K dodge · V/L swap weapon ·
-              S/↓ drop through platforms
+              <strong>Keyboard:</strong> LEFT/RIGHT or A/D move, SPACE/W/Z jump
+              (air-jump with Aether Wings), X/J attack, C/K dodge, V/L swap,
+              S/DOWN drop through platforms
               <br />
-              <strong>Xbox controller:</strong> left stick / D-pad move · A
-              jump · X attack · B dodge · Y swap weapon (plug in any time —
+              <strong>Xbox controller:</strong> left stick or D-pad move, A
+              jump, X attack, B dodge, Y swap weapon (plug in any time,
               detected automatically)
             </div>
           </>
-        ) : (
-          <GameCanvas />
-        )}
+        ) : null}
+
+        {gameStarted ? (
+          <section className="game-runtime">
+            <GameHeader snapshot={snapshot} />
+            <div className="game-runtime-canvas">
+              <GameCanvas onSnapshot={setSnapshot} />
+            </div>
+            <GameFooter snapshot={snapshot} />
+          </section>
+        ) : null}
 
         <div className="python-status" role="status" aria-live="polite">
           <strong>Python Service:</strong>{" "}

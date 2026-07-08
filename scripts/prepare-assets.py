@@ -33,7 +33,7 @@ import shutil
 import zipfile
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageSequence
 
 ROOT = Path(__file__).resolve().parent.parent
 ASSETS = ROOT / "assets"
@@ -91,14 +91,47 @@ def pack_rows(
 
 
 def gif_frames(path: Path) -> list[Image.Image]:
+    def border_is_uniform(img: Image.Image, rgba: tuple[int, int, int, int]) -> bool:
+        if img.width < 2 or img.height < 2:
+            return False
+        px = img.load()
+        for x in range(img.width):
+            if px[x, 0] != rgba or px[x, img.height - 1] != rgba:
+                return False
+        for y in range(img.height):
+            if px[0, y] != rgba or px[img.width - 1, y] != rgba:
+                return False
+        return True
+
+    def apply_chroma_key_if_safe(img: Image.Image) -> Image.Image:
+        rgba = img.convert("RGBA")
+        corner = rgba.getpixel((0, 0))
+        if corner[3] == 0:
+            return rgba
+        if not border_is_uniform(rgba, corner):
+            return rgba
+        pixels = list(rgba.getdata())
+        keyed = [
+            (r, g, b, 0) if (r, g, b, a) == corner else (r, g, b, a)
+            for (r, g, b, a) in pixels
+        ]
+        out = Image.new("RGBA", rgba.size)
+        out.putdata(keyed)
+        return out
+
     im = Image.open(path)
-    frames = []
-    try:
-        while True:
-            frames.append(im.convert("RGBA").copy())
-            im.seek(im.tell() + 1)
-    except EOFError:
-        pass
+    frames: list[Image.Image] = []
+    transparency_index = im.info.get("transparency")
+
+    for frame in ImageSequence.Iterator(im):
+        if frame.mode == "P" and transparency_index is not None:
+            pal = frame.copy()
+            pal.info["transparency"] = transparency_index
+            rgba = pal.convert("RGBA")
+        else:
+            rgba = frame.convert("RGBA")
+        frames.append(apply_chroma_key_if_safe(rgba))
+
     return frames
 
 
