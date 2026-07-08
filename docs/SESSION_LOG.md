@@ -25,6 +25,20 @@ Full chronological record of every AI-paired session on this project. The summar
 
 ## Entries
 
+### 2026-07-08 — Asset sourcing guide
+
+- **Tool used:** Claude / Cascade
+- **Goal:** Turn the user's asset-sourcing research into a repository-ready living document with CC0 categories, source links, sound buckets, and manifest templates.
+- **Prompt summary:** User supplied the curated sources, categories, and integration plan; I converted it into a polished Markdown doc and wired it into the existing doc system.
+- **What the agent produced:**
+  - Created `docs/ASSET_SOURCES.md` with licensing ground rule, recommended folder structure, sprite/sound source tables, category-to-source mapping, integration plan, highest-value targets, and CSV manifest templates.
+  - Added `ASSET_SOURCES.md` to `AGENTIC_WORKFLOW.md` Linked Documents table.
+  - Referenced `ASSET_SOURCES.md` from the README Assets & Credits section.
+- **Human review/changes:** Human provided the sources and structure; agent formatted and wired the document.
+- **Outcome:** ✅ merged
+- **Time saved vs. hand-writing (rough estimate):** ~20 minutes
+- **Anything worth remembering:** Keeping sourcing guidance in docs (not buried in chat) makes future asset passes reproducible and reviewable.
+
 ### 2026-07-08 — Documentation refinement and code review prep
 
 - **Tool used:** Claude / Cascade

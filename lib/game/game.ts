@@ -1233,16 +1233,15 @@ export class Game {
     this.lootCounter += 1;
     const seed = this.runSeed + this.lootCounter * 7919;
     const luck = this.stat("luck");
+    const abort = new AbortController();
+    const timer = setTimeout(() => abort.abort(), 3000);
     try {
       // Timeout so a hung request degrades to the fallback instead of a drop
       // that never lands (fetch has no default timeout).
-      const abort = new AbortController();
-      const timer = setTimeout(() => abort.abort(), 3000);
       const resp = await fetch(
         `/api/loot?seed=${seed}&luck=${luck}&enemyLevel=${enemyLevel}`,
         { signal: abort.signal },
       );
-      clearTimeout(timer);
       const payload = await resp.json();
       if (payload.ok && payload.drop) {
         this.lootSource = "python-service";
@@ -1252,6 +1251,8 @@ export class Game {
     } catch {
       this.lootSource = "client-fallback";
       return fallbackRoll(seed, luck, enemyLevel);
+    } finally {
+      clearTimeout(timer);
     }
   }
 
