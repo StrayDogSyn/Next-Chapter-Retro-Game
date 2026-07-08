@@ -47,3 +47,5 @@ STATUS.txt
 node_modules/
 **/node_modules/
 >>>>>>> agents/next-chapter-retro-game-setup
+
+node-portable/
