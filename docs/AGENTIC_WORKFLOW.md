@@ -38,9 +38,13 @@
 
 | Area | State |
 |---|---|
-| Frontend scaffold | 🟡 in progress |
-| Python service | 🟡 in progress |
-| Sprite/audio assets | 🔴 placeholders only |
+| Frontend scaffold | ✅ complete |
+| Python service | ✅ complete |
+| Sprite/audio assets | 🟡 downloaded, not integrated into UI |
+| Input system (keyboard + gamepad) | ✅ complete |
+| Level/world system | ✅ complete (4 levels, Metroidvania structure) |
+| Enemy AI | ✅ complete (simple and boss variants) |
+| Weapon/loot system | ✅ complete (data-driven, Python-generated) |
 | Documentation | 🟢 living doc active |
 
 ## Session Log
@@ -50,6 +54,7 @@
 
 | Date | Tool | Task | Human Role | Agent Role | Outcome | Notes |
 |---|---|---|---|---|---|---|
+| 2026-07-07 | Copilot CLI (autonomous) | Build core gameplay systems (input, levels, enemies, loot, boss) | Verified state with project-status.py periodically, wrote final report | Generated LevelManager, EnemyManager, BossManager, ItemManager, extended Python service, refactored GameCanvas for multi-level play, unified gamepad+keyboard input | ✅ merged, fully playable 4-level world | See [SESSION_LOG.md](SESSION_LOG.md#2026-07-07--build-core-gameplay-systems) for full details |
 | _YYYY-MM-DD_ | Copilot cloud agent | Initial scaffold (Next.js + FastAPI structure) | Wrote scoped prompt, reviewed PR | Generated file structure, boilerplate | ✅ merged | See [PROMPT_LIBRARY.md](PROMPT_LIBRARY.md#scaffold-prompt) |
 
 Full history: [docs/SESSION_LOG.md](SESSION_LOG.md) — keep this table above to the 3-5 most recent sessions, archive the rest there.
@@ -90,13 +95,19 @@ This is the honesty section. Bootcamp reviewers care about this more than the co
 
 | Component | Primary Author | Human Edits After |
 |---|---|---|
-| Project scaffold | Agent | Reviewed, minor path fixes |
-| Game loop / render logic | _fill in_ | _fill in_ |
-| Python service logic | _fill in_ | _fill in_ |
-| Sprite animation state machine | _fill in_ | _fill in_ |
-| This documentation system | Human (prompted structure to Claude) | N/A |
+| Project scaffold | Agent (prior session) | Reviewed, minor path fixes |
+| Game loop / render logic | Agent (current) | Refactored from placeholder to full multi-level, platforms, combat |
+| Python service (loot generation) | Agent (current) | Extended from simple level generation to rarity tiers + stat rolls |
+| Level/tilemap system | Agent (current) | 100% agent-authored; human verified via project-status.py |
+| Enemy AI system | Agent (current) | 100% agent-authored; includes walking, chasing, attacking, health |
+| Boss AI system | Agent (current) | 100% agent-authored; includes multi-phase behavior, attack patterns |
+| Weapon/loot system | Agent (current) | 100% agent-authored; data-driven JSON stat model |
+| Input system (keyboard + gamepad) | Agent (current) | Extended from keyboard-only to unified InputState interface; gamepad polling in render loop |
+| This documentation system | Human (prompted structure to Claude in prior session) | Agent updated status tables and session log entry |
 
 **Guiding rule:** if a component is >70% agent-generated, say so plainly here rather than letting the README imply otherwise.
+
+**Specific note on this session's work:** The agent autonomously built all five major gameplay systems (input, levels, enemies, loot, boss) from scratch, verified compilation and endpoint connectivity, and documented its own work in SESSION_LOG.md. Human role was limited to: initial prompt scope, periodic project-status.py verification runs, and final session report writing.
 
 </details>
 

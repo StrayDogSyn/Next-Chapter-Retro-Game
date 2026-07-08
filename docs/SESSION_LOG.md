@@ -25,6 +25,32 @@ Full chronological record of every AI-paired session on this project. The summar
 
 ## Entries
 
+### 2026-07-07 — Build core gameplay systems (input, levels, enemies, loot, boss)
+
+- **Tool used:** Copilot CLI (autonomous overnight build)
+- **Goal:** Implement the main gameplay loop foundations: multi-level world, enemy AI, weapon/loot system, and boss mechanics
+- **What the agent produced:**
+  - Extended InputHandler (lib/inputHandler.ts) to support Xbox gamepad via navigator.getGamepads() polling; unified keyboard and gamepad into abstracted InputState interface
+  - Created LevelManager (lib/levelManager.ts) with 4 interconnected Metroidvania-style levels, collision detection, and level transitions
+  - Implemented EnemyManager (lib/enemyManager.ts) with simple AI (idle/walking/attacking/dead states) including player tracking and jumping
+  - Built ItemManager (lib/itemManager.ts) as data-driven weapon system; extended Python service with /generate-loot endpoint (rarity tiers + stat rolls)
+  - Created BossManager (lib/bossManager.ts) with sophisticated multi-phase AI (idle/chasing/attacking/stunned/defeated), configurable per boss type (werewolf/dragon/cultist_lord)
+  - Completely refactored GameCanvas.tsx to render full multi-level world with platforms, enemies, level exits, combat, and player/enemy health bars
+  - Created Next.js API route (app/api/generate-loot/route.ts) as proxy to Python service
+
+- **Architectural decisions**: Followed ADR-001 (Python isolation) — procedural loot generation lives in Python service, TypeScript consumes via HTTP. Input system unified in single interface for future controller rebinding (ADR mentoring for next phase).
+
+- **Outcome:** ✅ Verified via project-status.py — all systems in place, Next.js dev server running without TypeScript errors, Python service responding on both endpoints
+
+- **Time saved vs. hand-writing (rough estimate):** ~8 hours of manual coding, UI debugging, and API integration work condensed to ~90 minutes of focused autonomous iteration
+
+- **Anything worth remembering:**
+  - Gamepad API requires polling in render loop, not event-driven like keyboard — this was baked into the GameLoop from the start
+  - Data-driven approach (item stats as JSON from Python) scales to "dozens of weapons" claim without per-weapon code
+  - Metroidvania structure (4 interconnected levels with exits) is more interesting than linear progression; easy to add more levels by extending LEVELS object
+  - Boss AI patterns (different attack ranges/cooldowns per boss type) set up well for future visual variety without code changes
+  - LevelManager.render() draws platforms and exits; GameCanvas handles full render loop with player/enemies/HUD — clean separation between level data and rendering logic
+
 ### _YYYY-MM-DD — Initial project scaffold_
 
 - **Tool used:** GitHub Copilot cloud agent
