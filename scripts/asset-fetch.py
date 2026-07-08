@@ -30,7 +30,7 @@ FREESOUND SETUP (required for the Freesound downloads to work)
          setx FREESOUND_API_KEY "your_key_here"          (Windows)
 
 USAGE
-    python scripts/asset-fetch.py
+    python asset_fetch.py
 """
 
 import csv
@@ -48,8 +48,7 @@ from bs4 import BeautifulSoup
 # CONFIG — edit these lists to add/remove candidates
 # ---------------------------------------------------------------------------
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-OUTPUT_DIR = REPO_ROOT / "assets"
+OUTPUT_DIR = Path("assets")
 SPRITES_DIR = OUTPUT_DIR / "img"
 AUDIO_DIR = OUTPUT_DIR / "sounds"
 MANIFEST_PATH = OUTPUT_DIR / "manifest.csv"
@@ -108,19 +107,30 @@ def find_oga_download_link(page_url: str) -> str | None:
     (Drupal's image style derivative system). Grabbing the first match
     naively picks up a thumbnail image instead of the real asset.
 
-    Fix: exclude anything under /styles/, then prefer real asset
-    extensions (zip/wav/ogg/mp3/rar/7z) over loose images, since the
-    actual payload on audio/sprite-pack pages is usually an archive.
+    Stronger fix: OGA's real "File(s):" attachment link is distinguishable
+    from inline body-content preview images because its visible link text
+    includes a file size, e.g. "DarkSaber.zip 19.9 Mb" or "werewolf.png
+    7 Kb". We prioritize that signal first, then fall back to preferred
+    extensions, then the LAST non-thumbnail candidate (attachments
+    typically appear after body content, not before it).
     """
     resp = requests.get(page_url, headers=HEADERS, timeout=20)
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
 
     candidates = []
+    size_labeled = []
     for link in soup.find_all("a", href=True):
         href = link["href"]
         if "/sites/default/files/" in href and "/styles/" not in href:
-            candidates.append(urljoin(page_url, href))
+            full = urljoin(page_url, href)
+            candidates.append(full)
+            link_text = link.get_text(" ", strip=True)
+            if re.search(r"\d+(\.\d+)?\s*(KB|MB|Kb|Mb|kb|mb)\b", link_text):
+                size_labeled.append(full)
+
+    if size_labeled:
+        return size_labeled[0]
 
     if not candidates:
         return None
@@ -129,10 +139,7 @@ def find_oga_download_link(page_url: str) -> str | None:
     for c in candidates:
         if c.lower().endswith(preferred_ext):
             return c
-
-    # No archive/audio match — fall back to the first non-thumbnail candidate,
-    # but flag it as unverified so download_oga_asset can warn about it.
-    return candidates[0]
+    return candidates[-1]
 
 
 def download_oga_asset(page_url: str, save_stem: str, dest_dir: Path) -> dict:

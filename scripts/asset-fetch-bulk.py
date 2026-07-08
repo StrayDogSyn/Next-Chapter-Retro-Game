@@ -29,7 +29,7 @@ FREESOUND SETUP (required for the Freesound portion)
     Set FREESOUND_API_KEY as an environment variable before running.
 
 USAGE
-    python scripts/asset-fetch-bulk.py
+    python asset_fetch_bulk.py
 
 CAPS
 Both sources are capped (see CONFIG below) to stay polite to these free
@@ -52,8 +52,7 @@ from bs4 import BeautifulSoup
 # CONFIG
 # ---------------------------------------------------------------------------
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-OUTPUT_DIR = REPO_ROOT / "assets"
+OUTPUT_DIR = Path("assets")
 SPRITES_DIR = OUTPUT_DIR / "img" / "bulk"
 AUDIO_DIR = OUTPUT_DIR / "sounds" / "bulk"
 MANIFEST_PATH = OUTPUT_DIR / "manifest_bulk.csv"
@@ -109,7 +108,12 @@ def slugify(text: str) -> str:
 
 def find_oga_download_link(page_url: str) -> tuple[str | None, str | None]:
     """Returns (file_url, page_title). Filters out /styles/ thumbnail
-    derivatives, prefers real asset extensions over loose images."""
+    derivatives. OGA's real "File(s):" attachment link is distinguishable
+    from inline body-content preview images because its visible link text
+    includes a file size, e.g. "DarkSaber.zip 19.9 Mb" or
+    "werewolf.png 7 Kb" — we prioritize that signal over extension
+    matching, since a size-unlabeled .png could easily be a decorative
+    image in the page body rather than the actual attachment."""
     resp = requests.get(page_url, headers=HEADERS, timeout=20)
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
@@ -118,10 +122,18 @@ def find_oga_download_link(page_url: str) -> tuple[str | None, str | None]:
     title = title_tag.get_text(strip=True) if title_tag else Path(page_url).name
 
     candidates = []
+    size_labeled = []
     for link in soup.find_all("a", href=True):
         href = link["href"]
         if "/sites/default/files/" in href and "/styles/" not in href:
-            candidates.append(urljoin(page_url, href))
+            full = urljoin(page_url, href)
+            candidates.append(full)
+            link_text = link.get_text(" ", strip=True)
+            if re.search(r"\d+(\.\d+)?\s*(KB|MB|Kb|Mb|kb|mb)\b", link_text):
+                size_labeled.append(full)
+
+    if size_labeled:
+        return size_labeled[0], title
 
     if not candidates:
         return None, title
@@ -130,7 +142,11 @@ def find_oga_download_link(page_url: str) -> tuple[str | None, str | None]:
     for c in candidates:
         if c.lower().endswith(preferred_ext):
             return c, title
-    return candidates[0], title
+
+    # Last resort: no size-labeled link and no preferred extension found.
+    # Take the LAST candidate rather than the first — OGA pages typically
+    # place body-content preview images before the attachment field.
+    return candidates[-1], title
 
 
 # ---------------------------------------------------------------------------
@@ -365,7 +381,7 @@ def main() -> None:
     print(f"  Skipped (already existed):    {skipped}")
     print(f"  Failed:                       {failed}")
     print(f"Manifest written to: {MANIFEST_PATH.resolve()}")
-    print("Run `python scripts/project-status.py` next to confirm actual file sizes on disk.")
+    print("Run project_status.py next to confirm actual file sizes on disk.")
 
 
 if __name__ == "__main__":
