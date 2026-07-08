@@ -1,0 +1,248 @@
+# Bugs & QA Findings — Living Improvement Roadmap
+
+> **Purpose:** This document tracks usability issues, gameplay bugs, and feature enhancements identified during human playtesting and QA audits. Each item provides root-cause analysis, actionable step-by-step remediation aligned with the project architecture, and a strict verification checklist.
+>
+> **Last updated:** 2026-07-08  
+> **Maintainer:** StrayDogSyn / QA & Engineering Team  
+> **Rule of Thumb:** All changes must respect existing architectural boundaries (no parallel canvas systems, unified `Game` class logic in `lib/game/game.ts`, asset ingestion strictly via `scripts/prepare-assets.py`).
+
+---
+
+## Quick Reference & Tracking Dashboard
+
+| ID | Category | Issue / Enhancement Summary | Priority | Status |
+|---|---|---|---|---|
+| [BUG-001](#bug-001-pit-dropped-loot-persistence) | Physics / Loot | Items dropped over pits despawn or fail to persist during room transitions | High | 🔴 Untracked |
+| [UI-002](#ui-002-equipment-dashboard-highlight--swap-effects) | UI / FX | Equipment needs stronger HUD highlighting and noticeable swap feedback | Medium | 🔴 Untracked |
+| [BUG-003](#bug-003-unreachable-platform-generation--dead-ends) | Level Gen | Initial floors have unreachable platform heights causing navigation dead-ends | High | 🔴 Untracked |
+| [UX-004](#ux-004-player-respawn--self-destruct-mechanism) | Controls / UX | No self-destruct/reset mechanism when trapped in soft-locks or dead-ends | High | 🔴 Untracked |
+| [AST-005](#ast-005-underutilized-sprite--audio-assets) | Asset Pipeline | Game engine only utilizes a small fraction of available sprites and SFX | Medium | 🔴 Untracked |
+| [UX-006](#ux-006-treasure--coin-micro-interactions) | Visuals / Polish | Coins and treasure lack premium micro-interactions and sprite variety | Medium | 🔴 Untracked |
+| [UI-007](#ui-007-dashboard-mini-map-integration) | UI / Navigation | Lack of spatial orientation; mini-map needed in the dashboard | High | 🔴 Untracked |
+| [UI-008](#ui-008-fullscreen-unobtrusive-help-modal) | UI / Accessibility | Fullscreen hides instructions; persistent unobtrusive `?` modal needed | Medium | 🔴 Untracked |
+| [SYS-009](#sys-009-xp-counter--inventory-stats-modal) | Progression / UI | Missing XP counter from defeats and centralized inventory/stats modal | High | 🔴 Untracked |
+| [AST-010](#ast-010-ingestion-of-downloads-archive-assets) | Asset Pipeline | Unprocessed asset archives in `./downloads` need pipeline integration | High | 🔴 Untracked |
+| [SYS-011](#sys-011-persistent-checkpoints--save-states) | Persistence | No checkpoint system or persistent save data across sessions | High | 🔴 Untracked |
+| [SYS-012](#sys-012-npc-item-shop--coin-economy-sink) | Gameplay / Economy | Coins lack an economy sink; NPC shop needed for replay value | Medium | 🔴 Untracked |
+
+---
+
+## Detailed Remediation Plans & Checklists
+
+### BUG-001: Pit-Dropped Loot Persistence
+**Issue Description:** When enemies flying over pits or positioned near room edges are defeated, the loot generated via `/api/loot` drops into bottomless pits or out-of-bounds trigger zones. If the player attempts to chase the item or transitions to the next room, the item is permanently despawned, leading to frustrating rewards loss.
+
+**Step-by-Step Improvement Recommendations:**
+1. **Loot Clamping Physics:** Modify `lib/game/items.ts` so that when an item spawns, its initial raycast checks the vertical column below it. If the target drop zone is a pit/hazard tile (`#` or void), horizontally clamp the drop coordinates to the nearest solid platform edge.
+2. **Room Transition Persistence:** In `lib/game/world.ts` and `game.ts`, decouple active floor items from temporary room state. Store active drops in a world-level map (`Map<roomId, Item[]>`).
+3. **Safety Magnet Feature:** Implement a "pit rescue" behavior: if an item falls below the viewport floor limit (`y > stageHeight`), respawn it at the entrance threshold of the current room rather than destroying it.
+
+**Completion Checklist:**
+- [ ] Updated item spawn math in `lib/game/items.ts` to prevent initial drops into hazard zones.
+- [ ] Implemented world-state item caching so uncollected loot persists when leaving and returning to a room.
+- [ ] Verified via dev-tools that defeating a wyrmwolf/bat over a pit cleanly lands the loot on an adjacent ledge.
+- [ ] Ran `npx tsc --noEmit` and `npm run dev` with clean output.
+- [ ] Executed `python scripts/project-status.py` and verified clean working tree before commit.
+
+---
+
+### UI-002: Equipment Dashboard Highlight & Swap Effects
+**Issue Description:** Currently, equipped items in the header/footer HUD (`HudSnapshot`) lack visual prominence. When players swap weapons or armor, the transition occurs silently without visual or audio feedback, making it unclear whether an equipment change succeeded.
+
+**Step-by-Step Improvement Recommendations:**
+1. **HUD Active Styling:** Update `app/globals.css` to add a distinct animated glow border (`box-shadow: 0 0 8px var(--retro-gold)`) and scaled typography for active equipment chips in `.game-header` and `.game-footer`.
+2. **Runtime Visual Feedback:** In `lib/game/game.ts`, when `equipItem()` is invoked, spawn a temporary 300ms particle burst around the hero sprite and trigger a quick white/gold sprite tint shader or overlay.
+3. **Audio Wiring:** Call `audioManager.play('equip_sword')` or `audioManager.play('equip_armor')` during the swap event. Ensure sound fallbacks are robustly defined in `audioManager.ts`.
+
+**Completion Checklist:**
+- [ ] Added active-state CSS classes and animations for equipped HUD elements.
+- [ ] Wired particle emitters and sprite flash effects to weapon/armor swap methods in `game.ts`.
+- [ ] Connected equipment audio cues in `lib/game/audioManager.ts`.
+- [ ] Captured browser screenshots demonstrating the highlighted equipment state and swap animation.
+- [ ] Verified zero TypeScript compiler errors (`npx tsc --noEmit`).
+
+---
+
+### BUG-003: Unreachable Platform Generation & Dead-Ends
+**Issue Description:** Initial rooms and procedurally generated platform layouts (from `/python-service/generate-level` or ASCII maps in `lib/game/world.ts`) sometimes generate platforms exceeding the player's maximum jump height parameter (`maxJumpHeight`), trapping the PC in dead-ends or making progression impossible.
+
+**Step-by-Step Improvement Recommendations:**
+1. **Jump Physics Auditing:** Calculate the exact parabolic jump reach of the PC based on gravity and initial jump velocity in `game.ts`. Document this constant (e.g., max vertical tile reach = 3.5 tiles; max horizontal gap = 4 tiles).
+2. **Validator Integration:** In `lib/game/levelLoader.ts` (and the Python level generator algorithm), integrate a reachability validation step using a flood-fill or A* pathfinding check from the room entrance to all exits and key platforms.
+3. **Auto-Correction / Fallback:** If a layout fails validation, automatically inject an intermediate jump platform or reject the seed and roll a new layout before rendering.
+
+**Completion Checklist:**
+- [ ] Standardized and documented maximum jump metrics in `lib/game/world.ts`.
+- [ ] Implemented reachability validation algorithm in `levelLoader.ts` / Python generation service.
+- [ ] Audited all 24 static Metroidvania rooms to guarantee 100% navigable paths without ability gating traps.
+- [ ] Verified automated fallback generation works without client freezes.
+- [ ] Logged test evidence and ran `python scripts/project-status.py`.
+
+---
+
+### UX-004: Player Respawn & Self-Destruct Mechanism
+**Issue Description:** When players become trapped in soft-locks or dead-end geometry, the only recourse is a hard browser refresh, which wipes out all session progress, collected loot, and memory state.
+
+**Step-by-Step Improvement Recommendations:**
+1. **Input Binding:** In `lib/game/input.ts`, register a secondary action keybind (e.g., Hold `R` for 2 seconds, or access via the Escape menu) mapped to `action: 'respawn'`.
+2. **Penalty & Relocation Math:** In `lib/game/game.ts`, create a `handleRespawn()` method that deducts 10% of current coins or 1 HP (never reducing below 1 HP to prevent cheap game-overs), resets velocity to zero, and teleports the PC to the current room's designated safe entrance spawn point.
+3. **Visual & Audio Cues:** Play a teleport/warp SFX (`magic.mp3`) and execute a fade-to-black screen transition during the relocation to make it feel like an intentional game mechanic rather than a debug hack.
+
+**Completion Checklist:**
+- [ ] Added debounce/hold input mapping for self-destruct/respawn in `input.ts`.
+- [ ] Implemented `handleRespawn()` logic in `game.ts` with balanced penalty mechanics.
+- [ ] Added visual screen fade and sound effect wiring for the respawn sequence.
+- [ ] Tested soft-lock recovery across multiple zones without browser console errors.
+- [ ] Validated clean build via `npm run dev` and `npx tsc --noEmit`.
+
+---
+
+### AST-005: Underutilized Sprite & Audio Assets
+**Issue Description:** A significant portion of downloaded sprites and sound effects present in `assets/manifest.csv` and `assets/wired-assets.txt` are ignored by the runtime engine, leading to repetitive visual presentation and monotonous audio.
+
+**Step-by-Step Improvement Recommendations:**
+1. **Manifest Audit:** Review `assets/wired-assets.txt` and compare against `assets/sounds/bulk/` and `assets/img/bulk/`. Identify unused enemy variants, environmental decorations, and combat SFX (e.g., distinct critical hit sounds, footstep loops, enemy death groans).
+2. **Pipeline Expansion:** Update `scripts/prepare-assets.py` to process, slice, and export these latent assets into `public/sprites/` and `public/audio/`, automatically appending metadata to `spritemeta.json`.
+3. **Runtime Wiring:** In `lib/game/audioManager.ts`, map new sound events (`crit_hit`, `enemy_death`, `chest_open`). In `game.ts`, assign diverse sprites to enemy subclasses and environmental tiles.
+
+**Completion Checklist:**
+- [ ] Updated `assets/wired-assets.txt` with at least 10 previously unused sprite and audio files.
+- [ ] Executed `python scripts/prepare-assets.py` successfully and verified new files in `/public`.
+- [ ] Wired new sound events into `audioManager.ts` and confirmed in-game playback.
+- [ ] Assigned new sprite sheets to game entities without breaking animation state machines.
+- [ ] Ran `python scripts/project-status.py` to verify asset hash consistency.
+
+---
+
+### UX-006: Treasure & Coin Micro-Interactions
+**Issue Description:** Coin and loot pickups currently lack satisfying tactile feedback. Collectibles vanish instantly upon contact without animation, particle effects, or audio variety, diminishing the reward sensation of looting.
+
+**Step-by-Step Improvement Recommendations:**
+1. **Sprite Diversity:** Wire multiple coin/gem denominations (bronze coin, silver coin, gold bar, ruby) from asset packs via `prepare-assets.py`, each with distinct value multipliers and looping shimmer animations.
+2. **Visual Micro-Interactions:** When collected, trigger a floating text entity (`+10 COINS`) that drifts upward and fades out over 600ms, accompanied by a 4-particle sparkle burst rendered on the canvas.
+3. **Audio Pitch Scaling:** In `audioManager.ts`, implement pitch chaining: when multiple coins are collected within a 1.5-second window, incrementally scale the playback rate of `coin.mp3` from `1.0x` up to `1.5x` for a combo effect.
+
+**Completion Checklist:**
+- [ ] Configured multi-frame shimmer animations for treasure items in `spritemeta.json`.
+- [ ] Implemented floating value popups and sparkle particle emitters in `lib/game/game.ts`.
+- [ ] Added audio pitch-scaling logic for rapid consecutive pickups in `audioManager.ts`.
+- [ ] Captured video/gif or frame screenshots of the collection micro-interaction.
+- [ ] Verified build stability with `npx tsc --noEmit`.
+
+---
+
+### UI-007: Dashboard Mini-Map Integration
+**Issue Description:** Navigating a 24-room Metroidvania world across 5 zones without a map leads to disorientation. Players cannot track which rooms they have cleared, where unexplored exits lie, or where checkpoints are located.
+
+**Step-by-Step Improvement Recommendations:**
+1. **Map State Tracking:** In `lib/game/world.ts`, maintain a `visitedRooms: Set<string>` and `clearedRooms: Set<string>` state property updated whenever the player enters or clears an area.
+2. **Mini-Map Rendering:** In `components/GameCanvas.tsx` (or as a dedicated HUD canvas overlay driven by `game.ts` snapshot data), render a 5x5 grid representing the zone layout.
+3. **Visual Hierarchy:** Style visited rooms as slate blue squares, the active room with a pulsing gold outline, unexplored connecting rooms as dim outlines, and boss/shop rooms with specific icons. Keep this integrated into `.game-header` or as a top-right canvas HUD overlay.
+
+**Completion Checklist:**
+- [ ] Added room discovery and clearing tracking to world state.
+- [ ] Built mini-map rendering logic cleanly integrated into the existing HUD structure (no parallel systems).
+- [ ] Verified correct spatial mapping of exits and current player coordinates on the mini-map.
+- [ ] Tested responsiveness across small and large viewport simulations.
+- [ ] Confirmed zero type or linting errors via command line.
+
+---
+
+### UI-008: Fullscreen Unobtrusive Help Modal
+**Issue Description:** When players toggle Fullscreen mode, surrounding browser HTML instructions and control hints vanish. Players are left without reference for keybindings, game objectives, or system options.
+
+**Step-by-Step Improvement Recommendations:**
+1. **Persistent HUD Trigger:** Render a semi-transparent, unobtrusive `?` icon button in the top-right corner of the active game stage (`opacity: 0.6`, hovering to `1.0`).
+2. **Keybinding & Toggle:** In `lib/game/input.ts`, bind the `F1` key, `?` key, and gamepad `Start/Options` button to toggle a modal state (`isHelpModalOpen = !isHelpModalOpen`). When open, pause the main game loop (`GameLoop.pause()`).
+3. **Modal UI Construction:** Create a clean, retro-styled overlay inside `components/GameCanvas.tsx` displaying:
+   - Keyboard & Gamepad control mappings.
+   - Current zone objectives and hints.
+   - Volume sliders and Return to Menu options.
+
+**Completion Checklist:**
+- [ ] Integrated persistent `?` trigger icon into the game viewport overlay.
+- [ ] Wired key/button listeners for toggling the help modal and pausing runtime execution.
+- [ ] Styled the modal overlay to match SNES/retro aesthetic guidelines in `globals.css`.
+- [ ] Tested modal functionality in both standard windowed and fullscreen modes.
+- [ ] Verified git tree cleanliness and ran `npx tsc --noEmit`.
+
+---
+
+### SYS-009: XP Counter & Inventory/Stats Modal
+**Issue Description:** Defeating enemies lacks long-term character progression, and players have no centralized interface to review accumulated loot affixes, overall stat bonuses (Damage, Defense, Crit Chance, Lifesteal), or stored inventory items.
+
+**Step-by-Step Improvement Recommendations:**
+1. **Experience & Leveling Math:** In `lib/game/game.ts`, define an XP curve (`requiredXP = level * 100 * 1.5`). Upon enemy defeat, award XP. On level-up, trigger a visual fanfare, fully restore HP, and increment base stats.
+2. **HUD XP Bar:** Add a thin, animated gold/blue progress bar directly below the HP bar in the header HUD snapshot.
+3. **Inventory Modal Screen:** Bind `I` or `Tab` to open an Inventory/Stats modal. Read the active player inventory array and render a grid of equipped/stored gear, detailed stat breakdowns, and item lore descriptions retrieved from the Python `/api/loot` metadata.
+
+**Completion Checklist:**
+- [ ] Implemented XP calculation, leveling progression, and stat scaling in `game.ts`.
+- [ ] Added responsive XP progress bar to the runtime header HUD.
+- [ ] Created modal inventory screen displaying live player stats and loot details.
+- [ ] Verified that equipping items from the inventory correctly recalculates combat stats.
+- [ ] Executed full build validation (`npm run dev` and `npx tsc --noEmit`).
+
+---
+
+### AST-010: Ingestion of `./downloads` Archive Assets
+**Issue Description:** The `./downloads` directory contains a massive repository of raw zip archives (sprites, tilesets, SFX packs) that remain unintegrated into the active runtime, representing wasted UI/UX and gameplay potential.
+
+**Step-by-Step Improvement Recommendations:**
+1. **Archive Cataloging:** List and inspect contents of `./downloads/*.zip`. Categorize assets into UI frames, background layers, character animations, and sound effects.
+2. **Automated Extraction in Pipeline:** Extend `scripts/prepare-assets.py` with an extraction module using Python's `zipfile` and `PIL` (Pillow). Configure it to unzip select targets, apply chroma-key transparency correction where needed, normalize file names, and copy them directly into `public/sprites/` and `public/audio/`.
+3. **Manifest Update:** Record every ingested asset from `./downloads` into `assets/manifest.csv` with appropriate attribution metadata to maintain strict compliance with `docs/CREDITS.md`.
+
+**Completion Checklist:**
+- [ ] Audited `./downloads` archives and mapped target assets to gameplay features.
+- [ ] Extended `scripts/prepare-assets.py` to handle automated archive extraction and formatting.
+- [ ] Regenerated runtime assets and verified zero missing texture/audio references in console.
+- [ ] Updated `docs/CREDITS.md` with source links and licensing info for all newly ingested files.
+- [ ] Ran `python scripts/project-status.py` to confirm clean ingestion state.
+
+---
+
+### SYS-011: Persistent Checkpoints & Save States
+**Issue Description:** The game currently operates as a permadeath session; refreshing the page or closing the browser resets all Metroidvania progression, cleared rooms, inventory, and character levels back to zero.
+
+**Step-by-Step Improvement Recommendations:**
+1. **State Serialization:** In `lib/game/game.ts`, implement `serializeState()` and `deserializeState()` methods that export/import a JSON object containing: `playerLevel`, `currentHP`, `maxHP`, `coins`, `inventory`, `equippedGear`, `currentRoomId`, and `visitedRooms`.
+2. **Checkpoint Entity:** Design a Shrine/Checkpoint object placed in specific safe rooms in `lib/game/world.ts`. When the player interacts with it (`Up` arrow or `Action`), play a healing visual effect, save the serialized JSON string to `localStorage.getItem('next_chapter_save_v1')`, and display a "GAME SAVED" notification.
+3. **Start Menu Integration:** In `components/StartMenu.tsx`, check `localStorage` on mount. If a valid save exists, render a "Continue Game (Room X - Level Y)" button alongside "Start New Game".
+
+**Completion Checklist:**
+- [ ] Created robust JSON serialization and deserialization methods for full game state.
+- [ ] Added interactive Checkpoint Shrine entities to world maps with visual save feedback.
+- [ ] Wired `localStorage` read/write capabilities safely handling browser privacy exceptions.
+- [ ] Added "Continue Game" functionality to the Start Menu component.
+- [ ] Verified loading a save accurately restores position, stats, and map exploration.
+
+---
+
+### SYS-012: NPC Item Shop & Coin Economy Sink
+**Issue Description:** Collected coins currently serve as an arbitrary high-score metric without an economy sink or gameplay utility, reducing player incentive to hunt for treasure or defeat optional enemies.
+
+**Step-by-Step Improvement Recommendations:**
+1. **Shopkeeper NPC Entity:** Implement a friendly NPC entity (`Shopkeeper`) positioned in Room 1 (Hub Zone). Add an idle animation state and an interaction prompt (`Press UP to trade`).
+2. **Shop Interface Modal:** When triggered, pause the game loop and render an interactive Shop Modal. List purchasable items:
+   - Health Potion (+50% HP) — 50 Coins
+   - Permanent Stat Booster (+2 ATK / +5 MAX HP) — 200 Coins
+   - Mystery Weapon Box (Triggers Python `/api/loot` call with forced Rare/Epic rarity) — 300 Coins
+3. **Transaction Logic:** Ensure purchase methods validate coin balances, deduct costs, instantly apply consumables or add equipment to the inventory, and play a satisfying cash-register/coin-clink SFX.
+
+**Completion Checklist:**
+- [ ] Spawns Shopkeeper NPC in designated hub rooms with interaction triggers.
+- [ ] Built responsive Shop Modal UI integrated with player inventory and coin balance.
+- [ ] Wired Mystery Box purchases directly to the backend Python `/api/loot` service.
+- [ ] Tested transaction edge cases (insufficient funds, full inventory, rapid double-clicking).
+- [ ] Performed full verification suite (`npx tsc --noEmit`, `npm run dev`, `project-status.py`).
+
+---
+
+## Verification & Final Sign-Off Protocol
+
+Before marking any task as complete in the dashboard above, the engineer or AI agent MUST execute the following terminal commands and attach actual output evidence to the project session logs:
+
+1. **Type & Syntax Check:**
+   ```bash
+   npx tsc --noEmit
