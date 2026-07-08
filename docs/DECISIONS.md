@@ -46,6 +46,7 @@ Lightweight Architecture Decision Records. Each one captures a choice, whether i
 
 ---
 
+<<<<<<< HEAD
 ## ADR-003: Client-side loot fallback when the Python service is down
 
 - **Date:** 2026-07-07
@@ -79,6 +80,22 @@ Lightweight Architecture Decision Records. Each one captures a choice, whether i
 - **Decision:** One re-runnable script extracts/crops/packs ONLY assets verified on disk into `public/sprites` + `public/audio`, and emits `public/sprites/spritemeta.json` (cell sizes, animation rows, frame counts) that the renderer consumes. It also writes `assets/wired-assets.txt` — the ground-truth list used to cross-check `docs/CREDITS.md`.
 - **Alternatives considered:** Committing hand-cropped sheets (opaque provenance, not reproducible); hardcoding frame rects in TS (the drift problem this repo already got burned by).
 - **Consequences:** Pillow becomes a dev-time dependency (not runtime); regenerating art changes is one command.
+=======
+## ADR-003: Unified input interface (InputState) for keyboard + gamepad
+
+- **Date:** 2026-07-07
+- **Status:** Accepted
+- **Originated from:** Agent suggestion (during gamepad implementation)
+- **Context:** Needed to support both keyboard and Xbox gamepad input without duplicating movement/action logic in the game loop
+- **Decision:** Create a single `InputState` interface that both keyboard and gamepad handlers write into; gamepad polling happens every frame in the render loop via `updateGamepadState()`
+- **Alternatives considered:**
+  - Separate keyboard and gamepad branches in GameCanvas (would double the input-checking code every frame)
+  - Use an event emitter pattern for gamepad input (would be async and mess with frame timing)
+- **Consequences:** 
+  - Clean separation between input handling (InputHandler) and game logic (GameCanvas) — game loop only reads from InputState
+  - Future controller rebinding (ADR for next phase) will only need to touch InputHandler, not game logic
+  - Gamepad must be polled every frame because there's no "gamepad button down" browser event; this is baked into GameLoop design
+>>>>>>> agents/next-chapter-retro-game-setup
 
 ---
 
