@@ -309,7 +309,9 @@ export class Game {
   private roomState(id: string): RoomState {
     let state = this.roomStates.get(id);
     if (!state) {
-      state = this.buildRoomState(this.world.get(id)!);
+      const room = this.world.get(id);
+      if (!room) throw new Error(`roomState: unknown room id "${id}"`);
+      state = this.buildRoomState(room);
       this.roomStates.set(id, state);
     }
     return state;
@@ -705,8 +707,10 @@ export class Game {
     // drops: bosses always drop loot, others 25% (plus coins)
     const dropChance = enemy.boss ? 1 : 0.25;
     if (Math.random() < dropChance) {
+      const stateAtKill = this.roomStates.get(killedInRoom);
       void this.rollLoot(enemy.level).then((loot) => {
-        this.roomState(killedInRoom).pickups.push({
+        if (!stateAtKill || this.roomStates.get(killedInRoom) !== stateAtKill) return;
+        stateAtKill.pickups.push({
           kind: "loot",
           x: cx - 8,
           y: cy - 8,
@@ -1068,8 +1072,10 @@ export class Game {
           if (pickup.opened) return true;
           pickup.opened = true;
           this.audio.play("chest", 0.9);
+          const stateAtOpen = this.roomStates.get(this.roomId);
           void this.rollLoot(3).then((loot) => {
-            state.pickups.push({
+            if (!stateAtOpen || this.roomStates.get(this.roomId) !== stateAtOpen) return;
+            stateAtOpen.pickups.push({
               kind: "loot",
               x: pickup.x,
               y: pickup.y - 14,
