@@ -159,7 +159,13 @@ export function describeLoot(drop: LootDrop): string {
  * sub-linear: e.g. epic goes 4.00% at luck 0 -> 5.71% at luck 100, not 8%.
  * Measured and matched against the Python service in the 2026-07-08 session.
  */
-export function fallbackRoll(seedNum: number, luckPct = 0, enemyLevel = 1): LootDrop {
+/**
+ * @param forcedRarity Skips the weighted rarity pick entirely (used by the
+ * SYS-012 shop's Mystery Weapon Box, which promises a guaranteed rare/epic —
+ * a client-only override, clearly distinct from the Python-authoritative
+ * roll path per ADR-001/ADR-003).
+ */
+export function fallbackRoll(seedNum: number, luckPct = 0, enemyLevel = 1, forcedRarity?: Rarity): LootDrop {
   let s = seedNum >>> 0;
   const rnd = () => {
     // xorshift32 — deterministic, matches nothing fancy, just stable
@@ -169,18 +175,23 @@ export function fallbackRoll(seedNum: number, luckPct = 0, enemyLevel = 1): Loot
     return ((s >>> 0) % 10000) / 10000;
   };
 
-  const rarities = Object.entries(RARITIES) as [Rarity, (typeof RARITIES)[Rarity]][];
-  const totalWeight = rarities.reduce(
-    (sum, [r, def]) => sum + def.weight * (r === "common" ? 1 : 1 + luckPct / 100),
-    0,
-  );
-  let pickPoint = rnd() * totalWeight;
-  let rarity: Rarity = "common";
-  for (const [r, def] of rarities) {
-    pickPoint -= def.weight * (r === "common" ? 1 : 1 + luckPct / 100);
-    if (pickPoint <= 0) {
-      rarity = r;
-      break;
+  let rarity: Rarity;
+  if (forcedRarity) {
+    rarity = forcedRarity;
+  } else {
+    const rarities = Object.entries(RARITIES) as [Rarity, (typeof RARITIES)[Rarity]][];
+    const totalWeight = rarities.reduce(
+      (sum, [r, def]) => sum + def.weight * (r === "common" ? 1 : 1 + luckPct / 100),
+      0,
+    );
+    let pickPoint = rnd() * totalWeight;
+    rarity = "common";
+    for (const [r, def] of rarities) {
+      pickPoint -= def.weight * (r === "common" ? 1 : 1 + luckPct / 100);
+      if (pickPoint <= 0) {
+        rarity = r;
+        break;
+      }
     }
   }
   const rdef = RARITIES[rarity];

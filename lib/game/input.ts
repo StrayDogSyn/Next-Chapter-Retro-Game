@@ -24,7 +24,10 @@ export type InputAction =
   | "dodge"
   | "useItem"
   | "interact"
-  | "pause";
+  | "pause"
+  | "respawn"
+  | "help"
+  | "inventory";
 
 export type InputState = {
   /** True while the control is held this frame. */
@@ -49,6 +52,9 @@ const ACTIONS: InputAction[] = [
   "useItem",
   "interact",
   "pause",
+  "respawn",
+  "help",
+  "inventory",
 ];
 
 const KEY_BINDINGS: Record<string, InputAction> = {
@@ -72,6 +78,11 @@ const KEY_BINDINGS: Record<string, InputAction> = {
   Enter: "interact",
   Escape: "pause",
   KeyP: "pause",
+  KeyR: "respawn",
+  F1: "help",
+  Slash: "help",
+  Tab: "inventory",
+  KeyI: "inventory",
 };
 
 /**
@@ -83,6 +94,7 @@ const GAMEPAD_BUTTON_BINDINGS: Record<number, InputAction> = {
   1: "dodge", // B
   2: "attack", // X
   3: "useItem", // Y
+  8: "help", // View/Back
   9: "pause", // Menu/Start
   12: "up", // D-pad up
   13: "down", // D-pad down

@@ -14,6 +14,7 @@ import { AudioManager } from "@/lib/audioManager";
 import { GameLoop } from "@/lib/gameLoop";
 import { InputManager } from "./input";
 import {
+  computeRoomCoords,
   loadWorld,
   type LoadedRoom,
   type Spawn,
@@ -30,7 +31,9 @@ import {
   fallbackRoll,
   RARITIES,
   STARTING_WEAPON,
+  UPGRADE_DEFS,
   type LootDrop,
+  type Rarity,
   type UpgradeId,
   type WeaponInstance,
 } from "./items";
@@ -108,7 +111,22 @@ type Projectile = {
   effect?: WeaponInstance["effect"];
 };
 
-type RoomState = { enemies: Enemy[]; pickups: Pickup[] };
+/** Persistent, non-consumable room entities (SYS-011 shrine, SYS-012 shopkeeper). */
+type Interactable = { kind: "shrine" | "shopkeeper"; x: number; y: number; w: number; h: number };
+
+type RoomState = { enemies: Enemy[]; pickups: Pickup[]; interactables: Interactable[] };
+
+/** Cosmetic-only: coin sparkles, floating "+N" text, equip-swap bursts (UI-002/UX-006). */
+type Particle = {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  maxLife: number;
+  color: string;
+  text?: string;
+};
 
 type DamageOptions = {
   effect?: WeaponInstance["effect"];
@@ -130,6 +148,21 @@ export type HudSnapshot = {
   upgrades: Partial<Record<UpgradeId, number>>;
   phase: "playing" | "dead" | "victory";
   lootSource: string;
+  respawnHoldPct: number;
+  level: number;
+  xp: number;
+  xpToNext: number;
+  minimap: MinimapRoom[];
+};
+
+export type MinimapRoom = {
+  id: string;
+  x: number;
+  y: number;
+  visited: boolean;
+  cleared: boolean;
+  current: boolean;
+  boss: boolean;
 };
 
 // ─────────────────────── enemy definitions ───────────────────────
@@ -172,6 +205,8 @@ export class Game {
   private input: InputManager;
   private audio = new AudioManager();
   private world = loadWorld();
+  private roomCoords = computeRoomCoords(this.world);
+  private visitedRooms = new Set<string>([START_ROOM]);
   private roomStates = new Map<string, RoomState>();
   private roomId = START_ROOM;
   private meta: SpriteMeta | null = null;
@@ -210,6 +245,33 @@ export class Game {
 
   private projectiles: Projectile[] = [];
   private animT = 0;
+  private stepT = 0;
+
+  // UX-004: self-destruct/respawn (hold R for RESPAWN_HOLD_SECONDS)
+  private respawnHoldT = 0;
+  private fadeT = 0;
+  private static readonly RESPAWN_HOLD_SECONDS = 1.2;
+
+  // UI-002 / UX-006: cosmetic feedback state
+  private particles: Particle[] = [];
+  private equipFlashT = 0;
+  private comboCount = 0;
+  private comboT = 0;
+
+  // UI-008: fullscreen-safe help overlay (pauses gameplay updates while open)
+  private helpOpen = false;
+
+  // SYS-009: XP/leveling + inventory overlay
+  private level = 1;
+  private xp = 0;
+  private xpToNext = 150;
+  private inventoryOpen = false;
+
+  // SYS-011 / SYS-012: shrine checkpoints + NPC shop
+  private static readonly SAVE_KEY = "next_chapter_save_v1";
+  private shopOpen = false;
+  private shopSelection = 0;
+  private shopAtkBonus = 0;
 
   onSnapshot: ((snap: HudSnapshot) => void) | null = null;
 
@@ -223,7 +285,7 @@ export class Game {
 
   // ─────────────────────── lifecycle ───────────────────────
 
-  async start() {
+  async start(continueFromSave = false) {
     const metaResp = await fetch("/sprites/spritemeta.json");
     this.meta = (await metaResp.json()) as SpriteMeta;
 
@@ -285,9 +347,11 @@ export class Game {
       roar: "/audio/roar.mp3",
       growl: "/audio/growl.mp3",
       magic: "/audio/magic.mp3",
+      step: "/audio/step.mp3",
     });
 
-    this.spawnIntoRoom(START_ROOM, "spawnPoint");
+    const loaded = continueFromSave && this.loadSavedGame();
+    if (!loaded) this.spawnIntoRoom(START_ROOM, "spawnPoint");
     void this.probeLootService();
     this.loop.start(
       (dt) => this.update(Math.min(dt, 0.05)),
@@ -299,6 +363,11 @@ export class Game {
     this.loop.stop();
     this.input.destroy();
     this.audio.stopAllLoops();
+  }
+
+  /** UI-008: called from the React "?" button in GameCanvas.tsx. */
+  toggleHelp() {
+    this.helpOpen = !this.helpOpen;
   }
 
   private async probeLootService() {
@@ -333,6 +402,7 @@ export class Game {
   private buildRoomState(room: LoadedRoom): RoomState {
     const enemies: Enemy[] = [];
     const pickups: Pickup[] = [];
+    const interactables: Interactable[] = [];
     for (const spawn of room.spawns) {
       const x = spawn.col * TILE + TILE / 2;
       const y = spawn.row * TILE + TILE;
@@ -356,6 +426,12 @@ export class Game {
           break;
         case "dash":
           pickups.push({ kind: "dash", x: x - 8, y: y - 16, w: 16, h: 16, vy: 0, bobT: 0 });
+          break;
+        case "shrine":
+          interactables.push({ kind: "shrine", x: x - 10, y: y - 20, w: 20, h: 20 });
+          break;
+        case "shopkeeper":
+          interactables.push({ kind: "shopkeeper", x: x - 12, y: y - 32, w: 24, h: 32 });
           break;
         default: {
           const def = ENEMY_DEFS[spawn.kind as EnemyKind];
@@ -389,11 +465,12 @@ export class Game {
         }
       }
     }
-    return { enemies, pickups };
+    return { enemies, pickups, interactables };
   }
 
   private spawnIntoRoom(roomId: string, mode: "spawnPoint" | { x: number; y: number }) {
     this.roomId = roomId;
+    this.visitedRooms.add(roomId);
     const room = this.room();
     if (mode === "spawnPoint") {
       const spawn = room.spawns.find((s: Spawn) => s.kind === "player");
@@ -512,7 +589,7 @@ export class Game {
   }
 
   private maxHp(): number {
-    return 100 + this.stat("maxHp");
+    return 100 + this.stat("maxHp") + (this.level - 1) * 3;
   }
 
   private moveSpeed(): number {
@@ -532,18 +609,51 @@ export class Game {
   }
 
   private weaponDamage(): number {
-    let dmg = this.weapon.damage;
+    let dmg = this.weapon.damage + (this.level - 1) + this.shopAtkBonus;
     const critPct = this.stat("critChance") + (this.weapon.effect === "crit" ? 10 : 0);
     if (Math.random() * 100 < critPct) dmg *= 2;
     return dmg;
+  }
+
+  /** SYS-009: award XP for a kill and roll over as many level-ups as it earns. */
+  private awardXp(amount: number) {
+    this.xp += amount;
+    while (this.xp >= this.xpToNext) {
+      this.xp -= this.xpToNext;
+      this.level += 1;
+      this.xpToNext = Math.round(this.level * 100 * 1.5);
+      this.hp = this.maxHp();
+      this.audio.play("levelup");
+      this.showMessage(`LEVEL UP! Now level ${this.level}`);
+    }
   }
 
   // ─────────────────────── update ───────────────────────
 
   private update(dt: number) {
     this.input.update();
+    if (this.input.state.pressed.help || (this.helpOpen && this.input.state.pressed.pause)) {
+      this.helpOpen = !this.helpOpen;
+    }
+    if (this.input.state.pressed.inventory || (this.inventoryOpen && this.input.state.pressed.pause)) {
+      this.inventoryOpen = !this.inventoryOpen;
+    }
+    if (this.shopOpen) {
+      this.updateShop();
+      this.pushSnapshot(dt);
+      return;
+    }
+    if (this.helpOpen || this.inventoryOpen) {
+      this.pushSnapshot(dt);
+      return;
+    }
+
     this.animT += dt;
     if (this.messageT > 0) this.messageT -= dt;
+    if (this.fadeT > 0) this.fadeT = Math.max(0, this.fadeT - dt / 0.5);
+    if (this.equipFlashT > 0) this.equipFlashT -= dt;
+    if (this.comboT > 0) this.comboT -= dt;
+    this.updateParticles(dt);
 
     if (this.phase === "dead" || this.phase === "victory") {
       if (this.input.state.pressed.jump || this.input.state.pressed.interact) {
@@ -568,6 +678,16 @@ export class Game {
     if (this.attackCooldown > 0) this.attackCooldown -= dt;
     if (this.attackAnimT > 0) this.attackAnimT -= dt;
     if (this.dashCooldown > 0) this.dashCooldown -= dt;
+
+    if (input.held.respawn) {
+      this.respawnHoldT += dt;
+      if (this.respawnHoldT >= Game.RESPAWN_HOLD_SECONDS) {
+        this.respawnHoldT = 0;
+        this.handleSelfDestruct();
+      }
+    } else {
+      this.respawnHoldT = 0;
+    }
 
     // movement
     const speed = this.moveSpeed();
@@ -624,6 +744,17 @@ export class Game {
     this.pvy = body.vy;
     this.onGround = result.onGround;
 
+    // AST-005: footstep cadence while walking on solid ground
+    if (this.onGround && Math.abs(this.pvx) > 10 && this.dashT <= 0) {
+      this.stepT -= dt;
+      if (this.stepT <= 0) {
+        this.stepT = 0.28;
+        this.audio.play("step", 0.35);
+      }
+    } else {
+      this.stepT = 0;
+    }
+
     // spikes
     const midCol = Math.floor((this.px + this.pw / 2) / TILE);
     const feetRow = Math.floor((this.py + this.ph) / TILE);
@@ -656,6 +787,8 @@ export class Game {
       }
     }
 
+    this.checkInteractables(input);
+
     // weapon swap
     if (input.pressed.useItem && this.secondary) {
       const held = this.weapon;
@@ -663,6 +796,7 @@ export class Game {
       this.secondary = held;
       this.audio.play("select", 0.7);
       this.showMessage(`Swapped to ${this.weapon.name}`);
+      this.triggerEquipFx();
     }
 
     if (this.hp <= 0 && this.phase === "playing") {
@@ -744,6 +878,7 @@ export class Game {
 
   private onEnemyKilled(enemy: Enemy) {
     this.audio.play("kill", 0.8);
+    this.awardXp(enemy.level * 10);
     const killedInRoom = this.roomId;
     const cx = enemy.x + enemy.w / 2;
     const cy = enemy.y + enemy.h / 2;
@@ -760,6 +895,7 @@ export class Game {
       this.flags.mechSlain = true;
       this.showMessage("The beast door grinds open...");
       this.audio.play("door", 0.9);
+      this.audio.play("explosion", 0.9);
     }
     if (enemy.boss) this.updateMusic();
 
@@ -1099,6 +1235,7 @@ export class Game {
         for (const enemy of enemies) {
           if (enemy.hp > 0 && pointInRect(p.x, p.y, enemy)) {
             this.damageEnemy(enemy, p.damage, { effect: p.effect });
+            this.audio.play("shoot", 0.4);
             return false;
           }
         }
@@ -1111,6 +1248,75 @@ export class Game {
       }
       return true;
     });
+  }
+
+  /**
+   * Nearest solid/platform floor Y for a given column, scanning downward from
+   * the top of the room. Falls back to the room's vertical center if the
+   * column is a sheer drop with no floor (open bottom edge) so pit rescue
+   * always has somewhere to land instead of despawning the item.
+   */
+  private findGroundY(x: number): number {
+    const col = Math.floor(x / TILE);
+    for (let row = 0; row < ROOM_H; row++) {
+      if (this.isSolidTile(this.tileAt(col, row)) || this.tileAt(col, row) === T_PLATFORM) {
+        return row * TILE;
+      }
+    }
+    return VIEW_H / 2;
+  }
+
+  /** UI-002: brief gold tint + particle burst around the hero on any weapon (un)equip. */
+  private triggerEquipFx() {
+    this.equipFlashT = 0.3;
+    this.spawnSparkle(this.px + this.pw / 2, this.py + this.ph / 2, RARITIES[this.weapon.rarity].color, 8);
+  }
+
+  private spawnSparkle(x: number, y: number, color = "#facc15", count = 4) {
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 40 + Math.random() * 50;
+      this.particles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 30,
+        life: 0.45,
+        maxLife: 0.45,
+        color,
+      });
+    }
+  }
+
+  private spawnFloatingText(x: number, y: number, text: string, color = "#ffe08a") {
+    this.particles.push({ x, y, vx: 0, vy: -34, life: 0.6, maxLife: 0.6, color, text });
+  }
+
+  private updateParticles(dt: number) {
+    this.particles = this.particles.filter((p) => {
+      p.life -= dt;
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vy += 90 * dt;
+      return p.life > 0;
+    });
+  }
+
+  private drawParticles() {
+    const ctx = this.ctx;
+    for (const p of this.particles) {
+      ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+      ctx.fillStyle = p.color;
+      if (p.text) {
+        ctx.font = "10px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(p.text, p.x, p.y);
+        ctx.textAlign = "left";
+      } else {
+        ctx.fillRect(p.x - 1.5, p.y - 1.5, 3, 3);
+      }
+    }
+    ctx.globalAlpha = 1;
   }
 
   private updatePickups(dt: number) {
@@ -1128,7 +1334,16 @@ export class Game {
           pickup.y = Math.floor((pickup.y + pickup.h) / TILE) * TILE - pickup.h;
           pickup.vy = 0;
         }
-        if (pickup.y > VIEW_H) return false;
+        if (pickup.y > VIEW_H) {
+          // Pit rescue (BUG-001): the column had no floor before the item fell
+          // out of view (open bottom edge / bottomless pit). Rather than
+          // despawn a real reward, place it on the nearest solid ground in
+          // its column, clamped inside the room so it's always reachable.
+          const rescueX = Math.min(Math.max(pickup.x, TILE), VIEW_W - pickup.w - TILE);
+          pickup.x = rescueX;
+          pickup.y = this.findGroundY(rescueX + pickup.w / 2) - pickup.h;
+          pickup.vy = 0;
+        }
       }
       // coin magnet
       if (pickup.kind === "coin" && magnet > 0) {
@@ -1143,10 +1358,17 @@ export class Game {
       if (!rectsOverlap(pickup, playerRect)) return true;
 
       switch (pickup.kind) {
-        case "coin":
+        case "coin": {
           this.coins += 1;
-          this.audio.play("coin", 0.6);
+          // UX-006: rapid consecutive pickups pitch the coin sound up (combo feel).
+          this.comboCount = this.comboT > 0 ? Math.min(5, this.comboCount + 1) : 1;
+          this.comboT = 1.5;
+          const rate = 1 + (this.comboCount - 1) * 0.125;
+          this.audio.play("coin", 0.6, rate);
+          this.spawnFloatingText(pickup.x + pickup.w / 2, pickup.y, "+1");
+          this.spawnSparkle(pickup.x + pickup.w / 2, pickup.y + pickup.h / 2);
           return false;
+        }
         case "health":
           this.hp = Math.min(this.maxHp(), this.hp + 30);
           this.audio.play("powerup", 0.7);
@@ -1220,6 +1442,7 @@ export class Game {
       this.secondary = this.weapon;
       this.weapon = loot;
       this.showMessage(`Equipped ${describeLoot(loot)}`);
+      this.triggerEquipFx();
     } else if (!this.secondary || dps(loot) > dps(this.secondary)) {
       this.secondary = loot;
       this.showMessage(`Stashed ${describeLoot(loot)} (Y/L to swap)`);
@@ -1233,16 +1456,15 @@ export class Game {
     this.lootCounter += 1;
     const seed = this.runSeed + this.lootCounter * 7919;
     const luck = this.stat("luck");
+    const abort = new AbortController();
+    const timer = setTimeout(() => abort.abort(), 3000);
     try {
       // Timeout so a hung request degrades to the fallback instead of a drop
       // that never lands (fetch has no default timeout).
-      const abort = new AbortController();
-      const timer = setTimeout(() => abort.abort(), 3000);
       const resp = await fetch(
         `/api/loot?seed=${seed}&luck=${luck}&enemyLevel=${enemyLevel}`,
         { signal: abort.signal },
       );
-      clearTimeout(timer);
       const payload = await resp.json();
       if (payload.ok && payload.drop) {
         this.lootSource = "python-service";
@@ -1252,6 +1474,8 @@ export class Game {
     } catch {
       this.lootSource = "client-fallback";
       return fallbackRoll(seed, luck, enemyLevel);
+    } finally {
+      clearTimeout(timer);
     }
   }
 
@@ -1276,6 +1500,7 @@ export class Game {
 
   private goToRoom(roomId: string, position: { x: number; y: number }) {
     this.roomId = roomId;
+    this.visitedRooms.add(roomId);
     this.px = position.x;
     this.py = position.y;
     this.projectiles = [];
@@ -1289,6 +1514,173 @@ export class Game {
     this.roomStates.clear(); // enemies respawn; upgrades/weapons/flags are kept
     this.musicMode = "none";
     this.spawnIntoRoom(START_ROOM, "spawnPoint");
+  }
+
+  /**
+   * UX-004: soft-lock recovery. Holding "respawn" teleports the player to a
+   * safe standable spot in the CURRENT room (no full room reset, unlike
+   * respawn() above) so a dead-end doesn't force a hard page refresh that
+   * wipes progress. Costs 10% of current coins, or 1 HP if broke — never
+   * enough to cause a cheap game-over on its own.
+   */
+  private handleSelfDestruct() {
+    if (this.coins > 0) {
+      this.coins = Math.max(0, this.coins - Math.max(1, Math.round(this.coins * 0.1)));
+    } else {
+      this.hp = Math.max(1, this.hp - 1);
+    }
+    const safeX = VIEW_W / 2;
+    this.px = safeX - this.pw / 2;
+    this.py = this.findGroundY(safeX) - this.ph;
+    this.pvx = 0;
+    this.pvy = 0;
+    this.iframes = 1;
+    this.fadeT = 1;
+    this.audio.play("magic", 0.8);
+    this.showMessage("Reset to safety");
+  }
+
+  // ─────────────────────── shrine / shop interactables (SYS-011 / SYS-012) ───────────────────────
+
+  private checkInteractables(input: import("./input").InputState) {
+    if (!input.pressed.interact) return;
+    const playerRect = { x: this.px, y: this.py, w: this.pw, h: this.ph };
+    for (const it of this.roomState(this.roomId).interactables) {
+      if (!rectsOverlap(playerRect, { x: it.x - 6, y: it.y - 6, w: it.w + 12, h: it.h + 12 })) continue;
+      if (it.kind === "shrine") {
+        this.activateShrine();
+      } else if (it.kind === "shopkeeper") {
+        this.shopOpen = true;
+      }
+      break;
+    }
+  }
+
+  private activateShrine() {
+    this.hp = this.maxHp();
+    this.saveGame();
+    this.audio.play("chest", 0.9);
+    this.showMessage("GAME SAVED");
+  }
+
+  private saveGame() {
+    if (typeof localStorage === "undefined") return;
+    const data = {
+      version: 1 as const,
+      roomId: this.roomId,
+      px: this.px,
+      py: this.py,
+      hp: this.hp,
+      coins: this.coins,
+      level: this.level,
+      xp: this.xp,
+      xpToNext: this.xpToNext,
+      weapon: this.weapon,
+      secondary: this.secondary,
+      upgrades: this.upgrades,
+      flags: this.flags,
+      visitedRooms: Array.from(this.visitedRooms),
+      shopAtkBonus: this.shopAtkBonus,
+    };
+    try {
+      localStorage.setItem(Game.SAVE_KEY, JSON.stringify(data));
+    } catch (error) {
+      console.warn("[save] failed to write localStorage", error);
+    }
+  }
+
+  static hasSave(): boolean {
+    try {
+      return typeof localStorage !== "undefined" && localStorage.getItem(Game.SAVE_KEY) !== null;
+    } catch {
+      return false;
+    }
+  }
+
+  /** Restores a shrine save, if one exists and parses cleanly. Returns whether it was applied. */
+  private loadSavedGame(): boolean {
+    if (typeof localStorage === "undefined") return false;
+    try {
+      const raw = localStorage.getItem(Game.SAVE_KEY);
+      if (!raw) return false;
+      const data = JSON.parse(raw);
+      if (!data || data.version !== 1 || typeof data.roomId !== "string") return false;
+      this.hp = data.hp;
+      this.coins = data.coins;
+      this.level = data.level;
+      this.xp = data.xp;
+      this.xpToNext = data.xpToNext;
+      this.weapon = data.weapon;
+      this.secondary = data.secondary;
+      this.upgrades = data.upgrades;
+      this.flags = data.flags;
+      this.visitedRooms = new Set<string>(data.visitedRooms ?? []);
+      this.shopAtkBonus = data.shopAtkBonus ?? 0;
+      this.spawnIntoRoom(data.roomId, { x: data.px, y: data.py });
+      return true;
+    } catch (error) {
+      console.warn("[save] failed to load localStorage save", error);
+      return false;
+    }
+  }
+
+  private static readonly SHOP_ITEMS = [
+    { name: "Health Potion", cost: 50 },
+    { name: "Stat Booster", cost: 200 },
+    { name: "Mystery Weapon Box", cost: 300 },
+  ] as const;
+
+  private updateShop() {
+    const input = this.input.state;
+    if (input.pressed.pause) {
+      this.shopOpen = false;
+      return;
+    }
+    if (input.pressed.up) {
+      this.shopSelection = (this.shopSelection + Game.SHOP_ITEMS.length - 1) % Game.SHOP_ITEMS.length;
+    }
+    if (input.pressed.down) {
+      this.shopSelection = (this.shopSelection + 1) % Game.SHOP_ITEMS.length;
+    }
+    if (input.pressed.interact) {
+      this.purchaseShopItem(this.shopSelection);
+    }
+  }
+
+  private purchaseShopItem(index: number) {
+    const item = Game.SHOP_ITEMS[index];
+    if (!item || this.coins < item.cost) {
+      this.audio.play("wrong", 0.6);
+      this.showMessage("Not enough coins");
+      return;
+    }
+    this.coins -= item.cost;
+    switch (index) {
+      case 0:
+        this.hp = Math.min(this.maxHp(), this.hp + this.maxHp() * 0.5);
+        break;
+      case 1:
+        this.upgrades.maxHp = (this.upgrades.maxHp ?? 0) + 5;
+        this.hp += 5;
+        this.shopAtkBonus += 2;
+        break;
+      case 2:
+        void this.buyMysteryBox();
+        break;
+    }
+    this.audio.play("powerup", 0.8);
+    this.showMessage(`Purchased ${item.name}`);
+  }
+
+  private async buyMysteryBox() {
+    this.lootCounter += 1;
+    const seed = this.runSeed + this.lootCounter * 104729;
+    const forcedRarity: Rarity = Math.random() < 0.5 ? "rare" : "epic";
+    // Client-only forced-rarity roll (see fallbackRoll's forcedRarity doc) —
+    // deliberately not routed through the Python-authoritative /api/loot path
+    // since "guaranteed rare+" is a shop mechanic, not a real drop roll.
+    const loot = fallbackRoll(seed, 100, this.level, forcedRarity);
+    this.applyLoot(loot);
   }
 
   private showMessage(text: string) {
@@ -1334,6 +1726,23 @@ export class Game {
       upgrades: { ...this.upgrades },
       phase: this.phase,
       lootSource: this.lootSource,
+      respawnHoldPct: Math.min(1, this.respawnHoldT / Game.RESPAWN_HOLD_SECONDS),
+      level: this.level,
+      xp: this.xp,
+      xpToNext: this.xpToNext,
+      minimap: Array.from(this.world.values()).map((room) => {
+        const coord = this.roomCoords.get(room.id) ?? { x: 0, y: 0 };
+        const state = this.roomStates.get(room.id);
+        return {
+          id: room.id,
+          x: coord.x,
+          y: coord.y,
+          visited: this.visitedRooms.has(room.id),
+          cleared: state ? state.enemies.every((e) => e.hp <= 0) : false,
+          current: room.id === this.roomId,
+          boss: room.boss,
+        };
+      }),
     });
   }
 
@@ -1344,13 +1753,120 @@ export class Game {
     ctx.clearRect(0, 0, VIEW_W, VIEW_H);
     this.drawBackground();
     this.drawTiles();
+    this.drawInteractables();
     this.drawPickups();
     this.drawEnemies();
     this.drawPlayer();
     this.drawProjectiles();
+    this.drawParticles();
     if (this.phase === "dead") this.drawOverlay("YOU DIED", "press JUMP to rise again");
     if (this.phase === "victory")
       this.drawOverlay("THE BEAST IS SLAIN", "a hero's rest — press JUMP for new game+");
+    if (this.fadeT > 0) {
+      ctx.fillStyle = `rgba(0,0,0,${this.fadeT})`;
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    }
+    if (this.helpOpen) this.drawHelpOverlay();
+    if (this.inventoryOpen) this.drawInventoryOverlay();
+    if (this.shopOpen) this.drawShopOverlay();
+  }
+
+  private drawShopOverlay() {
+    const ctx = this.ctx;
+    ctx.fillStyle = "rgba(6,10,16,0.88)";
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    ctx.fillStyle = "#ffcc66";
+    ctx.font = "bold 18px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("SHOPKEEPER", VIEW_W / 2, 40);
+    ctx.font = "12px monospace";
+    ctx.fillText(`Coins: ${this.coins}`, VIEW_W / 2, 62);
+
+    ctx.textAlign = "left";
+    Game.SHOP_ITEMS.forEach((item, i) => {
+      const y = 100 + i * 26;
+      const affordable = this.coins >= item.cost;
+      ctx.fillStyle = i === this.shopSelection ? "#ffcc66" : affordable ? "#e5e7eb" : "#6b7280";
+      ctx.fillText(`${i === this.shopSelection ? "> " : "  "}${item.name} — ${item.cost} coins`, 60, y);
+    });
+
+    ctx.fillStyle = "#9fb2c7";
+    ctx.textAlign = "center";
+    ctx.font = "11px monospace";
+    ctx.fillText("UP/DOWN select, E buy, ESC/P leave", VIEW_W / 2, VIEW_H - 14);
+    ctx.textAlign = "left";
+  }
+
+  private drawInventoryOverlay() {
+    const ctx = this.ctx;
+    ctx.fillStyle = "rgba(6,10,16,0.88)";
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    ctx.fillStyle = "#ffcc66";
+    ctx.font = "bold 18px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("INVENTORY & STATS", VIEW_W / 2, 30);
+    ctx.font = "12px monospace";
+    ctx.textAlign = "left";
+
+    let y = 58;
+    const line = (text: string, color = "#e5e7eb") => {
+      ctx.fillStyle = color;
+      ctx.fillText(text, 40, y);
+      y += 18;
+    };
+
+    line(`Level ${this.level}  —  XP ${Math.round(this.xp)}/${this.xpToNext}`, "#facc15");
+    line(`HP ${Math.round(this.hp)}/${this.maxHp()}   Coins ${this.coins}`);
+    line("");
+    line(`Weapon: ${this.weapon.name} (${this.weapon.rarity})`, RARITIES[this.weapon.rarity].color);
+    line(`  ${Math.round(this.weapon.damage)} dmg @ ${this.weapon.speed.toFixed(1)}/s, range ${this.weapon.range}${this.weapon.effect ? `, effect: ${this.weapon.effect}` : ""}`);
+    line(
+      this.secondary
+        ? `Secondary: ${this.secondary.name} (${this.secondary.rarity})`
+        : "Secondary: empty",
+      this.secondary ? RARITIES[this.secondary.rarity].color : "#6b7280",
+    );
+    line("");
+    line("Upgrades:", "#9fb2c7");
+    const upgradeIds = Object.keys(this.upgrades) as UpgradeId[];
+    if (upgradeIds.length === 0) {
+      line("  none yet");
+    } else {
+      for (const id of upgradeIds) {
+        const def = UPGRADE_DEFS[id];
+        const value = this.upgrades[id] ?? 0;
+        line(`  ${def.name}: +${value}${def.unit}`);
+      }
+    }
+    ctx.fillStyle = "#9fb2c7";
+    ctx.textAlign = "center";
+    ctx.fillText("TAB / I — close inventory", VIEW_W / 2, VIEW_H - 14);
+    ctx.textAlign = "left";
+  }
+
+  private drawHelpOverlay() {
+    const ctx = this.ctx;
+    ctx.fillStyle = "rgba(6,10,16,0.88)";
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    ctx.fillStyle = "#ffcc66";
+    ctx.font = "bold 18px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("CONTROLS", VIEW_W / 2, 30);
+    ctx.font = "12px monospace";
+    ctx.fillStyle = "#e5e7eb";
+    const lines = [
+      "Keyboard: LEFT/RIGHT or A/D move, SPACE/W/Z jump",
+      "X/J attack, C/K dodge, V/L swap weapon, S/DOWN drop through",
+      "Hold R: reset position (costs 10% coins or 1 HP)",
+      "Xbox: stick/D-pad move, A jump, X attack, B dodge, Y swap",
+      "",
+      `Zone: ${this.room().zone}   Room: ${this.room().name}`,
+      `Weapon: ${this.weapon.name} (${this.weapon.rarity})   Coins: ${this.coins}`,
+      "",
+      "F1 / ? / gamepad View — close this help",
+    ];
+    lines.forEach((line, i) => ctx.fillText(line, VIEW_W / 2, 62 + i * 18));
+    ctx.textAlign = "left";
   }
 
   private drawBackground() {
@@ -1498,6 +2014,18 @@ export class Game {
     const anim = this.facing > 0 ? "walkRight" : "walkLeft";
     this.drawSheetAnim("hero", anim, moving ? this.animT : 0, dx, dy, drawW, drawH, false, 9);
 
+    // UI-002: gold flash ring on equip/swap, fading out over equipFlashT's lifespan
+    if (this.equipFlashT > 0) {
+      ctx.save();
+      ctx.globalAlpha = this.equipFlashT / 0.3;
+      ctx.strokeStyle = RARITIES[this.weapon.rarity].color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(this.px + this.pw / 2, this.py + this.ph / 2, 18, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
     // melee swing arc
     if (this.attackAnimT > 0 && this.weapon.kind === "melee") {
       ctx.strokeStyle = RARITIES[this.weapon.rarity].color;
@@ -1541,6 +2069,31 @@ export class Game {
         ctx.fillRect(dx, dy - 6, def.drawW, 3);
         ctx.fillStyle = "#ef4444";
         ctx.fillRect(dx, dy - 6, (def.drawW * enemy.hp) / enemy.maxHp, 3);
+      }
+    }
+  }
+
+  private drawInteractables() {
+    const ctx = this.ctx;
+    for (const it of this.roomState(this.roomId).interactables) {
+      if (it.kind === "shrine") {
+        const glow = 0.6 + Math.sin(this.animT * 2) * 0.25;
+        ctx.fillStyle = `rgba(96, 165, 250, ${glow})`;
+        ctx.beginPath();
+        ctx.arc(it.x + it.w / 2, it.y + it.h / 2, it.w / 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#dbeafe";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = "#8b5e34";
+        ctx.fillRect(it.x + 4, it.y + 10, it.w - 8, it.h - 10);
+        ctx.fillStyle = "#e2b877";
+        ctx.beginPath();
+        ctx.arc(it.x + it.w / 2, it.y + 8, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#facc15";
+        ctx.fillRect(it.x + it.w / 2 - 6, it.y + it.h - 8, 12, 5);
       }
     }
   }

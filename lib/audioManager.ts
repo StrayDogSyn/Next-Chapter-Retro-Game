@@ -43,7 +43,7 @@ export class AudioManager {
     );
   }
 
-  async play(soundId: string, volume = 1) {
+  async play(soundId: string, volume = 1, playbackRate = 1) {
     const context = await this.getContext();
     const buffer = this.buffers.get(soundId);
 
@@ -53,6 +53,7 @@ export class AudioManager {
 
     const source = context.createBufferSource();
     source.buffer = buffer;
+    source.playbackRate.value = playbackRate;
     const gain = context.createGain();
     gain.gain.value = this.sfxGainValue * volume;
     source.connect(gain);
