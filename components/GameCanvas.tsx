@@ -126,7 +126,7 @@ export function GameCanvas() {
 
   return (
     <div style={{ position: "relative", border: "2px solid #6b7280", width: CANVAS_WIDTH }}>
-      <HUD score={score} lives={lives} />
+      <HUD snapshot={{ score: Math.floor(score), lives }} />
       <canvas
         ref={canvasRef}
         width={CANVAS_WIDTH}
