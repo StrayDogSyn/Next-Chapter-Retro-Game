@@ -1,0 +1,48 @@
+PROJECT STATUS SNAPSHOT — 2026-07-07T21:02:23
+Repo root: C:\Users\Petro\repos\Next_Chapter\Next-Chapter-Retro-Game
+
+--- GIT STATUS (uncommitted changes) ---
+(command unavailable: [WinError 2] The system cannot find the file specified)
+
+--- GIT LAST 5 COMMITS ---
+(command unavailable: [WinError 2] The system cannot find the file specified)
+
+--- asset-fetch.py VERSION CHECK ---
+File: C:\Users\Petro\repos\Next_Chapter\Next-Chapter-Retro-Game\scripts\asset-fetch.py
+SHA256 (first 12 chars): f6919e4ae181
+Thumbnail-filter fix present ('/styles/' check): YES
+
+--- assets/ TREE (actual sizes on disk) ---
+  assets\img\screenshots\phase-one-framework.png  (685.5 KB)
+  assets\loading-page.gif  (3673.3 KB)
+  assets\manifest.csv  (1.3 KB)
+  assets\sounds\beast_growl_generic.mp3  (172.6 KB)
+  assets\sounds\beast_roar_deep_kraken.mp3  (239.2 KB)
+  assets\sounds\beast_roar_dragon.mp3  (1378.5 KB)
+  assets\sounds\sfx_512_retro.zip  (20100.4 KB)
+
+--- docs/ TREE ---
+  docs\AGENTIC_WORKFLOW.md  (6.0 KB)
+  docs\ARCHITECTURE.md  (2.0 KB)
+  docs\CREDITS.md  (7.1 KB)
+  docs\DECISIONS.md  (2.2 KB)
+  docs\PROMPT_LIBRARY.md  (1.6 KB)
+  docs\SESSION_LOG.md  (4.1 KB)
+
+--- assets/manifest.csv CONTENTS ---
+source,page_url,filename,status,note
+opengameart,https://opengameart.org/content/dark-saber-werewolf,beast_boss_darksaber.gif,downloaded,https://opengameart.org/sites/default/files/Saber_preview2.gif
+opengameart,https://opengameart.org/content/werewolf,werewolf_base.png,downloaded,https://opengameart.org/sites/default/files/1536892116312Instagram_last_0.png
+opengameart,https://opengameart.org/content/8-bit-sound-effect-pack-vol-001,sfx_pack_8bit_vol1.png,downloaded,https://opengameart.org/sites/default/files/SoundFXPack.png
+opengameart,https://opengameart.org/content/audio-cc0-8bit-chiptune,,failed,No direct file link found — check page manually
+opengameart,https://opengameart.org/content/512-sound-effects-8-bit-style,sfx_512_retro.zip,downloaded,https://opengameart.org/sites/default/files/The%20Essential%20Retro%20Video%20Game%20Sound%20Effects%20Collection%20%5B512%20sounds%5D.zip
+freesound,https://freesound.org/s/479380/,beast_roar_dragon.mp3,downloaded,license: http://creativecommons.org/publicdomain/zero/1.0/
+freesound,https://freesound.org/s/837799/,beast_roar_deep_kraken.mp3,downloaded,license: http://creativecommons.org/publicdomain/zero/1.0/
+freesound,https://freesound.org/s/366671/,beast_growl_generic.mp3,downloaded,license: http://creativecommons.org/publicdomain/zero/1.0/
+
+
+--- ENVIRONMENT ---
+FREESOUND_API_KEY: NOT SET
+Python: 3.14.5
+
+=== PRIOR RUNS (most recent snapshot is always at the top) ===

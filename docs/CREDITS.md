@@ -11,7 +11,7 @@ Full sourcing record for every third-party sprite and audio asset in this projec
 <details>
 <summary><strong>Click to expand: workflow for adding an asset</strong></summary>
 
-1. Run `python asset-fetch.py` to fetch the tracked assets below automatically, or download manually from the link for any asset the scraper can't reach.
+1. Run `python scripts/asset-fetch.py` to fetch the tracked assets below automatically, or download manually from the link for any asset the scraper can't reach.
 2. Save it into `assets/img/` or `assets/sounds/` using the naming convention in the table.
 3. Flip the Status column from 🔴 to 🟡 once downloaded, then 🟢 once wired into the game.
 4. If the license requires attribution, copy the exact credit line into the **In-Game Credits Screen** section at the bottom — don't paraphrase it, use the wording the license/author specifies.
