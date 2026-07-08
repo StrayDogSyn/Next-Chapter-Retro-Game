@@ -1,3 +1,33 @@
+CLAUDE STATUS UPDATE — 2026-07-08
+Branch: claude/qa-guide-remediation
+Commits: 3 (not pushed)
+
+Summary:
+Worked through all 12 items in docs/BUGS_IMPROVEMENT_GUIDE.md on branch claude/qa-guide-remediation.
+
+11/12 fixed and verified (tsc --noEmit + next build clean throughout, checked incrementally):
+- BUG-001: Pit-dropped loot now lands on the nearest real floor instead of despawning.
+- BUG-003: Built and ran a real reachability auditor against live room data.
+  - Iteration v1 false-flagged 27 items because double-jump/dash were not modeled.
+  - Iteration v2 fixed movement modeling but exposed a circular check issue (an ability pickup cannot require itself).
+  - Iteration v3 found 14 real dead-ends across 8 rooms; fixed with stepping platforms.
+  - Final auditor run: 0 dead-ends and 26 correctly identified ability-gated items across all 24 rooms.
+- UX-004, UI-002, UX-006, UI-008, SYS-009, UI-007, SYS-011, SYS-012:
+  - Self-destruct
+  - Equip/coin particle + audio feedback
+  - Help overlay
+  - XP/leveling + inventory screen
+  - Mini-map
+  - Shrine checkpoints with localStorage saves + Continue Game
+  - NPC shop
+- AST-005: While auditing, found step.mp3 documented as wired but never loaded, and explosion/shoot loaded but never played. Fixed all three so every audio file and sprite sheet now has a real call site.
+
+1/12 partial:
+- AST-010: Audited sibling downloads/ archive (28 zips) but did not extract/ingest new sprites because visual verification is still required.
+
+Honest limitation:
+chromium-cli/playwright are not available in this sandbox, so none of the new UI (shrine/shop screens, overlays, mini-map, particles, audio) has been visually confirmed in a real browser. Verification was done via type checks, build checks, and code-trace validation only. This is called out explicitly in the guide's verification-summary section and in the session log to avoid implying a full visual pass. A real playthrough is the natural next step.
+
 PROJECT STATUS SNAPSHOT — 2026-07-07T23:11:37
 Repo root: C:\Users\Petro\repos\Next_Chapter\Next-Chapter-Retro-Game.worktrees\agents-next-chapter-retro-game-setup
 
