@@ -10,17 +10,18 @@ type GameCanvasProps = {
 export function GameCanvas({ onSnapshot }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const shellRef = useRef<HTMLDivElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const [displaySize, setDisplaySize] = useState<{ width: number; height: number }>({
     width: VIEW_W,
     height: VIEW_H,
   });
 
   useEffect(() => {
-    const shell = shellRef.current;
-    if (!shell) return;
+    const stage = stageRef.current;
+    if (!stage) return;
 
     const computeSize = () => {
-      const { width: maxW, height: maxH } = shell.getBoundingClientRect();
+      const { width: maxW, height: maxH } = stage.getBoundingClientRect();
       if (maxW <= 0 || maxH <= 0) return;
 
       const fitScale = Math.min(maxW / VIEW_W, maxH / VIEW_H);
@@ -35,7 +36,7 @@ export function GameCanvas({ onSnapshot }: GameCanvasProps) {
     };
 
     const observer = new ResizeObserver(computeSize);
-    observer.observe(shell);
+    observer.observe(stage);
     computeSize();
 
     return () => {
@@ -83,7 +84,7 @@ export function GameCanvas({ onSnapshot }: GameCanvasProps) {
       <button type="button" className="fullscreen-toggle" onClick={toggleFullscreen}>
         fullscreen
       </button>
-      <div className="game-canvas-stage">
+      <div className="game-canvas-stage" ref={stageRef}>
         <canvas
           ref={canvasRef}
           width={VIEW_W}
