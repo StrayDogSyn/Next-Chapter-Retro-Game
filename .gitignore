@@ -39,3 +39,5 @@ next-env.d.ts
 python-service/.venv/
 python-service/__pycache__/
 .asset-tmp/
+
+STATUS.txt

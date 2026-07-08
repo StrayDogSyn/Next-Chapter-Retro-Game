@@ -275,7 +275,7 @@ export class Game {
     });
 
     this.spawnIntoRoom(START_ROOM, "spawnPoint");
-    this.probeLootService();
+    void this.probeLootService();
     this.loop.start(
       (dt) => this.update(Math.min(dt, 0.05)),
       () => this.render(),
@@ -570,7 +570,11 @@ export class Game {
     }
     if (input.pressed.jump) {
       const canGroundJump = this.onGround || this.coyoteT > 0;
-      if (canGroundJump || this.jumpsUsed < this.maxJumps()) {
+      // Air-jump requires: not a ground jump, double-jump upgrade, and at least
+      // one prior jump already consumed (prevents a free air-jump when knocked
+      // airborne with jumpsUsed still at 0).
+      const canAirJump = !canGroundJump && this.jumpsUsed >= 1 && this.jumpsUsed < this.maxJumps();
+      if (canGroundJump || canAirJump) {
         this.pvy = this.jumpVelocity();
         this.jumpsUsed = canGroundJump ? 1 : this.jumpsUsed + 1;
         this.coyoteT = 0;
@@ -679,7 +683,7 @@ export class Game {
 
   private onEnemyKilled(enemy: Enemy) {
     this.audio.play("kill", 0.8);
-    const state = this.roomState(this.roomId);
+    const killedInRoom = this.roomId;
     const cx = enemy.x + enemy.w / 2;
     const cy = enemy.y + enemy.h / 2;
 
@@ -702,7 +706,7 @@ export class Game {
     const dropChance = enemy.boss ? 1 : 0.25;
     if (Math.random() < dropChance) {
       void this.rollLoot(enemy.level).then((loot) => {
-        state.pickups.push({
+        this.roomState(killedInRoom).pickups.push({
           kind: "loot",
           x: cx - 8,
           y: cy - 8,
@@ -714,7 +718,7 @@ export class Game {
         });
       });
     } else {
-      state.pickups.push({ kind: "coin", x: cx - 5, y: cy - 5, w: 10, h: 10, vy: -100, bobT: 0 });
+      this.roomState(killedInRoom).pickups.push({ kind: "coin", x: cx - 5, y: cy - 5, w: 10, h: 10, vy: -100, bobT: 0 });
     }
   }
 
