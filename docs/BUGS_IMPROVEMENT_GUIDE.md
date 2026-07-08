@@ -2,7 +2,7 @@
 
 > **Purpose:** This document tracks usability issues, gameplay bugs, and feature enhancements identified during human playtesting and QA audits. Each item provides root-cause analysis, actionable step-by-step remediation aligned with the project architecture, and a strict verification checklist.
 >
-> **Last updated:** 2026-07-08  
+> **Last updated:** 2026-07-08 (remediation pass — see `docs/SESSION_LOG.md`)  
 > **Maintainer:** StrayDogSyn / QA & Engineering Team  
 > **Rule of Thumb:** All changes must respect existing architectural boundaries (no parallel canvas systems, unified `Game` class logic in `lib/game/game.ts`, asset ingestion strictly via `scripts/prepare-assets.py`).
 
@@ -12,18 +12,35 @@
 
 | ID | Category | Issue / Enhancement Summary | Priority | Status |
 |---|---|---|---|---|
-| [BUG-001](#bug-001-pit-dropped-loot-persistence) | Physics / Loot | Items dropped over pits despawn or fail to persist during room transitions | High | 🔴 Untracked |
-| [UI-002](#ui-002-equipment-dashboard-highlight--swap-effects) | UI / FX | Equipment needs stronger HUD highlighting and noticeable swap feedback | Medium | 🔴 Untracked |
-| [BUG-003](#bug-003-unreachable-platform-generation--dead-ends) | Level Gen | Initial floors have unreachable platform heights causing navigation dead-ends | High | 🔴 Untracked |
-| [UX-004](#ux-004-player-respawn--self-destruct-mechanism) | Controls / UX | No self-destruct/reset mechanism when trapped in soft-locks or dead-ends | High | 🔴 Untracked |
-| [AST-005](#ast-005-underutilized-sprite--audio-assets) | Asset Pipeline | Game engine only utilizes a small fraction of available sprites and SFX | Medium | 🔴 Untracked |
-| [UX-006](#ux-006-treasure--coin-micro-interactions) | Visuals / Polish | Coins and treasure lack premium micro-interactions and sprite variety | Medium | 🔴 Untracked |
-| [UI-007](#ui-007-dashboard-mini-map-integration) | UI / Navigation | Lack of spatial orientation; mini-map needed in the dashboard | High | 🔴 Untracked |
-| [UI-008](#ui-008-fullscreen-unobtrusive-help-modal) | UI / Accessibility | Fullscreen hides instructions; persistent unobtrusive `?` modal needed | Medium | 🔴 Untracked |
-| [SYS-009](#sys-009-xp-counter--inventory-stats-modal) | Progression / UI | Missing XP counter from defeats and centralized inventory/stats modal | High | 🔴 Untracked |
-| [AST-010](#ast-010-ingestion-of-downloads-archive-assets) | Asset Pipeline | Unprocessed asset archives in `./downloads` need pipeline integration | High | 🔴 Untracked |
-| [SYS-011](#sys-011-persistent-checkpoints--save-states) | Persistence | No checkpoint system or persistent save data across sessions | High | 🔴 Untracked |
-| [SYS-012](#sys-012-npc-item-shop--coin-economy-sink) | Gameplay / Economy | Coins lack an economy sink; NPC shop needed for replay value | Medium | 🔴 Untracked |
+| [BUG-001](#bug-001-pit-dropped-loot-persistence) | Physics / Loot | Items dropped over pits despawn or fail to persist during room transitions | High | 🟢 Fixed |
+| [UI-002](#ui-002-equipment-dashboard-highlight--swap-effects) | UI / FX | Equipment needs stronger HUD highlighting and noticeable swap feedback | Medium | 🟢 Fixed |
+| [BUG-003](#bug-003-unreachable-platform-generation--dead-ends) | Level Gen | Initial floors have unreachable platform heights causing navigation dead-ends | High | 🟢 Fixed |
+| [UX-004](#ux-004-player-respawn--self-destruct-mechanism) | Controls / UX | No self-destruct/reset mechanism when trapped in soft-locks or dead-ends | High | 🟢 Fixed |
+| [AST-005](#ast-005-underutilized-sprite--audio-assets) | Asset Pipeline | Game engine only utilizes a small fraction of available sprites and SFX | Medium | 🟢 Fixed |
+| [UX-006](#ux-006-treasure--coin-micro-interactions) | Visuals / Polish | Coins and treasure lack premium micro-interactions and sprite variety | Medium | 🟢 Fixed |
+| [UI-007](#ui-007-dashboard-mini-map-integration) | UI / Navigation | Lack of spatial orientation; mini-map needed in the dashboard | High | 🟢 Fixed |
+| [UI-008](#ui-008-fullscreen-unobtrusive-help-modal) | UI / Accessibility | Fullscreen hides instructions; persistent unobtrusive `?` modal needed | Medium | 🟢 Fixed |
+| [SYS-009](#sys-009-xp-counter--inventory-stats-modal) | Progression / UI | Missing XP counter from defeats and centralized inventory/stats modal | High | 🟢 Fixed |
+| [AST-010](#ast-010-ingestion-of-downloads-archive-assets) | Asset Pipeline | Unprocessed asset archives in `./downloads` need pipeline integration | High | 🟡 Partial (audited; extraction deferred — see notes) |
+| [SYS-011](#sys-011-persistent-checkpoints--save-states) | Persistence | No checkpoint system or persistent save data across sessions | High | 🟢 Fixed |
+| [SYS-012](#sys-012-npc-item-shop--coin-economy-sink) | Gameplay / Economy | Coins lack an economy sink; NPC shop needed for replay value | Medium | 🟢 Fixed |
+
+---
+
+## Remediation Pass Verification Summary (2026-07-08)
+
+Honest accounting of what was actually verified for this pass, per this repo's own rule (`docs/AGENTIC_WORKFLOW.md`: trust `project-status.py`/real command output, not a narrated "done").
+
+**Verified with real command output:**
+- `npx tsc --noEmit` — clean after every change, checked incrementally per item, not just at the end.
+- `npm run build` (`next build`, includes lint + type check) — succeeds cleanly.
+- BUG-003's reachability claim is backed by an actual standalone run of the new validator against the real 24-room `ROOMS` data (compiled via `tsc` to CommonJS and executed with `node`, not just "should work" reasoning) — went from 27 flagged → 0 genuine dead-ends across three iterations, with the intermediate wrong results and the fixes for each shown in the session log.
+- Dev server smoke test: `npm run dev`, then `curl` against `/`, `/sprites/spritemeta.json`, `/api/procedural-level`, `/api/loot` — all respond, including the `/api/loot` degraded-mode fallback response when the Python service isn't running (expected, per ADR-003).
+
+**NOT verified — no browser automation available in this environment:**
+- `chromium-cli` and `playwright` are both absent from this sandbox and neither could be installed without adding a new dependency for a one-off check. No actual clicking, keyboard input, canvas rendering, or audio playback was observed.
+- This means: the shrine/shop UI, help/inventory overlays, mini-map rendering, particle effects, and audio cues are implemented and type-check, but have **not** been visually confirmed in a real browser. Per-item checklists below intentionally leave "captured browser screenshots" / "tested in-game" boxes unchecked for this reason — do that pass before calling any of this done for a demo or submission.
+- AST-010 (`./downloads` archive ingestion) was audited (contents listed, see session log) but not executed — extracting/cropping/chroma-keying new sprite sheets is exactly the kind of change that needs visual verification this session couldn't do, so it was deliberately left for a session with real browser access.
 
 ---
 
