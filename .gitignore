@@ -44,3 +44,7 @@ STATUS.txt
 
 # portable node runtime (local tooling, not project code)
 node-portable/
+
+# python bytecode from scripts
+scripts/__pycache__/
+**/__pycache__/
