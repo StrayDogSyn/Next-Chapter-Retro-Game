@@ -11,7 +11,7 @@ Full sourcing record for every third-party sprite and audio asset in this projec
 <details>
 <summary><strong>Click to expand: workflow for adding an asset</strong></summary>
 
-1. Download the asset from the link below (Claude's sandbox can't reach these domains directly — this is a manual step on your end).
+1. Run `python asset-fetch.py` to fetch the tracked assets below automatically, or download manually from the link for any asset the scraper can't reach.
 2. Save it into `assets/img/` or `assets/sounds/` using the naming convention in the table.
 3. Flip the Status column from 🔴 to 🟡 once downloaded, then 🟢 once wired into the game.
 4. If the license requires attribution, copy the exact credit line into the **In-Game Credits Screen** section at the bottom — don't paraphrase it, use the wording the license/author specifies.
@@ -82,7 +82,16 @@ Full sourcing record for every third-party sprite and audio asset in this projec
 _Populate this once assets move to 🟢 status — copy exact attribution wording as specified by each license, don't paraphrase._
 
 ```
-[placeholder — fill in as assets are integrated]
+Audio (CC0 — no attribution required):
+- Dragon roars/growls/snarls by Breviceps (freesound.org/s/479380)
+- Kraken/sea-creature layered roar by Bikkit99 (freesound.org/s/837799)
+- Generic large-creature growl by cylon8472 (freesound.org/s/366671)
+- 8-Bit Sound Effect Pack Vol. 001 via OpenGameArt
+- 512 Sound Effects (8-bit style) via OpenGameArt
+
+Sprites (attribution required — verify exact wording on source page):
+- Werewolf sprite by [author] (opengameart.org/content/werewolf)
+- Dark Saber Werewolf by MindChamber (opengameart.org/content/dark-saber-werewolf)
 ```
 
 ---

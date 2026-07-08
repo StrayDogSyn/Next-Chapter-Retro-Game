@@ -28,7 +28,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-REPO_ROOT = Path(".").resolve()
+REPO_ROOT = Path(__file__).resolve().parent.parent
 STATUS_PATH = REPO_ROOT / "STATUS.txt"
 HISTORY_MARKER = "=== PRIOR RUNS (most recent snapshot is always at the top) ==="
 

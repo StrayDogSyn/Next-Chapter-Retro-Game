@@ -30,7 +30,7 @@ FREESOUND SETUP (required for the Freesound downloads to work)
          setx FREESOUND_API_KEY "your_key_here"          (Windows)
 
 USAGE
-    python asset_fetch.py
+    python scripts/asset-fetch.py
 """
 
 import csv
@@ -48,7 +48,8 @@ from bs4 import BeautifulSoup
 # CONFIG — edit these lists to add/remove candidates
 # ---------------------------------------------------------------------------
 
-OUTPUT_DIR = Path("assets")
+REPO_ROOT = Path(__file__).resolve().parent.parent
+OUTPUT_DIR = REPO_ROOT / "assets"
 SPRITES_DIR = OUTPUT_DIR / "img"
 AUDIO_DIR = OUTPUT_DIR / "sounds"
 MANIFEST_PATH = OUTPUT_DIR / "manifest.csv"
