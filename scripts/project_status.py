@@ -82,7 +82,7 @@ def build_snapshot() -> str:
     lines.append(sh(["git", "log", "--oneline", "-5"]))
     lines.append("")
 
-    script_path = REPO_ROOT / "asset-fetch.py"
+    script_path = REPO_ROOT / "scripts" / "asset-fetch.py"
     lines.append("--- asset-fetch.py VERSION CHECK ---")
     lines.append(f"File: {script_path}")
     lines.append(f"SHA256 (first 12 chars): {sha256_short(script_path)}")
