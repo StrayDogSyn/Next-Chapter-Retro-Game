@@ -29,6 +29,22 @@ export function GameFooter({ snapshot }: GameFooterProps) {
         </span>
         <span className="hud-chip">State: {snapshot?.phase ?? "loading"}</span>
       </div>
+      {snapshot && snapshot.respawnHoldPct > 0 ? (
+        <div className="hud-line">
+          <span className="hud-chip" style={{ color: "#fbbf24" }}>
+            Resetting position...
+          </span>
+          <div style={{ height: 8, width: 140, border: "1px solid #47627d", background: "#122030", borderRadius: 3, overflow: "hidden" }}>
+            <div
+              style={{
+                height: "100%",
+                width: `${snapshot.respawnHoldPct * 100}%`,
+                background: "#fbbf24",
+              }}
+            />
+          </div>
+        </div>
+      ) : null}
       <div className="hud-line message" role="status" aria-live="polite">
         {snapshot?.message ? snapshot.message : " "}
       </div>

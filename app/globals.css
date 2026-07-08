@@ -108,6 +108,22 @@ body {
   color: #f7d46b;
 }
 
+.hud-chip.weapon {
+  font-weight: 700;
+  border-color: currentColor;
+  animation: equip-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes equip-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 3px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 9px currentColor;
+  }
+}
+
 .hud-label {
   color: #99b8d6;
   font-weight: 700;
@@ -115,6 +131,29 @@ body {
 
 .hud-label.boss {
   color: #f49292;
+}
+
+.minimap {
+  flex-shrink: 0;
+}
+
+.minimap-cell {
+  background: #3d5670;
+  border-radius: 2px;
+}
+
+.minimap-cell.cleared {
+  background: #4a6b8a;
+}
+
+.minimap-cell.boss {
+  background: #8a3d4a;
+}
+
+.minimap-cell.current {
+  background: #ffcc66;
+  box-shadow: 0 0 4px #ffcc66;
+  animation: equip-pulse 1.4s ease-in-out infinite;
 }
 
 .game-footer .controls {
@@ -142,9 +181,14 @@ body {
   box-shadow: 0 0 0 2px #9dc5ef;
 }
 
-.fullscreen-toggle {
+.stage-toolbar {
   align-self: flex-end;
+  display: flex;
+  gap: 0.4rem;
   margin: 0.4rem;
+}
+
+.fullscreen-toggle {
   padding: 0.22rem 0.45rem;
   border: 1px solid #6f8cad;
   border-radius: 4px;
@@ -153,6 +197,27 @@ body {
   font-family: inherit;
   font-size: 0.76rem;
   cursor: pointer;
+}
+
+.help-toggle {
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 1px solid #6f8cad;
+  border-radius: 50%;
+  background: rgba(30, 50, 71, 0.6);
+  color: #d7e6f8;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.8rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 120ms linear;
+}
+
+.help-toggle:hover,
+.help-toggle:focus-visible {
+  opacity: 1;
 }
 
 .game-canvas-stage {

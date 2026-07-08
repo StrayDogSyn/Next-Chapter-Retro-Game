@@ -106,6 +106,16 @@ def slugify(text: str) -> str:
     return re.sub(r"_+", "_", text).strip("_")[:60]
 
 
+
+# See asset-fetch.py for the full rationale: some OGA submissions attach
+# only a small "-preview.png"/"prev.png" companion image directly under
+# /sites/default/files/ (no /styles/ path), which then becomes the last/
+# only candidate when no size-labeled link exists. Confirmed in practice
+# for lpc_beetle, lpc_goblin, lpc_golem, monkey_lad_in_magical_planet, and
+# rpg_enemies_11_dragons (see manifest_bulk.csv).
+PREVIEW_FILENAME_RE = re.compile(r"prev(?:iew)?\.[a-zA-Z0-9]+$", re.IGNORECASE)
+
+
 def find_oga_download_link(page_url: str) -> tuple[str | None, str | None]:
     """Returns (file_url, page_title). Filters out /styles/ thumbnail
     derivatives. OGA's real "File(s):" attachment link is distinguishable
@@ -113,7 +123,9 @@ def find_oga_download_link(page_url: str) -> tuple[str | None, str | None]:
     includes a file size, e.g. "DarkSaber.zip 19.9 Mb" or
     "werewolf.png 7 Kb" — we prioritize that signal over extension
     matching, since a size-unlabeled .png could easily be a decorative
-    image in the page body rather than the actual attachment."""
+    image in the page body rather than the actual attachment. Candidates
+    whose filename itself looks like a preview/prev image are deprioritized
+    to dead last, since a same-page real attachment should win instead."""
     resp = requests.get(page_url, headers=HEADERS, timeout=20)
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
@@ -138,14 +150,20 @@ def find_oga_download_link(page_url: str) -> tuple[str | None, str | None]:
     if not candidates:
         return None, title
 
+    non_preview = [c for c in candidates if not PREVIEW_FILENAME_RE.search(c)]
+
     preferred_ext = (".zip", ".wav", ".ogg", ".mp3", ".rar", ".7z")
-    for c in candidates:
+    for c in non_preview:
         if c.lower().endswith(preferred_ext):
             return c, title
 
     # Last resort: no size-labeled link and no preferred extension found.
-    # Take the LAST candidate rather than the first — OGA pages typically
-    # place body-content preview images before the attachment field.
+    # Take the LAST non-preview candidate rather than the first — OGA pages
+    # typically place body-content preview images before the attachment
+    # field. If every candidate looks like a preview image, return it
+    # anyway (caller tags it as preview-only rather than a size guess).
+    if non_preview:
+        return non_preview[-1], title
     return candidates[-1], title
 
 
@@ -207,7 +225,13 @@ def download_oga_file(page_url: str, dest_dir: Path, hub_url: str) -> dict:
     dest_path.write_bytes(file_resp.content)
 
     size_kb = len(file_resp.content) / 1024
-    if size_kb < 20 and ext.lower() in (".png", ".jpg", ".jpeg", ".gif"):
+    if PREVIEW_FILENAME_RE.search(file_url):
+        result.update(
+            filename=filename,
+            status="downloaded-preview-only",
+            note=f"{file_url}  [CONFIRMED PREVIEW IMAGE — not the real asset, re-fetch from the page manually]",
+        )
+    elif size_kb < 20 and ext.lower() in (".png", ".jpg", ".jpeg", ".gif"):
         result.update(
             filename=filename,
             status="downloaded-unverified",
@@ -371,6 +395,7 @@ def main() -> None:
 
     downloaded = sum(1 for r in all_results if r["status"] == "downloaded")
     unverified = sum(1 for r in all_results if r["status"] == "downloaded-unverified")
+    preview_only = sum(1 for r in all_results if r["status"] == "downloaded-preview-only")
     skipped = sum(1 for r in all_results if r["status"] == "skipped-exists")
     failed = sum(1 for r in all_results if r["status"] == "failed")
 
@@ -378,6 +403,7 @@ def main() -> None:
     print(f"Total items processed: {len(all_results)}")
     print(f"  Downloaded (verified size):   {downloaded}")
     print(f"  Downloaded but UNVERIFIED:    {unverified}  <- check these manually")
+    print(f"  Downloaded but PREVIEW-ONLY:  {preview_only}  <- confirmed thumbnail, re-fetch from the page")
     print(f"  Skipped (already existed):    {skipped}")
     print(f"  Failed:                       {failed}")
     print(f"Manifest written to: {MANIFEST_PATH.resolve()}")

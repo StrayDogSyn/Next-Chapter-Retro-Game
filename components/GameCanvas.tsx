@@ -5,9 +5,10 @@ import { Game, VIEW_W, VIEW_H, type HudSnapshot } from "@/lib/game/game";
 
 type GameCanvasProps = {
   onSnapshot: (snapshot: HudSnapshot) => void;
+  continueFromSave?: boolean;
 };
 
-export function GameCanvas({ onSnapshot }: GameCanvasProps) {
+export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const shellRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -49,14 +50,16 @@ export function GameCanvas({ onSnapshot }: GameCanvasProps) {
     if (!canvas) return;
 
     const game = new Game(canvas);
+    gameRef.current = game;
     game.onSnapshot = (snap) => onSnapshot(snap);
-    void game.start();
+    void game.start(continueFromSave);
     handleFocus();
 
     return () => {
       game.destroy();
+      gameRef.current = null;
     };
-  }, [onSnapshot]);
+  }, [onSnapshot, continueFromSave]);
 
   const handleFocus = () => {
     shellRef.current?.focus();

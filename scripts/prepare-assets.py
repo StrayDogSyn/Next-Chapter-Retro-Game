@@ -152,28 +152,55 @@ def extract_foreground_frames(sheet: Image.Image) -> list[list[Image.Image]]:
 
 
 def gif_frames(path: Path) -> list[Image.Image]:
-    def border_is_uniform(img: Image.Image, rgba: tuple[int, int, int, int]) -> bool:
-        if img.width < 2 or img.height < 2:
-            return False
-        px = img.load()
-        for x in range(img.width):
-            if px[x, 0] != rgba or px[x, img.height - 1] != rgba:
-                return False
-        for y in range(img.height):
-            if px[0, y] != rgba or px[img.width - 1, y] != rgba:
-                return False
-        return True
+    """Extract GIF frames to RGBA, honoring transparency and chroma-keying flat backgrounds.
 
-    def apply_chroma_key_if_safe(img: Image.Image) -> Image.Image:
+    Many OpenGameArt GIFs have a solid-color background that is not marked as
+    transparent in the palette. The previous uniform-border check failed when
+    a sprite touched the frame edge (demon-flower blue box). We now also key
+    against the dominant opaque border color when it covers enough of the
+    perimeter.
+    """
+
+    def dominant_opaque_border_color(img: Image.Image) -> tuple[int, int, int] | None:
+        """Return the most common opaque RGB color along the image border, or None if no color dominates."""
+        if img.width < 2 or img.height < 2:
+            return None
+        px = img.load()
+        counts: dict[tuple[int, int, int], int] = {}
+        for x in range(img.width):
+            r, g, b, a = px[x, 0]
+            if a == 255:
+                counts[(r, g, b)] = counts.get((r, g, b), 0) + 1
+            r, g, b, a = px[x, img.height - 1]
+            if a == 255:
+                counts[(r, g, b)] = counts.get((r, g, b), 0) + 1
+        for y in range(img.height):
+            r, g, b, a = px[0, y]
+            if a == 255:
+                counts[(r, g, b)] = counts.get((r, g, b), 0) + 1
+            r, g, b, a = px[img.width - 1, y]
+            if a == 255:
+                counts[(r, g, b)] = counts.get((r, g, b), 0) + 1
+        if not counts:
+            return None
+        best, best_count = max(counts.items(), key=lambda item: item[1])
+        total = sum(counts.values())
+        # A clear background should cover most of the border; sprites that merely
+        # graze the edge won't dominate the perimeter.
+        if best_count / total < 0.6:
+            return None
+        return best
+
+    def apply_chroma_key(img: Image.Image) -> Image.Image:
         rgba = img.convert("RGBA")
-        corner = rgba.getpixel((0, 0))
-        if corner[3] == 0:
+        bg = dominant_opaque_border_color(rgba)
+        if bg is None:
             return rgba
-        if not border_is_uniform(rgba, corner):
-            return rgba
+        r_key, g_key, b_key = bg
+        # Use getdata/putdata; these GIF frames are small.
         pixels = list(rgba.getdata())
         keyed = [
-            (r, g, b, 0) if (r, g, b, a) == corner else (r, g, b, a)
+            (r, g, b, 0) if (r, g, b) == (r_key, g_key, b_key) else (r, g, b, a)
             for (r, g, b, a) in pixels
         ]
         out = Image.new("RGBA", rgba.size)
@@ -182,17 +209,25 @@ def gif_frames(path: Path) -> list[Image.Image]:
 
     im = Image.open(path)
     frames: list[Image.Image] = []
+    shared_transparency = im.info.get("transparency")
 
     for frame in ImageSequence.Iterator(im):
-        transparency_index = frame.info.get("transparency", im.info.get("transparency"))
+        transparency_index = frame.info.get("transparency", shared_transparency)
         if frame.mode == "P":
-            pal = frame.copy().convert("P")
+            pal = frame.copy()
             if transparency_index is not None:
                 pal.info["transparency"] = int(transparency_index)
             rgba = pal.convert("RGBA")
         else:
             rgba = frame.convert("RGBA")
-        frames.append(apply_chroma_key_if_safe(rgba))
+
+        # If the frame already carries real transparency from the GIF, keep it.
+        # Otherwise chroma-key a likely flat background.
+        alpha_channel = rgba.split()[-1]
+        if alpha_channel.getextrema()[1] < 255:
+            frames.append(rgba)
+        else:
+            frames.append(apply_chroma_key(rgba))
 
     return frames
 

@@ -5,7 +5,7 @@ import { GameFooter } from "@/components/GameFooter";
 import { GameHeader } from "@/components/GameHeader";
 import { GameCanvas } from "@/components/GameCanvas";
 import { StartMenu } from "@/components/StartMenu";
-import type { HudSnapshot } from "@/lib/game/game";
+import { Game, type HudSnapshot } from "@/lib/game/game";
 
 type LevelPayload = {
   ok: boolean;
@@ -19,8 +19,14 @@ type LevelPayload = {
 
 export default function Home() {
   const [gameStarted, setGameStarted] = useState(false);
+  const [continueFromSave, setContinueFromSave] = useState(false);
+  const [hasSave, setHasSave] = useState(false);
   const [levelData, setLevelData] = useState<LevelPayload | null>(null);
   const [snapshot, setSnapshot] = useState<HudSnapshot | null>(null);
+
+  useEffect(() => {
+    setHasSave(Game.hasSave());
+  }, []);
 
   useEffect(() => {
     async function loadLevelData() {
@@ -50,7 +56,17 @@ export default function Home() {
 
         {!gameStarted ? (
           <>
-            <StartMenu onStart={() => setGameStarted(true)} />
+            <StartMenu
+              onStart={() => {
+                setContinueFromSave(false);
+                setGameStarted(true);
+              }}
+              onContinue={() => {
+                setContinueFromSave(true);
+                setGameStarted(true);
+              }}
+              hasSave={hasSave}
+            />
             <div style={{ fontFamily: "monospace", fontSize: 13, lineHeight: 1.7 }}>
               <strong>Keyboard:</strong> LEFT/RIGHT or A/D move, SPACE/W/Z jump
               (air-jump with Aether Wings), X/J attack, C/K dodge, V/L swap,
@@ -67,7 +83,7 @@ export default function Home() {
           <section className="game-runtime">
             <GameHeader snapshot={snapshot} />
             <div className="game-runtime-canvas">
-              <GameCanvas onSnapshot={setSnapshot} />
+              <GameCanvas onSnapshot={setSnapshot} continueFromSave={continueFromSave} />
             </div>
             <GameFooter snapshot={snapshot} />
           </section>
