@@ -749,6 +749,10 @@ export class Game {
     const state = this.roomState(this.roomId);
     const pcx = this.px + this.pw / 2;
     const pcy = this.py + this.ph / 2;
+    // Summons (werewolf howl) are queued and appended AFTER the loop —
+    // pushing into state.enemies while for..of iterates it would make the
+    // iterator visit and update brand-new entries mid-frame.
+    const summons: Enemy[] = [];
 
     for (const enemy of state.enemies) {
       if (enemy.hp <= 0) continue;
@@ -917,11 +921,10 @@ export class Game {
             if (enemy.stateTime > 1.4) {
               enemy.state = "chase";
               enemy.stateTime = 0;
-              // summon two bats
-              const state2 = this.roomState(this.roomId);
+              // summon two bats (queued; appended after the loop)
               for (const offset of [-60, 60]) {
                 const def = ENEMY_DEFS.bat;
-                state2.enemies.push({
+                summons.push({
                   kind: "bat",
                   x: enemy.x + offset,
                   y: enemy.y - 40,
@@ -959,6 +962,8 @@ export class Game {
         this.pvy = -180;
       }
     }
+
+    if (summons.length) state.enemies.push(...summons);
   }
 
   /** Ground enemy movement with gravity + ledge/wall handling. */
@@ -1072,9 +1077,16 @@ export class Game {
           if (pickup.opened) return true;
           pickup.opened = true;
           this.audio.play("chest", 0.9);
-          const stateAtOpen = this.roomStates.get(this.roomId);
+          // Capture the room the chest lives in AT OPEN TIME. Comparing against
+          // this.roomId at resolution time (the old code) had two failure modes:
+          // loot silently lost if the player walked to another room mid-roll,
+          // and — same category as the respawn loot race — a wrong-room check
+          // after roomStates.clear(). Identity check on the captured room's
+          // state object covers both.
+          const roomAtOpen = this.roomId;
+          const stateAtOpen = this.roomStates.get(roomAtOpen);
           void this.rollLoot(3).then((loot) => {
-            if (!stateAtOpen || this.roomStates.get(this.roomId) !== stateAtOpen) return;
+            if (!stateAtOpen || this.roomStates.get(roomAtOpen) !== stateAtOpen) return;
             stateAtOpen.pickups.push({
               kind: "loot",
               x: pickup.x,
@@ -1128,7 +1140,15 @@ export class Game {
     const seed = this.runSeed + this.lootCounter * 7919;
     const luck = this.stat("luck");
     try {
-      const resp = await fetch(`/api/loot?seed=${seed}&luck=${luck}&enemyLevel=${enemyLevel}`);
+      // Timeout so a hung request degrades to the fallback instead of a drop
+      // that never lands (fetch has no default timeout).
+      const abort = new AbortController();
+      const timer = setTimeout(() => abort.abort(), 3000);
+      const resp = await fetch(
+        `/api/loot?seed=${seed}&luck=${luck}&enemyLevel=${enemyLevel}`,
+        { signal: abort.signal },
+      );
+      clearTimeout(timer);
       const payload = await resp.json();
       if (payload.ok && payload.drop) {
         this.lootSource = "python-service";
@@ -1137,7 +1157,7 @@ export class Game {
       throw new Error(payload.error ?? "loot service unavailable");
     } catch {
       this.lootSource = "client-fallback";
-      return fallbackRoll(seed, luck);
+      return fallbackRoll(seed, luck, enemyLevel);
     }
   }
 
@@ -1215,7 +1235,9 @@ export class Game {
             maxHp: bossEnemy.maxHp,
           }
         : null,
-      upgrades: this.upgrades,
+      // copy — handing React the live object means mutations are invisible
+      // (same identity) and racy; a fresh object per snapshot fixes both
+      upgrades: { ...this.upgrades },
       phase: this.phase,
       lootSource: this.lootSource,
     });

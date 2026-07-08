@@ -46,7 +46,6 @@ Lightweight Architecture Decision Records. Each one captures a choice, whether i
 
 ---
 
-<<<<<<< HEAD
 ## ADR-003: Client-side loot fallback when the Python service is down
 
 - **Date:** 2026-07-07
@@ -80,8 +79,11 @@ Lightweight Architecture Decision Records. Each one captures a choice, whether i
 - **Decision:** One re-runnable script extracts/crops/packs ONLY assets verified on disk into `public/sprites` + `public/audio`, and emits `public/sprites/spritemeta.json` (cell sizes, animation rows, frame counts) that the renderer consumes. It also writes `assets/wired-assets.txt` — the ground-truth list used to cross-check `docs/CREDITS.md`.
 - **Alternatives considered:** Committing hand-cropped sheets (opaque provenance, not reproducible); hardcoding frame rects in TS (the drift problem this repo already got burned by).
 - **Consequences:** Pillow becomes a dev-time dependency (not runtime); regenerating art changes is one command.
-=======
-## ADR-003: Unified input interface (InputState) for keyboard + gamepad
+---
+
+## ADR-006: Unified input interface (InputState) for keyboard + gamepad
+
+_(Renumbered from a duplicate "ADR-003" during the 2026-07-08 merge-conflict cleanup — two parallel sessions had each claimed 003. Content preserved as written.)_
 
 - **Date:** 2026-07-07
 - **Status:** Accepted
@@ -95,7 +97,6 @@ Lightweight Architecture Decision Records. Each one captures a choice, whether i
   - Clean separation between input handling (InputHandler) and game logic (GameCanvas) — game loop only reads from InputState
   - Future controller rebinding (ADR for next phase) will only need to touch InputHandler, not game logic
   - Gamepad must be polled every frame because there's no "gamepad button down" browser event; this is baked into GameLoop design
->>>>>>> agents/next-chapter-retro-game-setup
 
 ---
 

@@ -45,33 +45,33 @@ The service runs independently from Next.js and returns plain JSON consumed by N
 - Input handling (keyboard + Xbox gamepad unified interface)
 - Audio playback via Web Audio API
 - HUD (React components layered over the canvas)
-- **NEW:** Level management (LevelManager), enemy spawning and updates (EnemyManager), boss AI (BossManager), combat and item management (ItemManager)
+- Game orchestration consolidated in a single `Game` class (`lib/game/game.ts`) with supporting modules: `lib/game/input.ts` (unified InputState), `lib/game/world.ts` + `levelLoader.ts` (24-room validated world graph), `lib/game/items.ts` (data-driven weapons/upgrades). The earlier LevelManager/EnemyManager/BossManager/ItemManager parallel classes were consolidated away — see SESSION_LOG 2026-07-08 and the "no parallel systems" rule in AGENTIC_WORKFLOW.md.
 
 ## Backend Responsibilities
 
 - FastAPI service, run independently from the Next.js dev server
 - Exposes JSON endpoints consumed by Next.js API routes (not called directly from the browser)
 - **/generate-level** — Returns platform positions for a given seed
-- **/generate-loot** — Returns itemized loot table with rarity tiers and stat rolls
+- **/loot/roll** — Rolls one drop (rarity tier + randomized stats); **/loot/table** — full table dump for balancing
 
 ## Data Flow
 
-1. Browser input → Canvas renderer updates local player state
-2. LevelManager/EnemyManager/BossManager handle collision, AI updates, combat
-3. ItemManager tracks player inventory; when player kills an enemy or finds treasure, ItemManager adds items
-4. When game needs new loot, Next.js API route calls Python service → returns JSON → TypeScript consumes and instantiates Item objects
-5. Canvas renders all entities and HUD
+1. Browser input (keyboard events + per-frame gamepad poll) → shared InputState → `Game.update()`
+2. `Game` handles physics/collision, enemy + boss AI, combat, and room transitions against the loaded world graph
+3. On kill/chest-open, `Game.rollLoot()` calls `/api/loot` (Next.js route) → Python service rolls the drop → client renders/applies it (client fallback only if the service is unreachable, tagged `client-fallback` — ADR-003)
+4. Canvas renders tiles/entities/HUD overlay each frame
 
 ## Multi-Level World Structure
 
-- **Metroidvania-style interconnected world:** 4 levels with exits that transition between levels
-- **Level data format:** Platforms (for collision), enemies (with spawn positions), exits (with target level IDs), player spawn point
-- **Reusability:** Levels reference a shared pool of platform sizes and enemy types; new levels can be added by extending the LEVELS object in LevelManager
+- **Metroidvania-style interconnected world:** 24 single-screen rooms across 5 zones, connected by edge exits with ability/key gating (ADR-004)
+- **Room data format:** ASCII tile maps (solid/platform/spike/door) + entity spawn characters, validated at load by `levelLoader.ts`
+- **Reusability:** rooms share one carved tileset + zone backgrounds; new rooms are added by appending to `ROOMS` in `lib/game/world.ts` — the loader fails loudly on malformed maps or sealed exits
 
 ## Open Questions / Future Work
 
-- [ ] Real spritesheet integration (currently placeholder rectangles)
-- [ ] Audio event wiring (jump SFX, combat SFX, boss theme music)
+- [x] Real spritesheet integration (via `scripts/prepare-assets.py` + `spritemeta.json`)
+- [x] Audio event wiring (jump/combat SFX, zone + boss music)
 - [ ] Level progression save state (tracking which levels cleared, inventory persistence)
+- [ ] Implement the 4 stubbed weapon effects (burn, freeze, shock, curse) — see 2026-07-08 inventory
 - [ ] Determine if more than 4 levels needed, or if reusing/recombining level sections more is better for scope
 - [ ] Evaluate whether WebSocket communication is worth adding for real-time state sync (probably not needed for single-player local game)

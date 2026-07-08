@@ -127,6 +127,14 @@ export class InputManager {
     this.keyboardHeld[action] = false;
   };
 
+  private onBlur = () => {
+    // If the window loses focus while keys are held, their keyup events are
+    // lost (alt-tab, clicking outside) and the key would stay "held" forever —
+    // the exact stuck-input bug found in the deleted lib/inputHandler.ts.
+    // Releasing everything on blur is the standard fix.
+    for (const action of ACTIONS) this.keyboardHeld[action] = false;
+  };
+
   private onGamepadConnected = (event: GamepadEvent) => {
     // Informational only — actual state is read by polling every frame.
     this.gamepadIndex = event.gamepad.index;
@@ -150,6 +158,7 @@ export class InputManager {
     this.target = target;
     target.addEventListener("keydown", this.onKeyDown);
     target.addEventListener("keyup", this.onKeyUp);
+    target.addEventListener("blur", this.onBlur);
     target.addEventListener("gamepadconnected", this.onGamepadConnected);
     target.addEventListener("gamepaddisconnected", this.onGamepadDisconnected);
   }
@@ -199,8 +208,15 @@ export class InputManager {
     const pads = navigator.getGamepads();
     // Prefer the pad we saw connect; otherwise take the first live one so
     // pads connected before page load (no event fired) still work.
-    if (this.gamepadIndex !== null && pads[this.gamepadIndex]) {
-      return pads[this.gamepadIndex];
+    if (this.gamepadIndex !== null) {
+      const pad = pads[this.gamepadIndex];
+      // Some browsers keep the array slot with connected=false after unplug;
+      // reading buttons from that snapshot would freeze the last-held state
+      // into the game (stuck input). Treat it as gone and fall through.
+      if (pad && pad.connected) return pad;
+      this.gamepadIndex = null;
+      this.state.gamepadConnected = false;
+      this.state.gamepadId = null;
     }
     for (const pad of pads) {
       if (pad && pad.connected) {
@@ -221,6 +237,7 @@ export class InputManager {
   destroy() {
     this.target.removeEventListener("keydown", this.onKeyDown);
     this.target.removeEventListener("keyup", this.onKeyUp);
+    this.target.removeEventListener("blur", this.onBlur);
     this.target.removeEventListener("gamepadconnected", this.onGamepadConnected);
     this.target.removeEventListener("gamepaddisconnected", this.onGamepadDisconnected);
   }

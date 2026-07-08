@@ -149,10 +149,17 @@ export function describeLoot(drop: LootDrop): string {
 
 /**
  * Degraded-mode fallback roll used ONLY when /api/loot is unreachable.
- * Mirrors the Python algorithm loosely; anything rolled here is tagged
+ * Mirrors python-service/main.py roll_loot(); anything rolled here is tagged
  * rolledBy: "client-fallback" so drift is visible in the HUD/log.
+ *
+ * Luck formula (IDENTICAL in _pick_rarity() on the Python side — change both
+ * together): every non-common tier's weight is multiplied by (1 + luck/100),
+ * then a weighted pick runs over the new total. Because the boost also grows
+ * the total weight, the effect on final probability is deliberately
+ * sub-linear: e.g. epic goes 4.00% at luck 0 -> 5.71% at luck 100, not 8%.
+ * Measured and matched against the Python service in the 2026-07-08 session.
  */
-export function fallbackRoll(seedNum: number, luckPct = 0): LootDrop {
+export function fallbackRoll(seedNum: number, luckPct = 0, enemyLevel = 1): LootDrop {
   let s = seedNum >>> 0;
   const rnd = () => {
     // xorshift32 — deterministic, matches nothing fancy, just stable
@@ -195,13 +202,16 @@ export function fallbackRoll(seedNum: number, luckPct = 0): LootDrop {
   const base = BASE_WEAPONS[Math.floor(rnd() * BASE_WEAPONS.length)];
   const prefix = PREFIXES[Math.floor(rnd() * PREFIXES.length)];
   const roll = 1 + (rnd() * 2 - 1) * rdef.rollSpread;
+  // Same enemy-level damage scaling as the Python service (level_mult) —
+  // without this, fallback drops were noticeably weaker in late-game rooms.
+  const levelMult = 1 + 0.08 * Math.max(0, enemyLevel - 1);
   return {
     itemType: "weapon",
     baseId: base.id,
     prefixId: prefix.id,
     rarity,
     name: `${prefix.name ? prefix.name + " " : ""}${base.name}`,
-    damage: base.damage * prefix.damageMult * rdef.statMult * roll,
+    damage: base.damage * prefix.damageMult * rdef.statMult * roll * levelMult,
     speed: base.speed * prefix.speedMult,
     range: base.range,
     projectileSpeed: base.projectileSpeed,
