@@ -1,15 +1,29 @@
-PROJECT STATUS SNAPSHOT — 2026-07-07T21:16:52
-Repo root: C:\Users\Petro\repos\Next_Chapter\Next-Chapter-Retro-Game
+PROJECT STATUS SNAPSHOT — 2026-07-07T23:09:38
+Repo root: C:\Users\Petro\repos\Next_Chapter\Next-Chapter-Retro-Game.worktrees\agents-next-chapter-retro-game-setup
 
 --- GIT STATUS (uncommitted changes) ---
-(command unavailable: [WinError 2] The system cannot find the file specified)
+M STATUS.txt
+ M components/GameCanvas.tsx
+ M lib/inputHandler.ts
+ M package-lock.json
+ M python-service/main.py
+?? app/api/generate-loot/
+?? lib/bossManager.ts
+?? lib/enemyManager.ts
+?? lib/itemManager.ts
+?? lib/levelManager.ts
+?? node-portable/
 
 --- GIT LAST 5 COMMITS ---
-(command unavailable: [WinError 2] The system cannot find the file specified)
+43d2823 Add new dragon enemy sprite to assets
+b583ab5 Refactor code structure for improved readability and maintainability
+5a389a4 Refactor code structure for improved readability and maintainability
+29bc9f5 Add new monster roar sound effects to assets
+554a807 Refactor code structure for improved readability and maintainability
 
 --- asset-fetch.py VERSION CHECK ---
-File: C:\Users\Petro\repos\Next_Chapter\Next-Chapter-Retro-Game\scripts\asset-fetch.py
-SHA256 (first 12 chars): f6919e4ae181
+File: C:\Users\Petro\repos\Next_Chapter\Next-Chapter-Retro-Game.worktrees\agents-next-chapter-retro-game-setup\scripts\asset-fetch.py
+SHA256 (first 12 chars): 0375d4a10453
 Thumbnail-filter fix present ('/styles/' check): YES
 
 --- assets/ TREE (actual sizes on disk) ---
@@ -20,18 +34,13 @@ Thumbnail-filter fix present ('/styles/' check): YES
   assets\img\bulk\base_character.png  (17.4 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
   assets\img\bulk\bat_sprite.png  (2.6 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
   assets\img\bulk\biomech_dragon_splice.png  (20.9 KB)
-  assets\img\bulk\bloody_mary.png  (2.7 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
   assets\img\bulk\dead_tree_1.png  (4.5 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
   assets\img\bulk\demon_flower_monster_sprite_sheet.zip  (201.8 KB)
   assets\img\bulk\dirt_platformer_tiles.png  (5.2 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
   assets\img\bulk\goblin_sprite.zip  (270.8 KB)
   assets\img\bulk\hero_0.png  (151.3 KB)
   assets\img\bulk\living_tissue_background.zip  (23.4 KB)
-  assets\img\bulk\lpc_beetle.PNG  (1.8 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
-  assets\img\bulk\lpc_goblin.png  (2.1 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
-  assets\img\bulk\lpc_golem.png  (2.3 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
   assets\img\bulk\lpc_imp.zip  (145.7 KB)
-  assets\img\bulk\lpc_wolf_animation.png  (1.8 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
   assets\img\bulk\mangrove.png  (29.8 KB)
   assets\img\bulk\mech_0.png  (5.1 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
   assets\img\bulk\minimalist_pixel_tileset.png  (23.5 KB)
@@ -39,17 +48,15 @@ Thumbnail-filter fix present ('/styles/' check): YES
   assets\img\bulk\mountain_at_dusk_background.zip  (119.7 KB)
   assets\img\bulk\nature_tileset.png  (50.1 KB)
   assets\img\bulk\outdoor_tiles_again.png  (21.0 KB)
-  assets\img\bulk\plattoon.png  (1.7 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
   assets\img\bulk\rpg_enemies_11_dragons.png  (12.1 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
   assets\img\bulk\rpg_village_isometric.png  (1020.8 KB)
-  assets\img\bulk\simple_character_base_16x16.png  (0.7 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
   assets\img\bulk\sky_background.png  (28.1 KB)
   assets\img\bulk\wyrmwolf.png  (834.6 KB)
   assets\img\screenshots\phase-one-framework.png  (685.5 KB)
   assets\img\werewolf_base.png  (6.8 KB)   <-- SUSPECT: small image, may be a thumbnail, not the real asset
   assets\loading-page.gif  (3673.3 KB)
   assets\manifest.csv  (1.4 KB)
-  assets\manifest_bulk.csv  (14.0 KB)
+  assets\manifest_bulk.csv  (21.6 KB)
   assets\sounds\beast_growl_generic.mp3  (172.6 KB)
   assets\sounds\beast_roar_deep_kraken.mp3  (239.2 KB)
   assets\sounds\beast_roar_dragon.mp3  (1378.5 KB)
@@ -63,6 +70,9 @@ Thumbnail-filter fix present ('/styles/' check): YES
   assets\sounds\bulk\8bit_sword_hit_sword_1_8_bit_wav.mp3  (21.1 KB)
   assets\sounds\bulk\8bit_sword_hit_sword_2_8_bit_wav.mp3  (27.3 KB)
   assets\sounds\bulk\8bit_sword_hit_sword_hit_heavy.mp3  (27.5 KB)
+  assets\sounds\bulk\armor_clank_metal_armor_clanking_sounds_part_2.mp3  (3567.9 KB)
+  assets\sounds\bulk\armor_clank_metal_armor_plates_clanking_sounds_03062025.mp3  (3730.1 KB)
+  assets\sounds\bulk\armor_clank_metal_whoosh_sword_hit_armor_wav.mp3  (23.0 KB)
   assets\sounds\bulk\chiptune_boss_battle_battle_for_what.mp3  (1022.0 KB)
   assets\sounds\bulk\chiptune_boss_battle_super_mega_ultimate_final_boss_battle.mp3  (1461.3 KB)
   assets\sounds\bulk\dungeon_door_open_door_wood_heavy_antique_castle_dungeon_loc.mp3  (227.5 KB)
@@ -71,11 +81,18 @@ Thumbnail-filter fix present ('/styles/' check): YES
   assets\sounds\bulk\footstep_stone_footsteps_boots_gritty_ground_stones_leaves_m.mp3  (159.0 KB)
   assets\sounds\bulk\footstep_stone_fx_006_footstep_stone_r_wav.mp3  (8.5 KB)
   assets\sounds\bulk\footstep_stone_hiking_boot_footsteps_on_stone.mp3  (59.1 KB)
+  assets\sounds\bulk\game_over_jingle_game_over.mp3  (340.4 KB)
+  assets\sounds\bulk\game_over_jingle_j1game_over_mono_wav.mp3  (25.0 KB)
+  assets\sounds\bulk\game_over_jingle_you_failed_game_jingle.mp3  (71.2 KB)
   assets\sounds\bulk\jay_the_doggo_sound_effects.wav  (24.2 KB)
   assets\sounds\bulk\laser_gun_retro_laser_gun_blast.mp3  (95.5 KB)
   assets\sounds\bulk\laser_gun_retro_laser_shot_3.mp3  (9.5 KB)
   assets\sounds\bulk\laser_gun_retro_retro_laser_blaster_1_4.mp3  (38.4 KB)
   assets\sounds\bulk\laser_gun_retro_retro_laser_gun_shot_wav.mp3  (13.1 KB)
+  assets\sounds\bulk\magic_spell_cast_magspel_dark_magic_wand_spell_cast_005_gmcm.mp3  (50.1 KB)
+  assets\sounds\bulk\magic_spell_cast_magspel_dark_magic_wand_spell_cast_006_gmcm.mp3  (55.9 KB)
+  assets\sounds\bulk\magic_spell_cast_magspel_dark_magic_wand_spell_cast_007_gmcm.mp3  (48.7 KB)
+  assets\sounds\bulk\magic_spell_cast_magspel_dark_magic_wand_spell_cast_008_gmcm.mp3  (52.3 KB)
   assets\sounds\bulk\monster_5.wav  (618.6 KB)
   assets\sounds\bulk\monster_roar_monster_roar_2_mp3.mp3  (101.4 KB)
   assets\sounds\bulk\monster_roar_monster_roar_3_mp3.mp3  (111.7 KB)
@@ -100,17 +117,20 @@ Thumbnail-filter fix present ('/styles/' check): YES
   assets\sounds\bulk\treasure_chest_open_chest_opening_wav.mp3  (115.5 KB)
   assets\sounds\bulk\treasure_chest_open_opening_antique_trunk_latches_and_openin.mp3  (161.5 KB)
   assets\sounds\bulk\treasure_chest_open_treasure_chest_open.mp3  (27.1 KB)
+  assets\sounds\bulk\victory_fanfare_8bit_victory_fanfare_8_bit_thunder_1.mp3  (252.9 KB)
+  assets\sounds\bulk\victory_fanfare_8bit_victory_fanfare_8_bit_thunder_2.mp3  (255.6 KB)
+  assets\sounds\bulk\victory_fanfare_8bit_victory_fanfare_8_bit_thunder_3.mp3  (289.5 KB)
   assets\sounds\bulk\we_are_prophet_happy_energetic_tune.mp3  (322.0 KB)
   assets\sounds\sfx_512_retro.zip  (20100.4 KB)
   assets\sounds\sfx_pack_8bit_vol1.zip  (1128.7 KB)
 
 --- docs/ TREE ---
-  docs\AGENTIC_WORKFLOW.md  (6.0 KB)
+  docs\AGENTIC_WORKFLOW.md  (6.1 KB)
   docs\ARCHITECTURE.md  (2.0 KB)
   docs\CREDITS.md  (7.1 KB)
   docs\DECISIONS.md  (2.2 KB)
-  docs\PROMPT_LIBRARY.md  (1.6 KB)
-  docs\SESSION_LOG.md  (4.1 KB)
+  docs\PROMPT_LIBRARY.md  (1.7 KB)
+  docs\SESSION_LOG.md  (4.2 KB)
 
 --- assets/manifest.csv CONTENTS ---
 source,page_url,filename,status,note
