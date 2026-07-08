@@ -38,13 +38,13 @@
 
 | Area | State |
 |---|---|
-| Frontend scaffold | ✅ complete |
-| Python service | ✅ complete |
-| Sprite/audio assets | 🟡 downloaded, not integrated into UI |
-| Input system (keyboard + gamepad) | ✅ complete |
-| Level/world system | ✅ complete (4 levels, Metroidvania structure) |
-| Enemy AI | ✅ complete (simple and boss variants) |
-| Weapon/loot system | ✅ complete (data-driven, Python-generated) |
+| Frontend game (24 rooms, combat, loot, 3 bosses) | 🟢 playable; bug-fix pass 2026-07-08 (4 review findings verified/fixed) |
+| Python service (loot + level endpoints) | 🟢 authoritative — verified on the wire 2026-07-08 |
+| Sprite/audio assets | 🟢 wired via scripts/prepare-assets.py + spritemeta.json |
+| Input system (keyboard + gamepad) | 🟢 unified InputState; stuck-input fixes 2026-07-08 (blur release, disconnect handling) |
+| Level/world system | 🟢 24 single-screen rooms, 5 zones, validated exit graph |
+| Enemy AI | 🟢 4 regular kinds + 3 bosses with distinct patterns |
+| Weapon/loot system | 🟢 data-driven, Python-authoritative (280 combos; 4 of 6 effects still stubs) |
 | Documentation | 🟢 living doc active |
 
 ## Session Log

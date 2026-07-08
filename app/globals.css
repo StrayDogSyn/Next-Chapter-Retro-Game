@@ -21,19 +21,23 @@ body {
 }
 
 .game-shell {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
+  min-height: 100dvh;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
   padding: 1rem;
 }
 
 .game-panel {
-  width: min(900px, 100%);
+  width: min(1200px, 100%);
   border: 4px solid #314862;
   border-radius: 8px;
   padding: 1rem;
   background: linear-gradient(180deg, #263a51 0%, var(--panel) 100%);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 2rem);
 }
 
 .game-panel h1 {
@@ -50,4 +54,117 @@ body {
 .python-status {
   margin-top: 0.75rem;
   font-size: 0.9rem;
+}
+
+.game-runtime {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 0;
+  flex: 1;
+}
+
+.game-runtime-canvas {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+}
+
+.game-header,
+.game-footer {
+  border: 2px solid #4f6880;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #1f3247, #162636);
+  color: #d5e4f3;
+  font-size: 0.82rem;
+  padding: 0.5rem 0.6rem;
+}
+
+.hud-line {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.hud-line + .hud-line {
+  margin-top: 0.35rem;
+}
+
+.hud-chip {
+  background: rgba(12, 24, 38, 0.55);
+  border: 1px solid #3d5670;
+  border-radius: 3px;
+  padding: 0.1rem 0.35rem;
+}
+
+.hud-chip.coin {
+  color: #f7d46b;
+}
+
+.hud-label {
+  color: #99b8d6;
+  font-weight: 700;
+}
+
+.hud-label.boss {
+  color: #f49292;
+}
+
+.game-footer .controls {
+  line-height: 1.35;
+}
+
+.game-footer .message {
+  min-height: 1.2rem;
+  color: #ffde8a;
+}
+
+.game-canvas-shell {
+  border: 2px solid #6b7280;
+  border-radius: 6px;
+  background: #090f16;
+  width: 100%;
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  outline: none;
+}
+
+.game-canvas-shell:focus-visible {
+  box-shadow: 0 0 0 2px #9dc5ef;
+}
+
+.fullscreen-toggle {
+  align-self: flex-end;
+  margin: 0.4rem;
+  padding: 0.22rem 0.45rem;
+  border: 1px solid #6f8cad;
+  border-radius: 4px;
+  background: #1e3247;
+  color: #d7e6f8;
+  font-family: inherit;
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+
+.game-canvas-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem;
+}
+
+@media (max-width: 900px) {
+  .game-shell {
+    padding: 0.5rem;
+  }
+
+  .game-panel {
+    padding: 0.6rem;
+    min-height: calc(100dvh - 1rem);
+  }
 }
