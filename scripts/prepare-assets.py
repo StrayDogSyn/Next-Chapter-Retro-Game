@@ -121,12 +121,13 @@ def gif_frames(path: Path) -> list[Image.Image]:
 
     im = Image.open(path)
     frames: list[Image.Image] = []
-    transparency_index = im.info.get("transparency")
 
     for frame in ImageSequence.Iterator(im):
-        if frame.mode == "P" and transparency_index is not None:
-            pal = frame.copy()
-            pal.info["transparency"] = transparency_index
+        transparency_index = frame.info.get("transparency", im.info.get("transparency"))
+        if frame.mode == "P":
+            pal = frame.copy().convert("P")
+            if transparency_index is not None:
+                pal.info["transparency"] = int(transparency_index)
             rgba = pal.convert("RGBA")
         else:
             rgba = frame.convert("RGBA")
