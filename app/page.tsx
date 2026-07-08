@@ -50,11 +50,11 @@ export default function Home() {
             <div style={{ fontFamily: "monospace", fontSize: 13, lineHeight: 1.7 }}>
               <strong>Keyboard:</strong> LEFT/RIGHT or A/D move, SPACE/W/Z jump
               (air-jump with Aether Wings), X/J attack, C/K dodge, V/L swap,
-              S/DOWN drop through platforms
+              S/DOWN drop through platforms, ESC/P pause
               <br />
               <strong>Xbox controller:</strong> left stick or D-pad move, A
-              jump, X attack, B dodge, Y swap weapon (plug in any time,
-              detected automatically)
+              jump, X or RB/RT attack, B or LT dodge, Y or LB swap weapon,
+              START pause (plug in any time, detected automatically)
             </div>
           </>
         ) : null}

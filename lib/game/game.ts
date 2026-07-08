@@ -128,7 +128,7 @@ export type HudSnapshot = {
   message: string;
   boss: { name: string; hp: number; maxHp: number } | null;
   upgrades: Partial<Record<UpgradeId, number>>;
-  phase: "playing" | "dead" | "victory";
+  phase: "playing" | "paused" | "dead" | "victory";
   lootSource: string;
 };
 
@@ -181,7 +181,7 @@ export class Game {
   private lootSource = "unknown";
   private message = "";
   private messageT = 0;
-  private phase: "playing" | "dead" | "victory" = "playing";
+  private phase: "playing" | "paused" | "dead" | "victory" = "playing";
   private musicMode: "none" | "bg" | "boss" = "none";
   private snapshotT = 0;
 
@@ -544,6 +544,23 @@ export class Game {
     this.input.update();
     this.animT += dt;
     if (this.messageT > 0) this.messageT -= dt;
+
+    if (this.input.state.pressed.pause) {
+      if (this.phase === "playing") {
+        this.phase = "paused";
+        this.showMessage("Paused");
+        console.info("[game] paused");
+      } else if (this.phase === "paused") {
+        this.phase = "playing";
+        this.showMessage("Resumed");
+        console.info("[game] resumed");
+      }
+    }
+
+    if (this.phase === "paused") {
+      this.pushSnapshot(dt);
+      return;
+    }
 
     if (this.phase === "dead" || this.phase === "victory") {
       if (this.input.state.pressed.jump || this.input.state.pressed.interact) {
@@ -1348,6 +1365,7 @@ export class Game {
     this.drawEnemies();
     this.drawPlayer();
     this.drawProjectiles();
+    if (this.phase === "paused") this.drawOverlay("PAUSED", "press START / ESC / P to resume");
     if (this.phase === "dead") this.drawOverlay("YOU DIED", "press JUMP to rise again");
     if (this.phase === "victory")
       this.drawOverlay("THE BEAST IS SLAIN", "a hero's rest — press JUMP for new game+");

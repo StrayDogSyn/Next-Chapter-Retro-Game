@@ -83,6 +83,10 @@ const GAMEPAD_BUTTON_BINDINGS: Record<number, InputAction> = {
   1: "dodge", // B
   2: "attack", // X
   3: "useItem", // Y
+  4: "useItem", // LB
+  5: "attack", // RB
+  6: "dodge", // LT (analog trigger)
+  7: "attack", // RT (analog trigger)
   9: "pause", // Menu/Start
   12: "up", // D-pad up
   13: "down", // D-pad down
@@ -91,6 +95,13 @@ const GAMEPAD_BUTTON_BINDINGS: Record<number, InputAction> = {
 };
 
 const STICK_DEADZONE = 0.25;
+
+function applyDeadzone(value: number, deadzone: number): number {
+  if (Math.abs(value) <= deadzone) return 0;
+  const sign = value < 0 ? -1 : 1;
+  const normalized = (Math.abs(value) - deadzone) / (1 - deadzone);
+  return sign * Math.min(1, normalized);
+}
 
 function blankRecord(): Record<InputAction, boolean> {
   return Object.fromEntries(ACTIONS.map((a) => [a, false])) as Record<
@@ -214,18 +225,18 @@ export class InputManager {
     if (pad) {
       for (const [indexStr, action] of Object.entries(GAMEPAD_BUTTON_BINDINGS)) {
         const button = pad.buttons[Number(indexStr)];
-        if (button?.pressed) merged[action] = true;
+        if (button && (button.pressed || button.value > 0.6)) merged[action] = true;
       }
-      const stickX = pad.axes[0] ?? 0;
-      if (Math.abs(stickX) > STICK_DEADZONE) {
+      const stickX = applyDeadzone(pad.axes[0] ?? 0, STICK_DEADZONE);
+      const stickY = applyDeadzone(pad.axes[1] ?? 0, STICK_DEADZONE);
+      if (stickX !== 0) {
         axisX = stickX;
         if (stickX < 0) merged.left = true;
         if (stickX > 0) merged.right = true;
       }
       // Left stick vertical for up/down (menus, ladders).
-      const stickY = pad.axes[1] ?? 0;
-      if (stickY < -STICK_DEADZONE) merged.up = true;
-      if (stickY > STICK_DEADZONE) merged.down = true;
+      if (stickY < 0) merged.up = true;
+      if (stickY > 0) merged.down = true;
     }
 
     if (merged.left && !merged.right) axisX = Math.min(axisX || -1, -Math.abs(axisX) || -1);
@@ -240,7 +251,7 @@ export class InputManager {
     this.state.axisX = axisX;
 
     if (this.debug) {
-      const debugFrame = `L${Number(this.state.held.left)} R${Number(this.state.held.right)} U${Number(this.state.held.up)} D${Number(this.state.held.down)}|pL${Number(this.state.pressed.left)} pR${Number(this.state.pressed.right)} pU${Number(this.state.pressed.up)} pD${Number(this.state.pressed.down)}|ax=${this.state.axisX.toFixed(2)}`;
+      const debugFrame = `L${Number(this.state.held.left)} R${Number(this.state.held.right)} U${Number(this.state.held.up)} D${Number(this.state.held.down)} P${Number(this.state.held.pause)}|pL${Number(this.state.pressed.left)} pR${Number(this.state.pressed.right)} pU${Number(this.state.pressed.up)} pD${Number(this.state.pressed.down)} pP${Number(this.state.pressed.pause)}|ax=${this.state.axisX.toFixed(2)}`;
       if (debugFrame !== this.lastDebugFrame) {
         this.lastDebugFrame = debugFrame;
         console.info(`[input/debug] frame ${debugFrame}`);
