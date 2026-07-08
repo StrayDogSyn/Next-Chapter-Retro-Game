@@ -22,7 +22,7 @@ Lightweight Architecture Decision Records. Each one captures a choice, whether i
 
 ## ADR-001: Isolate Python service instead of embedding logic in Next.js API routes
 
-- **Date:** _fill in_
+- **Date:** 2026-07-07
 - **Status:** Accepted
 - **Originated from:** Human decision (specified in initial scaffold prompt)
 - **Context:** Needed a clear, defensible reason for Python to exist in a TypeScript-first stack rather than it being decorative
@@ -36,7 +36,7 @@ Lightweight Architecture Decision Records. Each one captures a choice, whether i
 
 ## ADR-002: No game engine library — hand-rolled canvas render loop
 
-- **Date:** _fill in_
+- **Date:** 2026-07-07
 - **Status:** Accepted
 - **Originated from:** Human decision
 - **Context:** Bootcamp submission is meant to demonstrate fundamentals, not library fluency
@@ -97,6 +97,20 @@ _(Renumbered from a duplicate "ADR-003" during the 2026-07-08 merge-conflict cle
   - Clean separation between input handling (InputHandler) and game logic (GameCanvas) — game loop only reads from InputState
   - Future controller rebinding (ADR for next phase) will only need to touch InputHandler, not game logic
   - Gamepad must be polled every frame because there's no "gamepad button down" browser event; this is baked into GameLoop design
+
+---
+
+## ADR-007: Living documentation as a first-class deliverable
+
+- **Date:** 2026-07-08
+- **Status:** Accepted
+- **Originated from:** Human decision
+- **Context:** As the project nears submission, screenshots, prompts, session logs, and ADRs are as important to reviewers as the code itself, but they were drifting behind the implementation.
+- **Decision:** Documentation updates are scoped as standalone tasks with the same "no code changes" boundary and ground-truth verification (`project-status.py`) as code tasks. Prompts are captured in `docs/PROMPT_LIBRARY.md` as reusable patterns, not one-off session transcripts.
+- **Alternatives considered:**
+  - Deferring docs polish until the end (risks stale/omitted context)
+  - Letting each agent session rewrite docs ad hoc (causes drift and conflicting claims)
+- **Consequences:** Every major phase leaves behind reproducible prompts, current screenshots, and dated decision records; the overhead is small compared to the debugging time saved by honest, traceable progress tracking.
 
 ---
 

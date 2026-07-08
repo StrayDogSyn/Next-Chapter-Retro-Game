@@ -25,6 +25,23 @@ Full chronological record of every AI-paired session on this project. The summar
 
 ## Entries
 
+### 2026-07-08 — Documentation refinement and code review prep
+
+- **Tool used:** Claude / Cascade
+- **Goal:** Refine all Markdown documentation to track project progress, wire in existing screenshots, and prepare a thorough code review of the current working tree.
+- **Prompt summary:** Used the documentation-polish prompt: docs-only scope, screenshot paths specified, stale placeholder backfill, prompt-library expansion, and a new session-log entry.
+- **What the agent produced:**
+  - Updated `README.md` with current features, architecture, project structure, a Screenshots gallery, and a refreshed roadmap.
+  - Wired screenshots into `docs/ARCHITECTURE.md` (phase-one framework diagram) and `docs/UI_REFACTOR_BRIEF.md` (responsive scaling and HUD evidence).
+  - Expanded `docs/PROMPT_LIBRARY.md` with six optimized, reusable prompts based on actual project sessions plus a "didn't work" lesson.
+  - Backfilled ADR-001 and ADR-002 dates in `docs/DECISIONS.md`; added ADR-007 (living documentation as a first-class deliverable).
+  - Updated `docs/AGENTIC_WORKFLOW.md` Quick Status, Session Log, prompt preview, decisions preview, and contribution map.
+  - No code, config, or asset files were modified, preserving in-flight work by the VS Code agent.
+- **Human review/changes:** Human scoped the work as docs-only and requested the code review focus; all doc changes were reviewed inline.
+- **Outcome:** ✅ documentation merged; 🟡 code review findings pending
+- **Time saved vs. hand-writing (rough estimate):** ~1–2 hours of cross-doc reconciliation and prompt curation
+- **Anything worth remembering:** Treating docs as a bounded, verifiable deliverable prevents them from drifting behind the code. The prompt library is now a reusable asset for future agent sessions.
+
 ### 2026-07-08 — Overnight architecture audit + combat-effect wiring + runtime proof pass
 
 - **Tool used:** Copilot CLI runtime in VS Code (autonomous overnight session)
