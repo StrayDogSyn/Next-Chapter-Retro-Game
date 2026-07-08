@@ -62,6 +62,16 @@ export function GameCanvas({ onSnapshot }: GameCanvasProps) {
     shellRef.current?.focus();
   };
 
+  useEffect(() => {
+    const onFocus = () => {
+      handleFocus();
+    };
+    window.addEventListener("focus", onFocus);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+    };
+  }, []);
+
   const toggleFullscreen = async () => {
     const shell = shellRef.current;
     if (!shell) return;
