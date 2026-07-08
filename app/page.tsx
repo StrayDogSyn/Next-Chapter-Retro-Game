@@ -42,13 +42,17 @@ export default function Home() {
 
   return (
     <main className="game-shell">
-      <section className="game-panel">
-        <h1>Next Chapter Retro Game</h1>
-        <p>
-          A SNES-styled Metroidvania platformer — 24 interconnected rooms,
-          Diablo-style loot rolled by a Python service, and boss fights.
-          Hand-rolled canvas engine, no game library.
-        </p>
+      <section className={`game-panel${gameStarted ? " game-panel--runtime" : ""}`}>
+        {!gameStarted ? (
+          <>
+            <h1>Next Chapter Retro Game</h1>
+            <p>
+              A SNES-styled Metroidvania platformer — 24 interconnected rooms,
+              Diablo-style loot rolled by a Python service, and boss fights.
+              Hand-rolled canvas engine, no game library.
+            </p>
+          </>
+        ) : null}
 
         {!gameStarted ? (
           <>
@@ -66,12 +70,11 @@ export default function Home() {
             <div style={{ fontFamily: "monospace", fontSize: 13, lineHeight: 1.7 }}>
               <strong>Keyboard:</strong> LEFT/RIGHT or A/D move, SPACE/W/Z jump
               (air-jump with Aether Wings), X/J attack, C/K dodge, V/L swap,
-              S/DOWN drop through platforms, hold R to reset position, F1/? help,
-              TAB/I inventory, E interact (shrines save your game)
+              S/DOWN drop through platforms, ESC/P pause
               <br />
               <strong>Xbox controller:</strong> left stick or D-pad move, A
-              jump, X attack, B dodge, Y swap weapon (plug in any time,
-              detected automatically)
+              jump, X or RB/RT attack, B or LT dodge, Y or LB swap weapon,
+              START pause (plug in any time, detected automatically)
             </div>
           </>
         ) : null}
@@ -86,13 +89,15 @@ export default function Home() {
           </section>
         ) : null}
 
-        <div className="python-status" role="status" aria-live="polite">
-          <strong>Python Service:</strong>{" "}
-          {levelData
-            ? `${levelData.source} (${levelData.level.platforms.length} platforms)`
-            : "Waiting for response..."}
-          {" · loot rolling: see HUD indicator in-game"}
-        </div>
+        {!gameStarted ? (
+          <div className="python-status" role="status" aria-live="polite">
+            <strong>Python Service:</strong>{" "}
+            {levelData
+              ? `${levelData.source} (${levelData.level.platforms.length} platforms)`
+              : "Waiting for response..."}
+            {" · loot rolling: see HUD indicator in-game"}
+          </div>
+        ) : null}
       </section>
     </main>
   );

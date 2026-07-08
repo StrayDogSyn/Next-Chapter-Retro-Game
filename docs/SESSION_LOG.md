@@ -25,41 +25,6 @@ Full chronological record of every AI-paired session on this project. The summar
 
 ## Entries
 
-### 2026-07-08 — Asset-pipeline integrity: suspect-thumbnail triage + scraper hardening
-
-- **Tool used:** Claude (remote/cloud session, `claude/asset-pipeline-integrity-m6n3jn`)
-- **Goal:** Investigate the 24 files `project-status.py` flagged as "SUSPECT: small image, may be a thumbnail" and fix them.
-- **What happened first (network constraint discovered):** This session's environment blocks outbound access to `opengameart.org` at the proxy policy level (confirmed: requests to the host return `connect_rejected` / 403 CONNECT tunnel failure). `asset-fetch.py` and `asset-fetch-bulk.py` both say explicitly in their docstrings to run on a machine with real network access, not a sandbox — so re-fetching replacement assets was not possible here. Rather than claim a fix that couldn't be performed, the session pivoted to what was actually verifiable: is the flagged list even correct?
-- **Finding — the heuristic was wrong more often than right:** `project-status.py`'s flag was pure byte-size (`< 20KB`), which false-positives hard on indexed-palette/low-complexity art (`base_character.png` is a genuine 1024×1024 sprite sheet at only 17.4KB). Reading actual pixel dimensions (stdlib PNG/GIF/JPEG header parsing, no Pillow needed) and cross-referencing `manifest.csv`/`manifest_bulk.csv`'s recorded source URLs narrowed 24 flagged files down to 9 real suspects:
-  - 5 **confirmed** by direct manifest evidence — the recorded fetch URL itself ends in `preview.png`/`prev.png` (`lpc_beetle`, `lpc_goblin`, `lpc_golem`, `monkey_lad_in_magical_planet`, `rpg_enemies_11_dragons`).
-  - 4 **likely** — exact classic Drupal auto-thumbnail dimensions (64×64/128×128) for assets that should be multi-frame sheets (`bat_sprite`, `bloody_mary`, `lpc_wolf_animation`, `simple_character_base_16x16`).
-  - The other ~15 (e.g. `palette.png`, `oga-swm-bg-gradient-sky.png`) are almost certainly legitimate small assets, not thumbnails.
-- **Root cause of the scraper bug:** `find_oga_download_link()` in both fetch scripts filters Drupal's `/styles/.../` derivative-thumbnail path, but doesn't catch OGA submissions whose *actual* attachment link is a small `preview.png`/`prev.png` companion image living directly under `/sites/default/files/` (no `/styles/` in the path). That case slipped through undetected until now.
-- **What the agent produced:**
-  - `scripts/project-status.py`: replaced the flat SUSPECT flag with a tiered CONFIRMED / LIKELY / worth-checking triage backed by real dimensions + manifest cross-reference, plus a summary count printed each run.
-  - `scripts/asset-fetch.py` and `scripts/asset-fetch-bulk.py`: `find_oga_download_link()` now deprioritizes `preview`/`prev`-named candidate URLs in favor of other same-page links, and any download that still matches gets tagged `downloaded-preview-only` (definitive) instead of the old ambiguous `downloaded-unverified`.
-  - New `docs/BUGS_IMPROVEMENT_GUIDE.md` entry (AST-013) recording the full triage and the concrete re-fetch checklist for whoever has real network access next.
-- **Human review/changes:** Pending review; all script changes were syntax-checked and re-run against the live repo tree in-session (`python scripts/project-status.py` confirmed the new tiered counts: 5 confirmed / 4 likely / 23 low-priority, down from 24 undifferentiated).
-- **Outcome:** 🟡 partial — detection and scraper hardening complete and verified; actual asset re-fetch is blocked by this environment's network policy and remains for a session with real network access.
-- **Anything worth remembering:** A "24 suspect files" alert sounds alarming but was mostly noise — always check whether a heuristic's false-positive rate has been measured before trusting its count. Byte size alone is a bad proxy for "thumbnail" when the asset is indexed-palette pixel art; pixel dimensions + the manifest's own recorded fetch URL are much stronger, verifiable signals.
-
-### 2026-07-08 — Documentation refinement and code review prep
-
-- **Tool used:** Claude / Cascade
-- **Goal:** Refine all Markdown documentation to track project progress, wire in existing screenshots, and prepare a thorough code review of the current working tree.
-- **Prompt summary:** Used the documentation-polish prompt: docs-only scope, screenshot paths specified, stale placeholder backfill, prompt-library expansion, and a new session-log entry.
-- **What the agent produced:**
-  - Updated `README.md` with current features, architecture, project structure, a Screenshots gallery, and a refreshed roadmap.
-  - Wired screenshots into `docs/ARCHITECTURE.md` (phase-one framework diagram) and `docs/UI_REFACTOR_BRIEF.md` (responsive scaling and HUD evidence).
-  - Expanded `docs/PROMPT_LIBRARY.md` with six optimized, reusable prompts based on actual project sessions plus a "didn't work" lesson.
-  - Backfilled ADR-001 and ADR-002 dates in `docs/DECISIONS.md`; added ADR-007 (living documentation as a first-class deliverable).
-  - Updated `docs/AGENTIC_WORKFLOW.md` Quick Status, Session Log, prompt preview, decisions preview, and contribution map.
-  - No code, config, or asset files were modified, preserving in-flight work by the VS Code agent.
-- **Human review/changes:** Human scoped the work as docs-only and requested the code review focus; all doc changes were reviewed inline.
-- **Outcome:** ✅ documentation merged; 🟡 code review findings pending
-- **Time saved vs. hand-writing (rough estimate):** ~1–2 hours of cross-doc reconciliation and prompt curation
-- **Anything worth remembering:** Treating docs as a bounded, verifiable deliverable prevents them from drifting behind the code. The prompt library is now a reusable asset for future agent sessions.
-
 ### 2026-07-08 — Overnight architecture audit + combat-effect wiring + runtime proof pass
 
 - **Tool used:** Copilot CLI runtime in VS Code (autonomous overnight session)

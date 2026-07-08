@@ -64,6 +64,14 @@ def extract(zip_rel: str, dest: Path, members_prefixes: tuple[str, ...] = ()) ->
     return dest
 
 
+def first_existing(*rel_paths: str) -> tuple[str, Path]:
+    for rel in rel_paths:
+        candidate = ASSETS / rel
+        if candidate.exists():
+            return rel, candidate
+    raise FileNotFoundError(f"None of the candidate files exist: {rel_paths}")
+
+
 def pack_rows(
     name: str,
     rows: dict[str, list[Image.Image]],
@@ -380,22 +388,34 @@ def main() -> None:
 
     # ---------- Audio ----------
     sfx1 = TMP / "sfx1"
-    with zipfile.ZipFile(ASSETS / "sounds/sfx_pack_8bit_vol1.zip") as zf:
+    sfx_zip_rel, sfx_zip_path = first_existing(
+        "sounds/sfx_pack_8bit_vol1.zip",
+        "sounds/bulk/8_bit_sound_effect_pack.zip",
+    )
+    with zipfile.ZipFile(sfx_zip_path) as zf:
         zf.extractall(sfx1)
-    WIRED.append("assets/sounds/sfx_pack_8bit_vol1.zip")
+    WIRED.append(f"assets/{sfx_zip_rel}")
     wav_picks = {
-        "jump.wav": "Jump 1.wav",
-        "hit.wav": "Hit 2.wav",
-        "coin.wav": "Coin 1.wav",
-        "powerup.wav": "Powerup 1.wav",
-        "explosion.wav": "Explosion 2.wav",
-        "select.wav": "Select 1.wav",
-        "shoot.wav": "Shoot 1.wav",
-        "wrong.wav": "Wrong 1.wav",
-        "door.wav": "Exit 3.wav",
+        "jump.wav": ("Jump 1.wav", "jump.wav", "hop.wav"),
+        "hit.wav": ("Hit 2.wav", "hit2.wav", "hit1.wav"),
+        "coin.wav": ("Coin 1.wav", "collect1.wav", "collect2.wav"),
+        "powerup.wav": ("Powerup 1.wav", "bonus.wav"),
+        "explosion.wav": ("Explosion 2.wav", "explodify.wav", "echosplosion.wav"),
+        "select.wav": ("Select 1.wav", "move.wav"),
+        "shoot.wav": ("Shoot 1.wav", "laser.wav", "laser2.wav"),
+        "wrong.wav": ("Wrong 1.wav", "fail.wav"),
+        "door.wav": ("Exit 3.wav", "computeron.wav", "blastoff.wav"),
     }
-    for dst, src in wav_picks.items():
-        shutil.copy(sfx1 / src, AUDIO_OUT / dst)
+    for dst, candidates in wav_picks.items():
+        src: Path | None = None
+        for candidate in candidates:
+            path = sfx1 / candidate
+            if path.exists():
+                src = path
+                break
+        if src is None:
+            raise FileNotFoundError(f"Missing WAV source for {dst}; tried: {candidates}")
+        shutil.copy(src, AUDIO_OUT / dst)
 
     mp3_picks = {
         "sword.mp3": "sounds/bulk/8bit_sword_hit_sword_1_8_bit_wav.mp3",

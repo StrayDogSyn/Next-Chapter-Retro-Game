@@ -14,10 +14,10 @@ export function GameFooter({ snapshot }: GameFooterProps) {
     <footer className="game-footer">
       <div className="hud-line controls">
         <span className="hud-chip">
-          Keyboard: LEFT/RIGHT or A/D move, SPACE/W/Z jump, X/J attack, C/K dodge, V/L swap, S/DOWN drop, E interact, hold R to reset position, F1/? help, TAB/I inventory
+          Keyboard: LEFT/RIGHT or A/D move, SPACE/W/Z jump, X/J attack, C/K dodge, V/L swap, ESC/P pause, S/DOWN drop
         </span>
         <span className="hud-chip">
-          Xbox: left stick or D-pad move, A jump, X attack, B dodge, Y swap, View help
+          Xbox: left stick or D-pad move, A jump, X/RB/RT attack, B/LT dodge, Y/LB swap, START pause
         </span>
       </div>
       <div className="hud-line">

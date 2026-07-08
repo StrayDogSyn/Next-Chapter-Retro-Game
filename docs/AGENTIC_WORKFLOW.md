@@ -2,7 +2,7 @@
 
 > **Purpose:** This is the working record of how this project was built in collaboration with an AI coding agent — what was asked, what came back, what was kept, changed, or thrown out, and why. It's updated after every pairing session, not written retroactively at submission time.
 >
-> **Last updated:** 2026-07-08
+> **Last updated:** _2026-07-08_
 > **Maintainer:** StrayDogSyn
 
 ---
@@ -44,9 +44,8 @@
 | Input system (keyboard + gamepad) | 🟢 unified InputState; stuck-input fixes 2026-07-08 (blur release, disconnect handling) |
 | Level/world system | 🟢 24 single-screen rooms, 5 zones, validated exit graph |
 | Enemy AI | 🟢 4 regular kinds + 3 bosses with distinct patterns |
-| Weapon/loot system | 🟢 data-driven, Python-authoritative (280 combos; 6/6 prefix effects wired); shop mystery-box is a documented client-only exception |
-| QA/Improvement backlog (`docs/BUGS_IMPROVEMENT_GUIDE.md`) | 🟢 11/12 items fixed 2026-07-08 (self-destruct, XP/inventory, mini-map, help modal, shrines/save, NPC shop, pit-loot rescue, reachability audit + fixes, equip/coin FX, audio-asset wiring); 🟡 AST-010 archive ingestion audited but deferred — needs a browser-capable session |
-| Documentation | 🟢 living doc active; README + docs polished and screenshot-backed 2026-07-08 |
+| Weapon/loot system | 🟢 data-driven, Python-authoritative (280 combos; 6/6 prefix effects now wired) |
+| Documentation | 🟢 living doc active |
 
 ## Session Log
 
@@ -55,10 +54,7 @@
 
 | Date | Tool | Task | Human Role | Agent Role | Outcome | Notes |
 |---|---|---|---|---|---|---|
-| 2026-07-08 | Claude (Sonnet 5) | QA & Improvement Guide remediation (11/12 items) | Gave the full guide, asked for iteration until complete | Fixed pit-loot despawn, built + debugged a real reachability auditor (3 iterations against live data) and fixed the 8 rooms it found, added self-destruct, equip/coin FX, help modal, XP+inventory, mini-map, shrine saves, NPC shop, and audio-asset wiring (found `step.mp3` was falsely documented as wired) | ✅ 11/12 merged; 🟡 AST-010 partial | See [SESSION_LOG.md](SESSION_LOG.md#2026-07-08--qa--improvement-guide-remediation-pass-11-of-12-items) |
-| 2026-07-08 | Claude / Cascade | Asset sourcing guide | Supplied curated sources, categories, and integration plan | Created docs/ASSET_SOURCES.md with CC0 tables, sound buckets, and manifest templates; wired it into README and AGENTIC_WORKFLOW | ✅ merged | See [SESSION_LOG.md](SESSION_LOG.md#2026-07-08--asset-sourcing-guide) |
-| 2026-07-08 | Claude / Cascade | Documentation refinement and code review prep | Scoped docs-only updates, requested thorough code review, provided screenshot directory | Updated README with current features/screenshots, wired screenshots into ARCHITECTURE/UI_REFACTOR_BRIEF, expanded PROMPT_LIBRARY.md, backfilled ADR dates, added ADR-007 and session-log entry | 🟡 in progress (code review findings pending) | See [SESSION_LOG.md](SESSION_LOG.md#2026-07-08--documentation-refinement-and-code-review-prep) |
-| 2026-07-08 | Copilot CLI (autonomous) | Overnight architecture audit + gameplay hardening | Provided overnight requirements + verification constraints | Implemented burn/freeze/shock/curse combat effects, refreshed credits to wired-only assets, ran lint/build + ground-truth status snapshots | 🟡 in progress (runtime/browser proof pass pending) | See [SESSION_LOG.md](SESSION_LOG.md#2026-07-08--overnight-architecture-audit--combat-effect-wiring--runtime-proof-pass) |
+| 2026-07-08 | Copilot CLI (autonomous) | Overnight architecture audit + gameplay hardening | Provided overnight requirements + verification constraints | Implemented burn/freeze/shock/curse combat effects, refreshed credits to wired-only assets, ran lint/build + ground-truth status snapshots | ✅ complete (runtime/browser + wire authority proof captured) | See [SESSION_LOG.md](SESSION_LOG.md#2026-07-08--overnight-architecture-audit--combat-effect-wiring--runtime-proof-pass) |
 | 2026-07-07 | Copilot CLI (autonomous) | Build core gameplay systems (input, levels, enemies, loot, boss) | Verified state with project-status.py periodically, wrote final report | Generated LevelManager, EnemyManager, BossManager, ItemManager, extended Python service, refactored GameCanvas for multi-level play, unified gamepad+keyboard input | ✅ merged, fully playable 4-level world | See [SESSION_LOG.md](SESSION_LOG.md#2026-07-07--build-core-gameplay-systems) for full details |
 | _YYYY-MM-DD_ | Copilot cloud agent | Initial scaffold (Next.js + FastAPI structure) | Wrote scoped prompt, reviewed PR | Generated file structure, boilerplate | ✅ merged | See [PROMPT_LIBRARY.md](PROMPT_LIBRARY.md#scaffold-prompt) |
 

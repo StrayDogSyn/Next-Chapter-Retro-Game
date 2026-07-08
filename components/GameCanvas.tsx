@@ -11,18 +11,18 @@ type GameCanvasProps = {
 export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const shellRef = useRef<HTMLDivElement | null>(null);
-  const gameRef = useRef<Game | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const [displaySize, setDisplaySize] = useState<{ width: number; height: number }>({
     width: VIEW_W,
     height: VIEW_H,
   });
 
   useEffect(() => {
-    const shell = shellRef.current;
-    if (!shell) return;
+    const stage = stageRef.current;
+    if (!stage) return;
 
     const computeSize = () => {
-      const { width: maxW, height: maxH } = shell.getBoundingClientRect();
+      const { width: maxW, height: maxH } = stage.getBoundingClientRect();
       if (maxW <= 0 || maxH <= 0) return;
 
       const fitScale = Math.min(maxW / VIEW_W, maxH / VIEW_H);
@@ -37,7 +37,7 @@ export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasP
     };
 
     const observer = new ResizeObserver(computeSize);
-    observer.observe(shell);
+    observer.observe(stage);
     computeSize();
 
     return () => {
@@ -65,6 +65,16 @@ export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasP
     shellRef.current?.focus();
   };
 
+  useEffect(() => {
+    const onFocus = () => {
+      handleFocus();
+    };
+    window.addEventListener("focus", onFocus);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+    };
+  }, []);
+
   const toggleFullscreen = async () => {
     const shell = shellRef.current;
     if (!shell) return;
@@ -84,20 +94,10 @@ export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasP
       onMouseDown={handleFocus}
       onTouchStart={handleFocus}
     >
-      <div className="stage-toolbar">
-        <button
-          type="button"
-          className="help-toggle"
-          title="Controls & help (F1)"
-          onClick={() => gameRef.current?.toggleHelp()}
-        >
-          ?
-        </button>
-        <button type="button" className="fullscreen-toggle" onClick={toggleFullscreen}>
-          fullscreen
-        </button>
-      </div>
-      <div className="game-canvas-stage">
+      <button type="button" className="fullscreen-toggle" onClick={toggleFullscreen}>
+        fullscreen
+      </button>
+      <div className="game-canvas-stage" ref={stageRef}>
         <canvas
           ref={canvasRef}
           width={VIEW_W}
