@@ -36,13 +36,17 @@ export default function Home() {
 
   return (
     <main className="game-shell">
-      <section className="game-panel">
-        <h1>Next Chapter Retro Game</h1>
-        <p>
-          A SNES-styled Metroidvania platformer — 24 interconnected rooms,
-          Diablo-style loot rolled by a Python service, and boss fights.
-          Hand-rolled canvas engine, no game library.
-        </p>
+      <section className={`game-panel${gameStarted ? " game-panel--runtime" : ""}`}>
+        {!gameStarted ? (
+          <>
+            <h1>Next Chapter Retro Game</h1>
+            <p>
+              A SNES-styled Metroidvania platformer — 24 interconnected rooms,
+              Diablo-style loot rolled by a Python service, and boss fights.
+              Hand-rolled canvas engine, no game library.
+            </p>
+          </>
+        ) : null}
 
         {!gameStarted ? (
           <>
@@ -69,13 +73,15 @@ export default function Home() {
           </section>
         ) : null}
 
-        <div className="python-status" role="status" aria-live="polite">
-          <strong>Python Service:</strong>{" "}
-          {levelData
-            ? `${levelData.source} (${levelData.level.platforms.length} platforms)`
-            : "Waiting for response..."}
-          {" · loot rolling: see HUD indicator in-game"}
-        </div>
+        {!gameStarted ? (
+          <div className="python-status" role="status" aria-live="polite">
+            <strong>Python Service:</strong>{" "}
+            {levelData
+              ? `${levelData.source} (${levelData.level.platforms.length} platforms)`
+              : "Waiting for response..."}
+            {" · loot rolling: see HUD indicator in-game"}
+          </div>
+        ) : null}
       </section>
     </main>
   );
