@@ -1,16 +1,27 @@
+"""Retro Game Python Service.
+
+Owns the procedural / random-generation game logic per ADR-001:
+  - /generate-level : procedural platform layout (original scaffold demo)
+  - /loot/roll      : Diablo-style loot rolling -- rarity tiers + randomized
+                      stat rolls. THIS is the authoritative loot source; the
+                      TypeScript client only renders what this returns (its
+                      local fallback is for offline resilience, see ADR-003).
+  - /loot/table     : full loot table dump, handy for balancing/debugging.
+"""
+
 from random import Random
-from enum import Enum
 
 from fastapi import FastAPI
 
+from loot_tables import (
+    BASE_WEAPONS,
+    PREFIXES,
+    RARITIES,
+    UPGRADE_DROP_CHANCE,
+    UPGRADES,
+)
+
 app = FastAPI(title="Retro Game Python Service")
-
-
-class Rarity(str, Enum):
-    COMMON = "common"
-    UNCOMMON = "uncommon"
-    RARE = "rare"
-    EPIC = "epic"
 
 
 @app.get("/health")
@@ -35,85 +46,78 @@ def generate_level(seed: int = 7) -> dict[str, object]:
     return {"seed": f"python-{seed}", "platforms": platforms}
 
 
-@app.get("/generate-loot")
-def generate_loot(seed: int = 42, quantity: int = 5) -> dict[str, object]:
-    """Generate randomized loot drops with Diablo-style rarity and stat rolls."""
-    rng = Random(seed)
-
-    # Weapon base types available
-    base_weapons = [
-        "sword",
-        "axe",
-        "spear",
-        "mace",
-        "bow",
-        "staff",
-    ]
-
-    # Stat modifiers by rarity
-    stat_ranges = {
-        Rarity.COMMON: {"damage": (5, 10), "crit_chance": (0, 5)},
-        Rarity.UNCOMMON: {"damage": (10, 15), "crit_chance": (5, 10)},
-        Rarity.RARE: {"damage": (15, 25), "crit_chance": (10, 20)},
-        Rarity.EPIC: {"damage": (25, 40), "crit_chance": (20, 35)},
+def _pick_rarity(rng: Random, luck_pct: float) -> str:
+    """Weighted rarity pick; luck multiplies the weight of every non-common tier."""
+    weights = {
+        name: tier["weight"] * (1.0 if name == "common" else 1.0 + luck_pct / 100.0)
+        for name, tier in RARITIES.items()
     }
+    total = sum(weights.values())
+    point = rng.random() * total
+    for name, weight in weights.items():
+        point -= weight
+        if point <= 0:
+            return name
+    return "common"
 
-    # Affixes that can spawn with items
-    affixes = [
-        "of Might",
-        "of Swiftness",
-        "Flaming",
-        "Icy",
-        "Draining",
-        "Legendary",
-    ]
 
-    loot_table = []
+@app.get("/loot/roll")
+def roll_loot(seed: int, luck: float = 0.0, enemy_level: int = 1) -> dict[str, object]:
+    """Roll one drop. Deterministic for a given (seed, luck, enemy_level)."""
+    rng = Random(f"{seed}:{round(luck, 3)}:{enemy_level}")
+    rarity = _pick_rarity(rng, luck)
+    tier = RARITIES[rarity]
+    level_mult = 1.0 + 0.08 * max(0, enemy_level - 1)
 
-    for i in range(quantity):
-        # Roll rarity: heavily weighted towards common
-        rarity_roll = rng.random()
-        if rarity_roll < 0.6:
-            rarity = Rarity.COMMON
-        elif rarity_roll < 0.85:
-            rarity = Rarity.UNCOMMON
-        elif rarity_roll < 0.98:
-            rarity = Rarity.RARE
-        else:
-            rarity = Rarity.EPIC
+    if rng.random() < UPGRADE_DROP_CHANCE:
+        upgrade_id = rng.choice(list(UPGRADES.keys()))
+        definition = UPGRADES[upgrade_id]
+        spread = 1.0 + rng.uniform(-tier["rollSpread"], tier["rollSpread"])
+        value = max(1, round(definition["baseValue"] * tier["statMult"] * spread))
+        return {
+            "itemType": "upgrade",
+            "upgradeId": upgrade_id,
+            "rarity": rarity,
+            "name": definition["name"],
+            "value": value,
+            "rolledBy": "python-service",
+        }
 
-        # Select weapon type
-        weapon_type = rng.choice(base_weapons)
+    base = rng.choice(BASE_WEAPONS)
+    prefix = rng.choice(PREFIXES)
+    spread = 1.0 + rng.uniform(-tier["rollSpread"], tier["rollSpread"])
+    damage = base["damage"] * prefix["damageMult"] * tier["statMult"] * spread * level_mult
+    name = f"{prefix['name']} {base['name']}".strip()
 
-        # Roll stats for this rarity
-        stat_config = stat_ranges[rarity]
-        damage = rng.randint(stat_config["damage"][0], stat_config["damage"][1])
-        crit_chance = rng.randint(
-            stat_config["crit_chance"][0], stat_config["crit_chance"][1]
-        )
+    drop: dict[str, object] = {
+        "itemType": "weapon",
+        "baseId": base["id"],
+        "prefixId": prefix["id"],
+        "rarity": rarity,
+        "name": name,
+        "damage": round(damage, 2),
+        "speed": round(base["speed"] * prefix["speedMult"], 2),
+        "range": base["range"],
+        "kind": base["kind"],
+        "sound": base["sound"],
+        "rolledBy": "python-service",
+    }
+    if "projectileSpeed" in base:
+        drop["projectileSpeed"] = base["projectileSpeed"]
+    if "effect" in prefix:
+        drop["effect"] = prefix["effect"]
+    return drop
 
-        # Optionally add an affix
-        affix = ""
-        if rng.random() < (0.3 if rarity == Rarity.COMMON else 0.7):
-            affix = rng.choice(affixes)
 
-        item_name = f"{affix} {weapon_type.capitalize()}".strip()
-
-        loot_table.append(
-            {
-                "id": f"item-{i}",
-                "name": item_name,
-                "type": weapon_type,
-                "rarity": rarity,
-                "damage": damage,
-                "crit_chance": crit_chance,
-                "value": int(damage * crit_chance / 2),  # Sale value
-            }
-        )
-
+@app.get("/loot/table")
+def loot_table() -> dict[str, object]:
+    """Full table dump for balancing: every base x prefix x rarity combo count."""
+    combos = len(BASE_WEAPONS) * len(PREFIXES) * len(RARITIES)
     return {
-        "seed": f"python-{seed}",
-        "generated_at": "server",
-        "loot_table": loot_table,
+        "baseWeapons": BASE_WEAPONS,
+        "prefixes": PREFIXES,
+        "rarities": RARITIES,
+        "upgrades": UPGRADES,
+        "distinctWeaponCombos": combos,
+        "upgradeDropChance": UPGRADE_DROP_CHANCE,
     }
-

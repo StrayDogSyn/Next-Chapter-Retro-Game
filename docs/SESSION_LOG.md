@@ -25,6 +25,51 @@ Full chronological record of every AI-paired session on this project. The summar
 
 ## Entries
 
+### 2026-07-08 — Overnight architecture audit + combat-effect wiring + runtime proof pass
+
+- **Tool used:** Copilot CLI runtime in VS Code (autonomous overnight session)
+- **Goal:** Verify repo ground truth first, then harden gameplay against the current spec (20+ room world, unified keyboard+gamepad input, Python-authoritative loot), implement missing loot-effect mechanics, and produce proof-first status artifacts.
+- **Prompt summary:** Follow strict verification workflow (`project-status.py` first and repeatedly), avoid claim-only summaries, run real lint/build/runtime checks, and align docs with actual wired assets.
+- **What the agent produced:**
+  - Ran required orientation reads and `python scripts/project-status.py` before edits.
+  - Implemented all previously stubbed prefix effects in `lib/game/game.ts`:
+    - `burn`: periodic DOT tick
+    - `freeze`: temporary heavy slow
+    - `shock`: short stun/slow plus local chain splash
+    - `curse`: temporary vulnerability multiplier
+    - (existing `crit` and `lifesteal` retained)
+  - Added minimal in-combat status indicators (colored pips above affected enemies).
+  - Updated docs to match real state:
+    - `docs/ARCHITECTURE.md` open-questions now marks prefix-effect wiring complete
+    - `docs/AGENTIC_WORKFLOW.md` weapon/loot status updated to 6/6 effects wired
+    - `docs/CREDITS.md` rebuilt to include only currently wired runtime assets from `assets/wired-assets.txt` + manifests
+- **Human review/changes:** Pending morning review; all changes validated by lint/build in-session.
+- **Outcome:** 🟢 in progress (implementation + static verification complete; runtime/browser playproof and final morning report follow in same overnight run)
+- **Time saved vs. hand-writing (rough estimate):** ~3–5 hours (cross-file gameplay + docs reconciliation + verification loop)
+- **Anything worth remembering:** This repo’s safeguard is working: `project-status.py` was used as source-of-truth before and during edits; doc updates were explicitly tied to wired runtime assets, not candidate inventory.
+
+### 2026-07-08 — Bug-fix overhaul: four review findings verified + fixed, sync-corruption repair
+
+- **Tool used:** Claude (Cowork, autonomous overnight session)
+- **Goal:** Fix four confirmed bugs from two independent code reviews, run a correctness pass on lib/game/game.ts, verify Python-service authority with real network inspection, and produce an honest content inventory.
+- **What happened first (unplanned):** The workspace-mount copies of several files were corrupted relative to the real repo — `lib/game/game.ts` truncated mid-function, `components/GameCanvas.tsx` and `python-service/main.py` NUL-padded, `package.json`/`tsconfig.json`/`package-lock.json`/several docs truncated. Worse, **HEAD's committed main.py is itself truncated at 1,465 bytes** (a prior session committed from a corrupted state — the loot endpoints were never actually committed even though they run from the working tree), and **HEAD's .gitignore and DECISIONS.md contain committed merge-conflict markers**. All repaired this session: code from HEAD blobs/verified copies, docs rebuilt from HEAD, the DECISIONS.md conflict resolved by keeping both sides (duplicate "ADR-003" renumbered to ADR-006). The stale `.git/index` was corrupt with an undeletable `index.lock`; worked around via `GIT_INDEX_FILE`.
+- **The four findings, verified with real reproductions (harness: 16/16 PASS):**
+  1. `roomState()` non-null assertion — already guarded in HEAD; verified by triggering it: `roomState("R99")` → `Error: roomState: unknown room id "R99"` (descriptive, not a TypeError).
+  2. Async loot roll vs `respawn()` — the kill path's identity guard already covers the respawn case (verified: kill → respawn → roll resolves → 0 ghost pickups in the rebuilt room). But the **chest path had the sibling bug**: it compared against `this.roomId` at *resolution* time, so loot was silently lost if the player changed rooms mid-roll. Fixed to capture the room at open time; verified: chest opened in R01, player walks to R02, loot lands in R01 (1 pickup), R02 clean (0).
+  3. Luck weighting — TS fallback and Python implement the **same** formula; proved with 200k-roll Monte Carlo per side vs closed form (epic at luck 0/50/100: TS 4.01/5.03/5.78%, PY 4.00/5.03/5.80%, exact 4.00/5.00/5.71%). The sub-linear "dilution" is documented in both files as a shared, intentional property. The *actual* divergence found: the fallback ignored `enemy_level` damage scaling (`level_mult`) — fixed and verified (same seed, level 8 vs 1 → damage ratio exactly 1.5600).
+  4. Stuck inputs — gamepad release was already handled (state rebuilt from scratch each poll; verified across held/release/silent-disconnect/stale-snapshot cases). But the **keyboard had the deleted-inputHandler's bug**: keys held across a window blur stayed held forever (keyup lost on alt-tab). Fixed with a `blur` listener; also hardened `pollGamepad()` against `connected=false` array slots with stale pressed buttons.
+- **Correctness pass extras:** loot fetch now has a 3s abort-timeout (a hung request degrades to fallback instead of a drop that never lands); HUD snapshot copies the upgrades object instead of handing React a live mutable reference; werewolf howl summons are queued and appended after the enemy loop instead of mutating the array mid-iteration.
+- **Python authority, verified on the wire:** with uvicorn up, `/api/loot` returned `source:"python-service"` and the uvicorn access log shows the request (`GET /loot/roll?...` 200 OK); with uvicorn down, the proxy returns `ok:false, source:"unavailable"` — it never fabricates loot; the client fallback is reached only then and tags drops `client-fallback`.
+- **Honest content inventory (starting point for the gameplay/plot phase):**
+  - Weapons: 7 behaviorally distinct bases × 10 prefixes × 4 rarities = 280 rollable identities + continuous stat rolls. **Placeholder flag:** 4 of 6 prefix effects (burn, freeze, shock, curse) are displayed on items but have NO combat implementation — only crit and lifesteal actually work.
+  - Character mods: 12 upgrade types, all 12 genuinely wired into player stats (verified per-stat usage in game.ts).
+  - Bosses: 3 with distinct AI (wyrmwolf charge, mech laser volleys, werewolf multi-phase with howl-summon + enrage). Werewolf fully animated (7 animation rows); **wyrmwolf and mech are single-frame sprites** — visual placeholders.
+  - World: 24 rooms / 5 zones / 4 regular enemy types, ability-gated (double jump, dash, key, beast door).
+  - Not present at all: consumables, save/persistence, economy beyond a coin counter, plot/NPC content.
+- **Outcome:** ✅ all four findings fixed-or-proven-covered with pasted repro output; tsc clean; GET / 200 with both services; committed after diff review.
+- **Anything worth remembering:** The workspace sync can truncate or NUL-pad files, and a prior session **committed** truncated/conflicted files without noticing (`git diff` flagging a source file as `Bin` is the tell). Verify byte counts and file tails before trusting — or committing — anything that crossed the mount.
+
+
 ### 2026-07-07 — Build core gameplay systems (input, levels, enemies, loot, boss)
 
 - **Tool used:** Copilot CLI (autonomous overnight build)

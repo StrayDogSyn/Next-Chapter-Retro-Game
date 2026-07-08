@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { GameFooter } from "@/components/GameFooter";
+import { GameHeader } from "@/components/GameHeader";
 import { GameCanvas } from "@/components/GameCanvas";
 import { StartMenu } from "@/components/StartMenu";
+import { Game, type HudSnapshot } from "@/lib/game/game";
 
 type LevelPayload = {
   ok: boolean;
@@ -16,7 +19,14 @@ type LevelPayload = {
 
 export default function Home() {
   const [gameStarted, setGameStarted] = useState(false);
+  const [continueFromSave, setContinueFromSave] = useState(false);
+  const [hasSave, setHasSave] = useState(false);
   const [levelData, setLevelData] = useState<LevelPayload | null>(null);
+  const [snapshot, setSnapshot] = useState<HudSnapshot | null>(null);
+
+  useEffect(() => {
+    setHasSave(Game.hasSave());
+  }, []);
 
   useEffect(() => {
     async function loadLevelData() {
@@ -32,25 +42,62 @@ export default function Home() {
 
   return (
     <main className="game-shell">
-      <section className="game-panel">
-        <h1>Next Chapter Retro Game</h1>
-        <p>
-          A beginner-friendly SNES-styled platformer scaffold with a custom
-          canvas loop and a Python-powered level endpoint.
-        </p>
+      <section className={`game-panel${gameStarted ? " game-panel--runtime" : ""}`}>
+        {!gameStarted ? (
+          <>
+            <h1>Next Chapter Retro Game</h1>
+            <p>
+              A SNES-styled Metroidvania platformer — 24 interconnected rooms,
+              Diablo-style loot rolled by a Python service, and boss fights.
+              Hand-rolled canvas engine, no game library.
+            </p>
+          </>
+        ) : null}
 
         {!gameStarted ? (
-          <StartMenu onStart={() => setGameStarted(true)} />
-        ) : (
-          <GameCanvas />
-        )}
+          <>
+            <StartMenu
+              onStart={() => {
+                setContinueFromSave(false);
+                setGameStarted(true);
+              }}
+              onContinue={() => {
+                setContinueFromSave(true);
+                setGameStarted(true);
+              }}
+              hasSave={hasSave}
+            />
+            <div style={{ fontFamily: "monospace", fontSize: 13, lineHeight: 1.7 }}>
+              <strong>Keyboard:</strong> LEFT/RIGHT or A/D move, SPACE/W/Z jump
+              (air-jump with Aether Wings), X/J attack, C/K dodge, V/L swap,
+              S/DOWN drop through platforms, ESC/P pause
+              <br />
+              <strong>Xbox controller:</strong> left stick or D-pad move, A
+              jump, X or RB/RT attack, B or LT dodge, Y or LB swap weapon,
+              START pause (plug in any time, detected automatically)
+            </div>
+          </>
+        ) : null}
 
-        <div className="python-status" role="status" aria-live="polite">
-          <strong>Python Service:</strong>{" "}
-          {levelData
-            ? `${levelData.source} (${levelData.level.platforms.length} platforms)`
-            : "Waiting for response..."}
-        </div>
+        {gameStarted ? (
+          <section className="game-runtime">
+            <GameHeader snapshot={snapshot} />
+            <div className="game-runtime-canvas">
+              <GameCanvas onSnapshot={setSnapshot} continueFromSave={continueFromSave} />
+            </div>
+            <GameFooter snapshot={snapshot} />
+          </section>
+        ) : null}
+
+        {!gameStarted ? (
+          <div className="python-status" role="status" aria-live="polite">
+            <strong>Python Service:</strong>{" "}
+            {levelData
+              ? `${levelData.source} (${levelData.level.platforms.length} platforms)`
+              : "Waiting for response..."}
+            {" · loot rolling: see HUD indicator in-game"}
+          </div>
+        ) : null}
       </section>
     </main>
   );

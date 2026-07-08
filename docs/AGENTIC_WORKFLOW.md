@@ -2,7 +2,7 @@
 
 > **Purpose:** This is the working record of how this project was built in collaboration with an AI coding agent — what was asked, what came back, what was kept, changed, or thrown out, and why. It's updated after every pairing session, not written retroactively at submission time.
 >
-> **Last updated:** _fill in date of last edit_
+> **Last updated:** _2026-07-08_
 > **Maintainer:** StrayDogSyn
 
 ---
@@ -38,13 +38,13 @@
 
 | Area | State |
 |---|---|
-| Frontend scaffold | ✅ complete |
-| Python service | ✅ complete |
-| Sprite/audio assets | 🟡 downloaded, not integrated into UI |
-| Input system (keyboard + gamepad) | ✅ complete |
-| Level/world system | ✅ complete (4 levels, Metroidvania structure) |
-| Enemy AI | ✅ complete (simple and boss variants) |
-| Weapon/loot system | ✅ complete (data-driven, Python-generated) |
+| Frontend game (24 rooms, combat, loot, 3 bosses) | 🟢 playable; bug-fix pass 2026-07-08 (4 review findings verified/fixed) |
+| Python service (loot + level endpoints) | 🟢 authoritative — verified on the wire 2026-07-08 |
+| Sprite/audio assets | 🟢 wired via scripts/prepare-assets.py + spritemeta.json |
+| Input system (keyboard + gamepad) | 🟢 unified InputState; stuck-input fixes 2026-07-08 (blur release, disconnect handling) |
+| Level/world system | 🟢 24 single-screen rooms, 5 zones, validated exit graph |
+| Enemy AI | 🟢 4 regular kinds + 3 bosses with distinct patterns |
+| Weapon/loot system | 🟢 data-driven, Python-authoritative (280 combos; 6/6 prefix effects now wired) |
 | Documentation | 🟢 living doc active |
 
 ## Session Log
@@ -54,6 +54,7 @@
 
 | Date | Tool | Task | Human Role | Agent Role | Outcome | Notes |
 |---|---|---|---|---|---|---|
+| 2026-07-08 | Copilot CLI (autonomous) | Overnight architecture audit + gameplay hardening | Provided overnight requirements + verification constraints | Implemented burn/freeze/shock/curse combat effects, refreshed credits to wired-only assets, ran lint/build + ground-truth status snapshots | ✅ complete (runtime/browser + wire authority proof captured) | See [SESSION_LOG.md](SESSION_LOG.md#2026-07-08--overnight-architecture-audit--combat-effect-wiring--runtime-proof-pass) |
 | 2026-07-07 | Copilot CLI (autonomous) | Build core gameplay systems (input, levels, enemies, loot, boss) | Verified state with project-status.py periodically, wrote final report | Generated LevelManager, EnemyManager, BossManager, ItemManager, extended Python service, refactored GameCanvas for multi-level play, unified gamepad+keyboard input | ✅ merged, fully playable 4-level world | See [SESSION_LOG.md](SESSION_LOG.md#2026-07-07--build-core-gameplay-systems) for full details |
 | _YYYY-MM-DD_ | Copilot cloud agent | Initial scaffold (Next.js + FastAPI structure) | Wrote scoped prompt, reviewed PR | Generated file structure, boilerplate | ✅ merged | See [PROMPT_LIBRARY.md](PROMPT_LIBRARY.md#scaffold-prompt) |
 
@@ -69,7 +70,11 @@ A running collection of prompts that worked (and a few that didn't) — full det
 <summary><strong>Preview: top prompts by usefulness</strong></summary>
 
 - **Scaffold prompt** — structured, file-by-file spec → clean PR, minimal rework
-- _(add more as sessions accumulate)_
+- **Asset sourcing and pipeline prompt** — license + verification loop prevents fake "done" claims
+- **UI refactor handoff prompt** — diagnose to file/function level, no parallel systems
+- **Bug-fix / code review prompt** — reproduce before fix, upstream root cause, honest reporting
+- **Combat effects wiring prompt** — bounded scope + Python-authority verification
+- **Documentation polish prompt** — docs-only boundary + path conventions
 
 </details>
 
@@ -83,6 +88,7 @@ Architecture Decision Records (ADRs) — every time the agent's suggestion was a
 | # | Decision | Agent Suggested? | Outcome |
 |---|---|---|---|
 | ADR-001 | Python service isolated from Next.js API routes rather than embedded | Yes | Accepted — see full ADR |
+| ADR-007 | Living documentation as a first-class deliverable | No | Accepted — see full ADR |
 
 </details>
 
@@ -103,7 +109,7 @@ This is the honesty section. Bootcamp reviewers care about this more than the co
 | Boss AI system | Agent (current) | 100% agent-authored; includes multi-phase behavior, attack patterns |
 | Weapon/loot system | Agent (current) | 100% agent-authored; data-driven JSON stat model |
 | Input system (keyboard + gamepad) | Agent (current) | Extended from keyboard-only to unified InputState interface; gamepad polling in render loop |
-| This documentation system | Human (prompted structure to Claude in prior session) | Agent updated status tables and session log entry |
+| This documentation system | Human (prompted structure to Claude in prior session) | Agent updated status tables, session logs, prompt library, screenshot wiring, and ADRs 2026-07-08 |
 
 **Guiding rule:** if a component is >70% agent-generated, say so plainly here rather than letting the README imply otherwise.
 
@@ -131,4 +137,5 @@ This is the honesty section. Bootcamp reviewers care about this more than the co
 | [DECISIONS.md](DECISIONS.md) | ADR-style record of architecture decisions |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | System design and the Python-service rationale |
 | [CREDITS.md](CREDITS.md) | Third-party sprite/audio sourcing, licenses, and attribution status |
+| [ASSET_SOURCES.md](ASSET_SOURCES.md) | CC0 sourcing plan, category-to-source mapping, and manifest templates |
 | [../STATUS.txt](../STATUS.txt) | Ground-truth project snapshot — generated by `scripts/project-status.py`, not narrated by any agent |
