@@ -45,6 +45,7 @@ The service runs independently from Next.js and returns plain JSON consumed by N
 - Input handling (keyboard + Xbox gamepad unified interface)
 - Audio playback via Web Audio API
 - HUD (React components layered over the canvas)
+- Combat status pips rendered above enemies for active affix effects (burn/freeze/shock/curse)
 - Game orchestration consolidated in a single `Game` class (`lib/game/game.ts`) with supporting modules: `lib/game/input.ts` (unified InputState), `lib/game/world.ts` + `levelLoader.ts` (24-room validated world graph), `lib/game/items.ts` (data-driven weapons/upgrades). The earlier LevelManager/EnemyManager/BossManager/ItemManager parallel classes were consolidated away — see SESSION_LOG 2026-07-08 and the "no parallel systems" rule in AGENTIC_WORKFLOW.md.
 
 ## Backend Responsibilities
