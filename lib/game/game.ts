@@ -130,19 +130,20 @@ const ENEMY_DEFS: Record<
     h: number;
     drawW: number;
     drawH: number;
+    nativeFacing: 1 | -1;
     hp: number;
     touchDamage: number;
     level: number;
     boss?: boolean;
   }
 > = {
-  bat: { sheet: "bat", w: 18, h: 14, drawW: 28, drawH: 28, hp: 15, touchDamage: 8, level: 1 },
-  goblin: { sheet: "goblin", w: 22, h: 42, drawW: 52, drawH: 46, hp: 40, touchDamage: 12, level: 2 },
-  imp: { sheet: "imp", w: 20, h: 30, drawW: 40, drawH: 40, hp: 25, touchDamage: 8, level: 2 },
-  flower: { sheet: "flower", w: 26, h: 30, drawW: 48, drawH: 48, hp: 30, touchDamage: 10, level: 2 },
-  wyrmwolf: { sheet: "wyrmwolf", w: 70, h: 46, drawW: 110, drawH: 82, hp: 220, touchDamage: 18, level: 5, boss: true },
-  mech: { sheet: "mech", w: 44, h: 60, drawW: 64, drawH: 74, hp: 260, touchDamage: 16, level: 6, boss: true },
-  werewolf: { sheet: "boss_werewolf", w: 44, h: 70, drawW: 84, drawH: 88, hp: 420, touchDamage: 22, level: 8, boss: true },
+  bat: { sheet: "bat", w: 18, h: 14, drawW: 28, drawH: 28, nativeFacing: -1, hp: 15, touchDamage: 8, level: 1 },
+  goblin: { sheet: "goblin", w: 22, h: 42, drawW: 52, drawH: 46, nativeFacing: 1, hp: 40, touchDamage: 12, level: 2 },
+  imp: { sheet: "imp", w: 20, h: 30, drawW: 40, drawH: 40, nativeFacing: 1, hp: 25, touchDamage: 8, level: 2 },
+  flower: { sheet: "flower", w: 26, h: 30, drawW: 48, drawH: 48, nativeFacing: 1, hp: 30, touchDamage: 10, level: 2 },
+  wyrmwolf: { sheet: "wyrmwolf", w: 70, h: 46, drawW: 110, drawH: 82, nativeFacing: 1, hp: 220, touchDamage: 18, level: 5, boss: true },
+  mech: { sheet: "mech", w: 44, h: 60, drawW: 64, drawH: 74, nativeFacing: 1, hp: 260, touchDamage: 16, level: 6, boss: true },
+  werewolf: { sheet: "boss_werewolf", w: 44, h: 70, drawW: 84, drawH: 88, nativeFacing: 1, hp: 420, touchDamage: 22, level: 8, boss: true },
 };
 
 const BOSS_NAMES: Record<string, string> = {
@@ -1425,8 +1426,9 @@ export class Game {
       const def = ENEMY_DEFS[enemy.kind];
       const dx = enemy.x + enemy.w / 2 - def.drawW / 2;
       const dy = enemy.y + enemy.h - def.drawH;
-      // most sheets face left natively (goblin/werewolf art) — flip when moving right
-      const flip = enemy.facing > 0;
+      // Flip only when desired runtime facing differs from each sheet's native orientation.
+      // Imp uses explicit left/right animation rows, so it should not be mirrored.
+      const flip = enemy.kind === "imp" ? false : enemy.facing !== def.nativeFacing;
       this.drawSheetAnim(def.sheet, enemy.anim, enemy.animTime, dx, dy, def.drawW, def.drawH, flip);
       // small health bar for damaged non-bosses
       if (!enemy.boss && enemy.hp < enemy.maxHp) {

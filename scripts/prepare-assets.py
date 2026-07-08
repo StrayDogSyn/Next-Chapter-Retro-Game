@@ -90,6 +90,59 @@ def pack_rows(
     log(f"wrote {out.relative_to(ROOT)}  ({sheet.width}x{sheet.height})")
 
 
+def key_background_to_alpha(img: Image.Image) -> Image.Image:
+    """Convert a flat background color (sampled from corner) to transparent."""
+    rgba = img.convert("RGBA")
+    bg = rgba.getpixel((0, 0))
+    data = [
+        (0, 0, 0, 0) if (r, g, b) == bg[:3] else (r, g, b, a)
+        for (r, g, b, a) in rgba.getdata()
+    ]
+    out = Image.new("RGBA", rgba.size)
+    out.putdata(data)
+    return out
+
+
+def segment_non_empty_runs(flags: list[bool]) -> list[tuple[int, int]]:
+    runs: list[tuple[int, int]] = []
+    start: int | None = None
+    for i, has_fg in enumerate(flags):
+        if has_fg and start is None:
+            start = i
+        elif not has_fg and start is not None:
+            runs.append((start, i - 1))
+            start = None
+    if start is not None:
+        runs.append((start, len(flags) - 1))
+    return runs
+
+
+def extract_foreground_frames(sheet: Image.Image) -> list[list[Image.Image]]:
+    """Split a non-uniform sheet into [rows][frames] based on foreground occupancy."""
+    rgba = key_background_to_alpha(sheet)
+    px = rgba.load()
+    row_has_fg = [any(px[x, y][3] > 0 for x in range(rgba.width)) for y in range(rgba.height)]
+    row_runs = segment_non_empty_runs(row_has_fg)
+
+    rows: list[list[Image.Image]] = []
+    for y0, y1 in row_runs:
+        col_has_fg = [
+            any(px[x, y][3] > 0 for y in range(y0, y1 + 1))
+            for x in range(rgba.width)
+        ]
+        col_runs = segment_non_empty_runs(col_has_fg)
+        frames: list[Image.Image] = []
+        for x0, x1 in col_runs:
+            crop = rgba.crop((x0, y0, x1 + 1, y1 + 1))
+            bbox = crop.getbbox()
+            if bbox:
+                frames.append(crop.crop(bbox))
+        if frames:
+            rows.append(frames)
+
+    return rows
+
+
 def gif_frames(path: Path) -> list[Image.Image]:
     def border_is_uniform(img: Image.Image, rgba: tuple[int, int, int, int]) -> bool:
         if img.width < 2 or img.height < 2:
@@ -192,11 +245,15 @@ def main() -> None:
     # ---------- Enemy: armored goblin spearman ----------
     gob_dir = extract("img/bulk/goblin_sprite.zip", TMP / "gob")
     gob = Image.open(gob_dir / "goblins.png")
-    h2 = gob.height // 2  # 585 -> 292
-    walk = [gob.crop((c * (gob.width // 4), h2, (c + 1) * (gob.width // 4), gob.height)) for c in range(4)]
-    top_w = gob.width // 5
-    idle = [gob.crop((0, 0, top_w, h2))]
-    attack = [gob.crop((2 * top_w, 0, 3 * top_w, h2)), gob.crop((3 * top_w, 0, 4 * top_w, h2))]
+    gob_rows = extract_foreground_frames(gob)
+    # Source is an irregular collage (top row 5 poses, bottom row 4 walk poses).
+    # Segmenting by foreground avoids splitting spears/body across grid boundaries.
+    if len(gob_rows) < 2:
+        raise RuntimeError("goblin sheet parsing failed: expected at least 2 sprite rows")
+    top_row, bottom_row = gob_rows[0], gob_rows[1]
+    walk = bottom_row[:4]
+    idle = [top_row[0]]
+    attack = top_row[2:5] if len(top_row) >= 5 else top_row[1:]
     pack_rows("goblin", {"walk": walk, "idle": idle, "attack": attack}, cell_w=72, cell_h=64)
 
     # ---------- Enemy: LPC imp (64px LPC grid; rows: up/left/down/right) ----------
