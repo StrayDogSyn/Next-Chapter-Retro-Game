@@ -25,6 +25,33 @@ Full chronological record of every AI-paired session on this project. The summar
 
 ## Entries
 
+### 2026-07-08 — QA & Improvement Guide remediation pass (11 of 12 items)
+
+- **Tool used:** Claude (Sonnet 5)
+- **Goal:** Work through every item in `docs/BUGS_IMPROVEMENT_GUIDE.md` — 4 bugs, 8 enhancements — iterating until each was actually implemented and verified, not just claimed.
+- **Prompt summary:** "Complete all recommendations in the provided guide. Iterate and audit until all bugs and improvements are completed."
+- **What the agent produced (see full verification summary added to `BUGS_IMPROVEMENT_GUIDE.md`):**
+  - **BUG-001 (pit-dropped loot):** `Game.findGroundY()` + a pit-rescue branch in `updatePickups()` — an item that falls past `VIEW_H` (open-bottom room with no floor in its column) now lands on the nearest real floor instead of despawning.
+  - **BUG-003 (unreachable platforms):** Added a genuinely new reachability auditor to `levelLoader.ts` — flood-fills standable cells from each room's real entry points (derived from its own `exits`, since the world graph is reciprocal) under two movement profiles (base jump vs. double-jump+dash), and only flags an item as a dead-end if it's unreachable under **both**. This took three real iterations to get right (see below), not one guess:
+    1. First run (single-jump-only heuristic): 27 false-flagged items — turned out to be a validator bug, not a level bug (it didn't model the double-jump/dash upgrades the game already has, so it flagged intentional ability-gated bonus content, e.g. R06's chest+key vault).
+    2. Added the two-profile check → 15 remaining, including R20's own dash pickup flagged as needing dash to reach it — a circularity bug in the checker (an ability can't require itself); fixed by checking ability pickups against the base profile only.
+    3. Remaining 14 were genuine: floating decorative platforms (mostly coins, one health pickup) with a vertical gap the entry topology couldn't cover even with the full movement kit. Fixed by adding one intermediate "shelf" platform per room (R04, R05, R10, R14, R15, R19, R21) and repositioning R20's dash platform down into jump range. Two rounds of off-by-one errors (platform-tile-row vs. the standable-cell-row above it) were caught by re-running the compiled validator against the real data each time, not by hand-verifying the math.
+    - Final state, confirmed by an actual run: **0 dead-ends, 26 items correctly identified as intentional ability gating** across all 24 rooms.
+  - **UX-004 (self-destruct/respawn):** hold `R` for 1.2s → teleports to a safe ground position in the *current* room (not a full respawn), costs 10% coins or 1 HP if broke, fade transition, HUD progress bar in the footer.
+  - **UI-002 (equipment feedback):** gold pulsing glow on the weapon HUD chip (CSS), particle burst + ring flash on the hero sprite on any equip/swap.
+  - **UX-006 (coin micro-interactions):** floating "+1" text, sparkle burst, and a pitch-scaling combo (1.0x→1.5x over 5 rapid pickups) added to `AudioManager.play()`.
+  - **UI-008 (help modal):** `F1`/`?`/gamepad View toggles a canvas-drawn control reference; pauses gameplay updates while open (mirrors the dead/victory branch) rather than a second overlay system.
+  - **SYS-009 (XP + inventory):** kill-based XP with a level curve, small per-level dmg/HP bonus, HUD XP bar, and a `Tab`/`I` inventory overlay listing live weapon/upgrade state.
+  - **UI-007 (mini-map):** room grid coordinates BFS'd from `START_ROOM` along `exits` in `levelLoader.ts`, visited/cleared tracking in `Game`, rendered as a small CSS-grid overlay in the header.
+  - **SYS-011 (checkpoints):** new `shrine` spawn kind (one per zone entrance, placed at verified-reachable spots), `localStorage`-backed save/load, "Continue Game" button on the start menu gated on `Game.hasSave()`.
+  - **SYS-012 (NPC shop):** new `shopkeeper` spawn kind in the hub room, canvas shop UI (potion/stat-booster/mystery-box), the mystery box uses a new `forcedRarity` param on `fallbackRoll()` — explicitly a client-only mechanic, not routed through the Python loot authority (ADR-001/003 stay intact).
+  - **AST-005:** found and fixed a real drift bug while auditing — `step.mp3` was documented as "wired" in `CREDITS.md` but never actually in the `loadAll()` call, and `explosion`/`shoot` were loaded but never played anywhere. Wired all three: footstep cadence while walking, `explosion` on mech-boss defeat, `shoot` on projectile impact. Confirmed via `grep` that every loaded sprite (16/16) and audio file (22/22) now has at least one real usage — not before.
+  - **AST-010:** audited only — listed the sibling `downloads/` archive contents (28 zips across two folders); did not extract/ingest, see verification summary for why.
+- **Verification:** `npx tsc --noEmit` clean after every item (checked incrementally, not just at the end); `npm run build` clean; BUG-003's fix verified by actually compiling and running the new validator against the real room data three times as it was debugged (pasted output at each stage, not just "should be fixed"); dev server + `curl` smoke test of `/`, static assets, and both API routes.
+- **Explicitly not verified:** no real browser/interactive testing — `chromium-cli` and `playwright` are both unavailable in this sandbox, and installing either for a one-off check wasn't warranted. UI overlays, particle effects, and audio cues type-check and are logically traced but have not been visually confirmed. Flagged clearly in `BUGS_IMPROVEMENT_GUIDE.md`'s new verification-summary section so this isn't mistaken for a full pass.
+- **Outcome:** ✅ 11/12 items fixed and merged to `claude/qa-guide-remediation`; 🟡 AST-010 partial (audited, ingestion deferred)
+- **Anything worth remembering:** The BUG-003 validator work is a good example of why this repo's "verify, don't narrate" rule exists even for the verification tooling itself — the first two versions of the auditor were themselves wrong (a false-positive rate that would have led to "fixing" intentional level design, then a circular check on ability pickups), and only running it against real data caught both. A hand-derived "this should be reachable" argument was wrong twice in a row before the actual run settled it.
+
 ### 2026-07-08 — Asset sourcing guide
 
 - **Tool used:** Claude / Cascade
