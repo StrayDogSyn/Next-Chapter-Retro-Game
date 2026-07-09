@@ -37,6 +37,7 @@ import {
   type UpgradeId,
   type WeaponInstance,
 } from "./items";
+import { Rng, generateSeedPhrase } from "./rng";
 
 export const VIEW_W = ROOM_W * TILE; // 640
 export const VIEW_H = ROOM_H * TILE; // 352
@@ -134,12 +135,6 @@ type DamageOptions = {
   applyOnHitEffects?: boolean;
 };
 
-type DamageOptions = {
-  effect?: WeaponInstance["effect"];
-  bypassStatusMult?: boolean;
-  applyOnHitEffects?: boolean;
-};
-
 export type HudSnapshot = {
   hp: number;
   maxHp: number;
@@ -154,6 +149,8 @@ export type HudSnapshot = {
   upgrades: Partial<Record<UpgradeId, number>>;
   phase: "playing" | "paused" | "dead" | "victory";
   lootSource: string;
+  /** Shareable run seed — show on death screen for bug reports / challenges */
+  seed: string;
   respawnHoldPct: number;
   level: number;
   xp: number;
@@ -218,7 +215,21 @@ export class Game {
   private meta: SpriteMeta | null = null;
   private sheets = new Map<string, HTMLImageElement>();
   private lootCounter = 0;
-  private runSeed = Math.floor(Math.random() * 1_000_000);
+  // ADR-008: seeded deterministic RNG. One root seed per run; each subsystem
+  // forks its own stream so draws in one system never shift another's sequence
+  // (opening an extra chest must not reshuffle combat crits). seedPhrase is
+  // surfaced in the HUD for shareable runs and reproducible bug reports.
+  readonly seedPhrase = generateSeedPhrase();
+  private rng = new Rng(this.seedPhrase);
+  private combatRng = this.rng.fork("combat");
+  private lootRng = this.rng.fork("loot");
+  private shopRng = this.rng.fork("shop");
+  private vfxRng = this.rng.fork("vfx");
+  // numeric seed for the /api/loot path + fallbackRoll — derived from the
+  // root seed so the whole run remains reproducible from seedPhrase alone
+  private runSeed = this.rng.fork("loot-seed").int(0, 999_999);
+  // pity: consecutive drops below rare; feeds effective luck in rollLoot()
+  private lootPity = 0;
   private lootSource = "unknown";
   private message = "";
   private messageT = 0;
@@ -419,7 +430,7 @@ export class Game {
           pickups.push({ kind: "chest", x: x - 10, y: y - 16, w: 20, h: 16, vy: 0, bobT: 0 });
           break;
         case "coin":
-          pickups.push({ kind: "coin", x: x - 5, y: y - 12, w: 10, h: 10, vy: 0, bobT: Math.random() * 6 });
+          pickups.push({ kind: "coin", x: x - 5, y: y - 12, w: 10, h: 10, vy: 0, bobT: this.vfxRng.next() * 6 });
           break;
         case "health":
           pickups.push({ kind: "health", x: x - 7, y: y - 14, w: 14, h: 12, vy: 0, bobT: 0 });
@@ -617,7 +628,7 @@ export class Game {
   private weaponDamage(): number {
     let dmg = this.weapon.damage + (this.level - 1) + this.shopAtkBonus;
     const critPct = this.stat("critChance") + (this.weapon.effect === "crit" ? 10 : 0);
-    if (Math.random() * 100 < critPct) dmg *= 2;
+    if (this.combatRng.next() * 100 < critPct) dmg *= 2;
     return dmg;
   }
 
@@ -924,7 +935,7 @@ export class Game {
 
     // drops: bosses always drop loot, others 25% (plus coins)
     const dropChance = enemy.boss ? 1 : 0.25;
-    if (Math.random() < dropChance) {
+    if (this.lootRng.chance(dropChance)) {
       const stateAtKill = this.roomStates.get(killedInRoom);
       void this.rollLoot(enemy.level).then((loot) => {
         if (!stateAtKill || this.roomStates.get(killedInRoom) !== stateAtKill) return;
@@ -1296,8 +1307,8 @@ export class Game {
 
   private spawnSparkle(x: number, y: number, color = "#facc15", count = 4) {
     for (let i = 0; i < count; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = 40 + Math.random() * 50;
+      const angle = this.vfxRng.next() * Math.PI * 2;
+      const speed = 40 + this.vfxRng.next() * 50;
       this.particles.push({
         x,
         y,
@@ -1474,10 +1485,28 @@ export class Game {
     }
   }
 
+  /** Luck-equivalent added per consecutive sub-rare drop. Rides the existing
+   *  luck formula (identical on Python + fallback paths, see items.ts), so
+   *  pity works on BOTH paths with zero changes to either roller. */
+  private static readonly PITY_LUCK_PER_MISS = 15;
+
   private async rollLoot(enemyLevel: number): Promise<LootDrop> {
     this.lootCounter += 1;
     const seed = this.runSeed + this.lootCounter * 7919;
-    const luck = this.stat("luck");
+    // Pity timer: each sub-rare drop raises effective luck; rare+ resets it.
+    // Capped so a long drought guarantees "very likely", not "certain" —
+    // certainty would let testers farm pity deliberately.
+    const luck = this.stat("luck") + Math.min(300, this.lootPity * Game.PITY_LUCK_PER_MISS);
+    const drop = await this.fetchOrFallbackRoll(seed, luck, enemyLevel);
+    if (drop.rarity === "rare" || drop.rarity === "epic") {
+      this.lootPity = 0;
+    } else {
+      this.lootPity += 1;
+    }
+    return drop;
+  }
+
+  private async fetchOrFallbackRoll(seed: number, luck: number, enemyLevel: number): Promise<LootDrop> {
     const abort = new AbortController();
     const timer = setTimeout(() => abort.abort(), 3000);
     try {
@@ -1697,7 +1726,7 @@ export class Game {
   private async buyMysteryBox() {
     this.lootCounter += 1;
     const seed = this.runSeed + this.lootCounter * 104729;
-    const forcedRarity: Rarity = Math.random() < 0.5 ? "rare" : "epic";
+    const forcedRarity: Rarity = this.shopRng.chance(0.5) ? "rare" : "epic";
     // Client-only forced-rarity roll (see fallbackRoll's forcedRarity doc) —
     // deliberately not routed through the Python-authoritative /api/loot path
     // since "guaranteed rare+" is a shop mechanic, not a real drop roll.
@@ -1748,6 +1777,7 @@ export class Game {
       upgrades: { ...this.upgrades },
       phase: this.phase,
       lootSource: this.lootSource,
+      seed: this.seedPhrase,
       respawnHoldPct: Math.min(1, this.respawnHoldT / Game.RESPAWN_HOLD_SECONDS),
       level: this.level,
       xp: this.xp,
@@ -2163,7 +2193,6 @@ export class Game {
           break;
         case "chest":
           ctx.fillStyle = pickup.opened ? "#57534e" : "#92400e";
-          ctx.fillRect(x, y + 4, 20, 12);
           ctx.fillStyle = pickup.opened ? "#78716c" : "#b45309";
           ctx.fillRect(x, y, 20, 6);
           ctx.fillStyle = "#facc15";

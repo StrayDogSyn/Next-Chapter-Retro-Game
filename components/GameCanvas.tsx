@@ -10,6 +10,7 @@ type GameCanvasProps = {
 
 export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const gameRef = useRef<Game | null>(null);
   const shellRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [displaySize, setDisplaySize] = useState<{ width: number; height: number }>({

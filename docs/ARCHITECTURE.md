@@ -27,8 +27,6 @@ flowchart TD
     L -->|JSON| J
 ```
 
-![Phase one framework diagram](../assets/img/screenshots/phase-one-framework.png)
-
 ## Why Python Exists Here
 
 The Python service owns procedural generation because:
