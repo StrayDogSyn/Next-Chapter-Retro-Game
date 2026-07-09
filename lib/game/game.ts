@@ -2234,8 +2234,12 @@ export class Game {
     const dx = this.px + this.pw / 2 - drawW / 2;
     const dy = this.py + this.ph - drawH;
     const moving = Math.abs(this.pvx) > 10;
-    const facingLeft = this.facing < 0;
-    this.drawSheetAnim("hero", "walkRight", moving ? this.animT : 0, dx, dy, drawW, drawH, facingLeft, 9);
+    // The hero sheet has dedicated walkLeft/walkRight rows (distinct walk-cycle
+    // timing, and an asymmetric armband) — mirroring walkRight instead of using
+    // the authored walkLeft row put the armband on the wrong arm when facing
+    // left. Use the correct row directly; no runtime flip needed.
+    const anim = this.facing > 0 ? "walkRight" : "walkLeft";
+    this.drawSheetAnim("hero", anim, moving ? this.animT : 0, dx, dy, drawW, drawH, false, 9);
 
     // UI-002: gold flash ring on equip/swap, fading out over equipFlashT's lifespan
     if (this.equipFlashT > 0) {
