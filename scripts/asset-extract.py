@@ -31,7 +31,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SOURCE_DIRS = [REPO_ROOT / "assets", REPO_ROOT / "downloads"]
 EXTRACT_ROOT = REPO_ROOT / "public" / "assets" / "extracted"
-MANIFEST_PATH = EXTRACT_ROOT / "manifest.json"
+MANIFEST_PATH = REPO_ROOT / "public" / "assets" / "manifest.json"
+LEGACY_MANIFEST_PATH = EXTRACT_ROOT / "manifest.json"
 
 IMAGE_EXTS = {".png", ".gif", ".bmp", ".webp", ".jpg", ".jpeg"}
 AUDIO_EXTS = {".wav", ".ogg", ".mp3", ".flac", ".it", ".xm", ".mod"}
@@ -93,6 +94,7 @@ def build_manifest() -> dict:
     """Walk EXTRACT_ROOT and record every servable file with a path RELATIVE to
     public/, so the runtime can prefix BASE_PATH for GitHub Pages."""
     packs: dict[str, dict] = {}
+    files_by_stem: dict[str, list[str]] = {}
     public_root = REPO_ROOT / "public"
     for pack_dir in sorted(p for p in EXTRACT_ROOT.iterdir() if p.is_dir()):
         entries = {"images": [], "audio": [], "data": [], "other": []}
@@ -103,11 +105,16 @@ def build_manifest() -> dict:
             kind = classify(f)
             key = {"image": "images", "audio": "audio", "data": "data", "other": "other"}[kind]
             entries[key].append(rel)
+
+            stem_key = f.stem.lower()
+            files_by_stem.setdefault(stem_key, []).append(rel)
         packs[pack_dir.name] = entries
+
     return {
         "generatedAt": datetime.now(timezone.utc).isoformat(),
         "note": "Paths are relative to public/. Prefix with BASE_PATH at runtime.",
         "packs": packs,
+        "filesByStem": files_by_stem,
     }
 
 
@@ -153,12 +160,17 @@ def main() -> int:
 
     manifest = build_manifest()
     MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
-    MANIFEST_PATH.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    LEGACY_MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+    manifest_text = json.dumps(manifest, indent=2)
+    MANIFEST_PATH.write_text(manifest_text, encoding="utf-8")
+    LEGACY_MANIFEST_PATH.write_text(manifest_text, encoding="utf-8")
 
     total_files = sum(
         len(v) for pack in manifest["packs"].values() for v in pack.values()
     )
     print(f"\nManifest: {MANIFEST_PATH.relative_to(REPO_ROOT)}")
+    print(f"Legacy copy: {LEGACY_MANIFEST_PATH.relative_to(REPO_ROOT)}")
     print(f"  packs: {len(manifest['packs'])}  |  files listed: {total_files}")
     print(f"  extracted now: {extracted_count}  |  skipped (existing): {skipped_count}")
     print("\nNext: python scripts/project-status.py   # verify, per house rules")

@@ -38,6 +38,7 @@ import {
   type WeaponInstance,
 } from "./items";
 import { Rng, generateSeedPhrase } from "./rng";
+import { loadAssetManifest, resolveManifestAsset, type AssetManifest } from "./assetManifest";
 
 export const VIEW_W = ROOM_W * TILE; // 640
 export const VIEW_H = ROOM_H * TILE; // 352
@@ -138,6 +139,8 @@ type DamageOptions = {
 export type HudSnapshot = {
   hp: number;
   maxHp: number;
+  shield: number;
+  maxShield: number;
   coins: number;
   weapon: { name: string; rarity: string; color: string; rolledBy: string };
   secondary: { name: string; rarity: string; color: string } | null;
@@ -155,6 +158,16 @@ export type HudSnapshot = {
   level: number;
   xp: number;
   xpToNext: number;
+  elapsedSeconds: number;
+  enemiesDefeated: number;
+  stats: {
+    toughnessPct: number;
+    critChancePct: number;
+    lifeStealPct: number;
+    dodgeInvulnMs: number;
+    attackPower: number;
+    defensePct: number;
+  };
   minimap: MinimapRoom[];
 };
 
@@ -236,6 +249,7 @@ export class Game {
   private phase: "playing" | "paused" | "dead" | "victory" = "playing";
   private musicMode: "none" | "bg" | "boss" = "none";
   private snapshotT = 0;
+  private assetManifest: AssetManifest | null = null;
 
   // player
   private px = 0;
@@ -283,6 +297,10 @@ export class Game {
   private xp = 0;
   private xpToNext = 150;
   private inventoryOpen = false;
+  private externalMenuOpen = false;
+  private externalMenuPaused = false;
+  private runStartedAt = performance.now();
+  private enemiesDefeated = 0;
 
   // SYS-011 / SYS-012: shrine checkpoints + NPC shop
   private static readonly SAVE_KEY = "next_chapter_save_v1";
@@ -303,6 +321,8 @@ export class Game {
   // ─────────────────────── lifecycle ───────────────────────
 
   async start(continueFromSave = false) {
+    this.assetManifest = await loadAssetManifest();
+
     const metaResp = await fetch("/sprites/spritemeta.json");
     this.meta = (await metaResp.json()) as SpriteMeta;
 
@@ -334,15 +354,17 @@ export class Game {
               resolve();
             };
             img.onerror = () => {
-              console.error(`[assets] failed to load /sprites/${name}.png`);
+              console.error(`[assets] failed to load sprite for ${name}`);
               resolve();
             };
-            img.src = `/sprites/${name}.png`;
+            img.src =
+              resolveManifestAsset(this.assetManifest, name, [".png", ".webp", ".jpg", ".jpeg"]) ??
+              `/sprites/${name}.png`;
           }),
       ),
     );
 
-    await this.audio.loadAll({
+    const audioFiles: Record<string, string> = {
       jump: "/audio/jump.wav",
       hit: "/audio/hit.wav",
       coin: "/audio/coin.wav",
@@ -365,7 +387,17 @@ export class Game {
       growl: "/audio/growl.mp3",
       magic: "/audio/magic.mp3",
       step: "/audio/step.mp3",
-    });
+    };
+
+    const audioEntries = Object.fromEntries(
+      Object.entries(audioFiles).map(([id, fallbackPath]) => {
+        const stem = fallbackPath.split("/").pop()?.split(".")[0] ?? id;
+        const resolved = resolveManifestAsset(this.assetManifest, stem, [".wav", ".ogg", ".mp3", ".flac"]);
+        return [id, resolved ?? fallbackPath];
+      }),
+    );
+
+    await this.audio.loadAll(audioEntries);
 
     const loaded = continueFromSave && this.loadSavedGame();
     if (!loaded) this.spawnIntoRoom(START_ROOM, "spawnPoint");
@@ -385,6 +417,22 @@ export class Game {
   /** UI-008: called from the React "?" button in GameCanvas.tsx. */
   toggleHelp() {
     this.helpOpen = !this.helpOpen;
+  }
+
+  setUiModalOpen(open: boolean) {
+    this.externalMenuOpen = open;
+    this.inventoryOpen = false;
+    this.helpOpen = false;
+    this.shopOpen = false;
+    if (open && this.phase === "playing") {
+      this.phase = "paused";
+      this.externalMenuPaused = true;
+      this.showMessage("Menu opened");
+    } else if (!open && this.externalMenuPaused && this.phase === "paused") {
+      this.phase = "playing";
+      this.externalMenuPaused = false;
+      this.showMessage("Menu closed");
+    }
   }
 
   private async probeLootService() {
@@ -649,6 +697,10 @@ export class Game {
 
   private update(dt: number) {
     this.input.update();
+    if (this.externalMenuOpen) {
+      this.pushSnapshot(dt);
+      return;
+    }
     if (this.input.state.pressed.help || (this.helpOpen && this.input.state.pressed.pause)) {
       this.helpOpen = !this.helpOpen;
     }
@@ -911,6 +963,7 @@ export class Game {
   }
 
   private onEnemyKilled(enemy: Enemy) {
+    this.enemiesDefeated += 1;
     this.audio.play("kill", 0.8);
     this.awardXp(enemy.level * 10);
     const killedInRoom = this.roomId;
@@ -1747,6 +1800,8 @@ export class Game {
     this.onSnapshot({
       hp: Math.max(0, Math.round(this.hp)),
       maxHp: this.maxHp(),
+      shield: 0,
+      maxShield: 0,
       coins: this.coins,
       weapon: {
         name: this.weapon.name,
@@ -1782,6 +1837,16 @@ export class Game {
       level: this.level,
       xp: this.xp,
       xpToNext: this.xpToNext,
+      elapsedSeconds: Math.max(0, (performance.now() - this.runStartedAt) / 1000),
+      enemiesDefeated: this.enemiesDefeated,
+      stats: {
+        toughnessPct: Math.min(60, this.stat("defense")),
+        critChancePct: this.stat("critChance") + (this.weapon.effect === "crit" ? 10 : 0),
+        lifeStealPct: this.stat("lifeSteal") + (this.weapon.effect === "lifesteal" ? 8 : 0),
+        dodgeInvulnMs: Math.round((0.12 + (this.stat("dash") > 0 ? 0.1 : 0)) * 1000),
+        attackPower: Math.round(this.weapon.damage + this.shopAtkBonus),
+        defensePct: Math.min(60, this.stat("defense")),
+      },
       minimap: Array.from(this.world.values()).map((room) => {
         const coord = this.roomCoords.get(room.id) ?? { x: 0, y: 0 };
         const state = this.roomStates.get(room.id);
@@ -1993,9 +2058,27 @@ export class Game {
             else name = "top";
           } else if (left !== T_SOLID) name = "wallLeft";
           else if (right !== T_SOLID) name = "wallRight";
-          ctx.drawImage(tilesImg, this.tileIndex(name) * TILE, 0, TILE, TILE, x, y, TILE, TILE);
+          const idx = this.tileIndex(name);
+          if (idx >= 0) {
+            ctx.drawImage(tilesImg, idx * TILE, 0, TILE, TILE, x, y, TILE, TILE);
+          } else {
+            ctx.fillStyle = "#334155";
+            ctx.fillRect(x, y, TILE, TILE);
+          }
         } else if (tile === T_PLATFORM && tilesImg) {
-          ctx.drawImage(tilesImg, this.tileIndex("platform") * TILE, 0, TILE, TILE, x, y, TILE, TILE);
+          const idx = this.tileIndex("platform");
+          if (idx >= 0) {
+            ctx.drawImage(tilesImg, idx * TILE, 0, TILE, TILE, x, y, TILE, TILE);
+          } else {
+            ctx.fillStyle = "#60a5fa";
+            ctx.fillRect(x, y + TILE - 4, TILE, 4);
+          }
+        } else if (tile === T_SOLID) {
+          ctx.fillStyle = "#334155";
+          ctx.fillRect(x, y, TILE, TILE);
+        } else if (tile === T_PLATFORM) {
+          ctx.fillStyle = "#60a5fa";
+          ctx.fillRect(x, y + TILE - 4, TILE, 4);
         } else if (tile === T_SPIKE) {
           ctx.fillStyle = "#cbd5e1";
           for (let i = 0; i < 4; i++) {

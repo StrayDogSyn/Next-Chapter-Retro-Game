@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Game, VIEW_W, VIEW_H, type HudSnapshot } from "@/lib/game/game";
+import { GameHudOverlay } from "@/components/GameHudOverlay";
+import { GameMenuModal } from "@/components/GameMenuModal";
 
 type GameCanvasProps = {
   onSnapshot: (snapshot: HudSnapshot) => void;
@@ -12,7 +14,11 @@ export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasP
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const gameRef = useRef<Game | null>(null);
   const shellRef = useRef<HTMLDivElement | null>(null);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const [snapshot, setSnapshot] = useState<HudSnapshot | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const gamepadMenuPressedRef = useRef(false);
   const [displaySize, setDisplaySize] = useState<{ width: number; height: number }>({
     width: VIEW_W,
     height: VIEW_H,
@@ -52,7 +58,10 @@ export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasP
 
     const game = new Game(canvas);
     gameRef.current = game;
-    game.onSnapshot = (snap) => onSnapshot(snap);
+    game.onSnapshot = (snap) => {
+      setSnapshot(snap);
+      onSnapshot(snap);
+    };
     void game.start(continueFromSave);
     handleFocus();
 
@@ -77,14 +86,65 @@ export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasP
   }, []);
 
   const toggleFullscreen = async () => {
-    const shell = shellRef.current;
-    if (!shell) return;
-    if (document.fullscreenElement === shell) {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    if (document.fullscreenElement === viewport) {
       await document.exitFullscreen();
       return;
     }
-    await shell.requestFullscreen();
+    await viewport.requestFullscreen();
     handleFocus();
+  };
+
+  useEffect(() => {
+    gameRef.current?.setUiModalOpen(menuOpen);
+  }, [menuOpen]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.code === "Tab" || event.code === "KeyI") {
+        event.preventDefault();
+        setMenuOpen((open) => !open);
+      }
+      if (event.code === "Escape" && menuOpen) {
+        event.preventDefault();
+        setMenuOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
+
+  useEffect(() => {
+    let frame = 0;
+    const poll = () => {
+      const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+      const firstConnected = Array.from(pads).find((pad) => pad && pad.connected);
+      const pressed = Boolean(
+        firstConnected &&
+          ((firstConnected.buttons[9] && firstConnected.buttons[9].pressed) ||
+            (firstConnected.buttons[8] && firstConnected.buttons[8].pressed)),
+      );
+
+      if (pressed && !gamepadMenuPressedRef.current) {
+        setMenuOpen((open) => !open);
+      }
+      gamepadMenuPressedRef.current = pressed;
+      frame = requestAnimationFrame(poll);
+    };
+
+    frame = requestAnimationFrame(poll);
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  const copySeed = async () => {
+    if (!snapshot?.seed) return;
+    try {
+      await navigator.clipboard.writeText(snapshot.seed);
+    } catch {
+      // Ignore clipboard failures in unsupported environments.
+    }
   };
 
   return (
@@ -98,18 +158,26 @@ export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasP
       <button type="button" className="fullscreen-toggle" onClick={toggleFullscreen}>
         fullscreen
       </button>
-      <div className="game-canvas-stage" ref={stageRef}>
-        <canvas
-          ref={canvasRef}
-          width={VIEW_W}
-          height={VIEW_H}
-          style={{
-            imageRendering: "pixelated",
-            display: "block",
-            width: displaySize.width,
-            height: displaySize.height,
-          }}
-        />
+      <div
+        id="game-stage-viewport"
+        className="relative w-full aspect-video bg-slate-950 overflow-hidden"
+        ref={viewportRef}
+      >
+        <div className="game-canvas-stage" ref={stageRef}>
+          <canvas
+            ref={canvasRef}
+            width={VIEW_W}
+            height={VIEW_H}
+            style={{
+              imageRendering: "pixelated",
+              display: "block",
+              width: displaySize.width,
+              height: displaySize.height,
+            }}
+          />
+        </div>
+        <GameHudOverlay snapshot={snapshot} onToggleMenu={() => setMenuOpen((open) => !open)} onCopySeed={copySeed} />
+        <GameMenuModal open={menuOpen} snapshot={snapshot} onClose={() => setMenuOpen(false)} />
       </div>
     </div>
   );
