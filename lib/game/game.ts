@@ -228,7 +228,8 @@ export class Game {
   private roomId = START_ROOM;
   private meta: SpriteMeta | null = null;
   private sheets = new Map<string, HTMLImageElement>();
-  private lootCounter = 0;
+  private dropLootCounter = 0;
+  private shopLootCounter = 0;
   // ADR-008: seeded deterministic RNG. One root seed per run; each subsystem
   // forks its own stream so draws in one system never shift another's sequence
   // (opening an extra chest must not reshuffle combat crits). seedPhrase is
@@ -688,7 +689,7 @@ export class Game {
   private weaponDamage(): number {
     let dmg = this.weapon.damage + (this.level - 1) + this.shopAtkBonus;
     const critPct = this.stat("critChance") + (this.weapon.effect === "crit" ? 10 : 0);
-    if (this.combatRng.next() * 100 < critPct) dmg *= 2;
+    if (critPct > 0 && this.combatRng.next() * 100 < critPct) dmg *= 2;
     return dmg;
   }
 
@@ -1556,8 +1557,8 @@ export class Game {
   private static readonly PITY_LUCK_PER_MISS = 15;
 
   private async rollLoot(enemyLevel: number): Promise<LootDrop> {
-    this.lootCounter += 1;
-    const seed = this.runSeed + this.lootCounter * 7919;
+    this.dropLootCounter += 1;
+    const seed = this.runSeed + this.dropLootCounter * 7919;
     // Pity timer: each sub-rare drop raises effective luck; rare+ resets it.
     // Capped so a long drought guarantees "very likely", not "certain" —
     // certainty would let testers farm pity deliberately.
@@ -1681,22 +1682,33 @@ export class Game {
 
   private saveGame() {
     if (typeof localStorage === "undefined") return;
+    const currentRoom = this.world.has(this.roomId) ? this.roomId : START_ROOM;
+    const maxHp = this.maxHp();
+    const clampedHp = Math.round(clampNumber(this.hp, 0, maxHp, maxHp));
+    const clampedCoins = Math.round(clampNumber(this.coins, 0, 999_999, 0));
+    const clampedLevel = Math.round(clampNumber(this.level, 1, 999, 1));
+    const clampedXpToNext = Math.round(clampNumber(this.xpToNext, 1, 1_000_000, 150));
+    const clampedXp = Math.round(clampNumber(this.xp, 0, clampedXpToNext, 0));
     const data = {
       version: 1 as const,
-      roomId: this.roomId,
-      px: this.px,
-      py: this.py,
-      hp: this.hp,
-      coins: this.coins,
-      level: this.level,
-      xp: this.xp,
-      xpToNext: this.xpToNext,
+      roomId: currentRoom,
+      px: clampNumber(this.px, 0, VIEW_W - this.pw, 0),
+      py: clampNumber(this.py, 0, VIEW_H - this.ph, 0),
+      hp: clampedHp,
+      coins: clampedCoins,
+      level: clampedLevel,
+      xp: clampedXp,
+      xpToNext: clampedXpToNext,
       weapon: this.weapon,
       secondary: this.secondary,
-      upgrades: this.upgrades,
+      upgrades: Object.fromEntries(
+        Object.entries(this.upgrades)
+          .filter(([id]) => isUpgradeId(id))
+          .map(([id, value]) => [id, Math.round(clampNumber(value, 0, 999, 0))]),
+      ) as Partial<Record<UpgradeId, number>>,
       flags: this.flags,
-      visitedRooms: Array.from(this.visitedRooms),
-      shopAtkBonus: this.shopAtkBonus,
+      visitedRooms: Array.from(this.visitedRooms).filter((id) => this.world.has(id)),
+      shopAtkBonus: clampNumber(this.shopAtkBonus, 0, 999, 0),
     };
     try {
       localStorage.setItem(Game.SAVE_KEY, JSON.stringify(data));
@@ -1721,18 +1733,38 @@ export class Game {
       if (!raw) return false;
       const data = JSON.parse(raw);
       if (!data || data.version !== 1 || typeof data.roomId !== "string") return false;
-      this.hp = data.hp;
-      this.coins = data.coins;
-      this.level = data.level;
-      this.xp = data.xp;
-      this.xpToNext = data.xpToNext;
+
+      const roomId = this.world.has(data.roomId) ? data.roomId : START_ROOM;
+      const level = Math.round(clampNumber(data.level, 1, 999, 1));
+      const xpToNext = Math.round(clampNumber(data.xpToNext, 1, 1_000_000, Math.round(level * 100 * 1.5)));
+      const xp = Math.round(clampNumber(data.xp, 0, xpToNext, 0));
+      const maxHpAtLevel = 100 + (level - 1) * 3;
+
+      this.level = level;
+      this.xpToNext = xpToNext;
+      this.xp = xp;
+      this.hp = Math.round(clampNumber(data.hp, 0, maxHpAtLevel, maxHpAtLevel));
+      this.coins = Math.round(clampNumber(data.coins, 0, 999_999, 0));
       this.weapon = data.weapon;
       this.secondary = data.secondary;
-      this.upgrades = data.upgrades;
+      const upgradesInput = data.upgrades && typeof data.upgrades === "object" ? data.upgrades : {};
+      const normalizedUpgrades: Partial<Record<UpgradeId, number>> = {};
+      for (const [id, value] of Object.entries(upgradesInput as Record<string, unknown>)) {
+        if (!isUpgradeId(id)) continue;
+        normalizedUpgrades[id] = Math.round(clampNumber(value, 0, 999, 0));
+      }
+      this.upgrades = normalizedUpgrades;
       this.flags = data.flags;
-      this.visitedRooms = new Set<string>(data.visitedRooms ?? []);
-      this.shopAtkBonus = data.shopAtkBonus ?? 0;
-      this.spawnIntoRoom(data.roomId, { x: data.px, y: data.py });
+      const visited = Array.isArray(data.visitedRooms)
+        ? data.visitedRooms.filter((id): id is string => typeof id === "string" && this.world.has(id))
+        : [];
+      this.visitedRooms = new Set<string>(visited);
+      this.visitedRooms.add(roomId);
+      this.shopAtkBonus = clampNumber(data.shopAtkBonus, 0, 999, 0);
+      const x = clampNumber(data.px, 0, VIEW_W - this.pw, 0);
+      const y = clampNumber(data.py, 0, VIEW_H - this.ph, 0);
+      this.spawnIntoRoom(roomId, { x, y });
+      this.hp = Math.min(this.hp, this.maxHp());
       return true;
     } catch (error) {
       console.warn("[save] failed to load localStorage save", error);
@@ -1789,8 +1821,8 @@ export class Game {
   }
 
   private async buyMysteryBox() {
-    this.lootCounter += 1;
-    const seed = this.runSeed + this.lootCounter * 104729;
+    this.shopLootCounter += 1;
+    const seed = this.runSeed + this.shopLootCounter * 104729;
     const forcedRarity: Rarity = this.shopRng.chance(0.5) ? "rare" : "epic";
     // Client-only forced-rarity roll (see fallbackRoll's forcedRarity doc) —
     // deliberately not routed through the Python-authoritative /api/loot path
@@ -2372,4 +2404,13 @@ function pointInRect(
   r: { x: number; y: number; w: number; h: number },
 ): boolean {
   return px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h;
+}
+
+function clampNumber(value: unknown, min: number, max: number, fallback: number): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
+  return Math.min(max, Math.max(min, value));
+}
+
+function isUpgradeId(value: string): value is UpgradeId {
+  return value in UPGRADE_DEFS;
 }
