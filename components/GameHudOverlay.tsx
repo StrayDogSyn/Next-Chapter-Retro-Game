@@ -43,8 +43,10 @@ export function GameHudOverlay({ snapshot, onToggleMenu, onCopySeed }: Props) {
   if (!snapshot) return null;
 
   const hpPct = pct(snapshot.hp, snapshot.maxHp);
-  const shieldPct = pct(snapshot.shield, snapshot.maxShield);
   const xpPct = pct(snapshot.xp, snapshot.xpToNext);
+  // There's no shield mechanic wired up yet (Game always reports 0/0) — showing
+  // a bar that can never fill reads as a broken visual, not an empty stat.
+  const hasShield = snapshot.maxShield > 0;
 
   return (
     <div className="game-hud-overlay" aria-hidden={false}>
@@ -60,13 +62,17 @@ export function GameHudOverlay({ snapshot, onToggleMenu, onCopySeed }: Props) {
           <span>HP</span>
           <span>{snapshot.hp}/{snapshot.maxHp}</span>
         </div>
-        <div className="hud-bar-shell shield">
-          <div className="hud-bar-fill" style={{ width: `${shieldPct}%` }} />
-        </div>
-        <div className="hud-row hud-row--between">
-          <span>Shield</span>
-          <span>{snapshot.shield}/{snapshot.maxShield}</span>
-        </div>
+        {hasShield ? (
+          <>
+            <div className="hud-bar-shell shield">
+              <div className="hud-bar-fill" style={{ width: `${pct(snapshot.shield, snapshot.maxShield)}%` }} />
+            </div>
+            <div className="hud-row hud-row--between">
+              <span>Shield</span>
+              <span>{snapshot.shield}/{snapshot.maxShield}</span>
+            </div>
+          </>
+        ) : null}
         <div className="hud-bar-shell xp">
           <div className="hud-bar-fill" style={{ width: `${xpPct}%` }} />
         </div>
