@@ -112,6 +112,8 @@ uvicorn main:app --reload  # http://localhost:8000
 │   ├── sprites/         # Spritesheet assets
 │   └── audio/           # CC0/open-source SFX
 └── docs/                # Living documentation (see below)
+    └── archive/
+        └── historical/  # Deprecated/superseded docs kept for traceability
 ```
 
 ## AI Collaboration
