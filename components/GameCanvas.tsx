@@ -19,33 +19,31 @@ export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasP
   const [snapshot, setSnapshot] = useState<HudSnapshot | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const gamepadMenuPressedRef = useRef(false);
-  const [displaySize, setDisplaySize] = useState<{ width: number; height: number }>({
-    width: VIEW_W,
-    height: VIEW_H,
-  });
 
   useEffect(() => {
     const stage = stageRef.current;
-    if (!stage) return;
+    const canvas = canvasRef.current;
+    if (!stage || !canvas) return;
 
-    const computeSize = () => {
-      const { width: maxW, height: maxH } = stage.getBoundingClientRect();
-      if (maxW <= 0 || maxH <= 0) return;
+    const updateCanvasSize = () => {
+      const rect = stage.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
 
-      const fitScale = Math.min(maxW / VIEW_W, maxH / VIEW_H);
-      const integerScale = Math.floor(fitScale);
-      const scale = integerScale >= 1 ? integerScale : fitScale;
-      const clamped = Math.max(0.25, scale);
+      const dpr = window.devicePixelRatio || 1;
+      const pixelWidth = Math.max(1, Math.floor(rect.width * dpr));
+      const pixelHeight = Math.max(1, Math.floor(rect.height * dpr));
 
-      setDisplaySize({
-        width: Math.max(1, Math.floor(VIEW_W * clamped)),
-        height: Math.max(1, Math.floor(VIEW_H * clamped)),
-      });
+      if (gameRef.current) {
+        gameRef.current.resizeViewport(pixelWidth, pixelHeight);
+      } else if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+        canvas.width = pixelWidth;
+        canvas.height = pixelHeight;
+      }
     };
 
-    const observer = new ResizeObserver(computeSize);
+    const observer = new ResizeObserver(updateCanvasSize);
     observer.observe(stage);
-    computeSize();
+    updateCanvasSize();
 
     return () => {
       observer.disconnect();
@@ -171,8 +169,8 @@ export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasP
             style={{
               imageRendering: "pixelated",
               display: "block",
-              width: displaySize.width,
-              height: displaySize.height,
+              width: "100%",
+              height: "100%",
             }}
           />
         </div>

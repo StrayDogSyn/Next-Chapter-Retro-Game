@@ -217,6 +217,7 @@ const BOSS_NAMES: Record<string, string> = {
 
 export class Game {
   private ctx: CanvasRenderingContext2D;
+  private camera = { x: 0, y: 0 };
   private loop = new GameLoop();
   private input: InputManager;
   private audio = new AudioManager();
@@ -316,6 +317,17 @@ export class Game {
     this.ctx = ctx;
     ctx.imageSmoothingEnabled = false;
     this.input = new InputManager(window);
+  }
+
+  resizeViewport(width: number, height: number) {
+    const nextW = Math.max(1, Math.floor(width));
+    const nextH = Math.max(1, Math.floor(height));
+    const canvas = this.ctx.canvas;
+    if (canvas.width === nextW && canvas.height === nextH) return;
+    canvas.width = nextW;
+    canvas.height = nextH;
+    // Reset after backing store resize, otherwise browsers re-enable smoothing.
+    this.ctx.imageSmoothingEnabled = false;
   }
 
   // ─────────────────────── lifecycle ───────────────────────
@@ -1865,16 +1877,40 @@ export class Game {
 
   // ─────────────────────── rendering ───────────────────────
 
+  private updateCamera() {
+    const roomWidth = ROOM_W * TILE;
+    const roomHeight = ROOM_H * TILE;
+    const targetX = this.px + this.pw / 2 - VIEW_W / 2;
+    const targetY = this.py + this.ph / 2 - VIEW_H / 2;
+    const maxX = Math.max(0, roomWidth - VIEW_W);
+    const maxY = Math.max(0, roomHeight - VIEW_H);
+    this.camera.x = Math.min(Math.max(0, targetX), maxX);
+    this.camera.y = Math.min(Math.max(0, targetY), maxY);
+  }
+
   private render() {
     const ctx = this.ctx;
-    ctx.clearRect(0, 0, VIEW_W, VIEW_H);
+    const canvas = ctx.canvas;
+    const scaleX = canvas.width / VIEW_W;
+    const scaleY = canvas.height / VIEW_H;
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.imageSmoothingEnabled = false;
+    ctx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
+
+    this.updateCamera();
     this.drawBackground();
+    ctx.save();
+    ctx.translate(-this.camera.x, -this.camera.y);
     this.drawTiles();
     this.drawInteractables();
     this.drawPickups();
     this.drawEnemies();
     this.drawPlayer();
     this.drawProjectiles();
+    this.drawParticles();
+    ctx.restore();
     if (this.phase === "paused") this.drawOverlay("PAUSED", "press START / ESC / P to resume");
     if (this.phase === "dead") this.drawOverlay("YOU DIED", "press JUMP to rise again");
     if (this.phase === "victory")
@@ -2145,9 +2181,8 @@ export class Game {
     const dx = this.px + this.pw / 2 - drawW / 2;
     const dy = this.py + this.ph - drawH;
     const moving = Math.abs(this.pvx) > 10;
-    // hero sheet has side-walk rows; walkLeft row is already left-facing
-    const anim = this.facing > 0 ? "walkRight" : "walkLeft";
-    this.drawSheetAnim("hero", anim, moving ? this.animT : 0, dx, dy, drawW, drawH, false, 9);
+    const facingLeft = this.facing < 0;
+    this.drawSheetAnim("hero", "walkRight", moving ? this.animT : 0, dx, dy, drawW, drawH, facingLeft, 9);
 
     // UI-002: gold flash ring on equip/swap, fading out over equipFlashT's lifespan
     if (this.equipFlashT > 0) {
