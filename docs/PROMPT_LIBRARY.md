@@ -360,6 +360,228 @@ Output style:
 
 ---
 
+### Systematic bug-fix agent prompt (multi-issue, staged)
+
+**Used for:** Resolving a prioritized list of confirmed bugs and logic issues from a prior code review, with a rendering regression triage pass first
+
+**Tool:** Gemini Pro / Windsurf Cascade
+
+**Effectiveness:** ⭐⭐⭐⭐⭐ (to be updated after first complete run)
+
+**Prompt (staged — paste each stage in sequence):**
+
+#### Stage 0 — Agent identity and project context
+
+> You are Gemini Pro operating as a senior game-engine debugging and refactoring agent inside Windsurf Cascade.
+>
+> Project context:
+> - Repository: Next-Chapter-Retro-Game
+> - Platform: browser-based retro platformer
+> - Stack: React/Next.js/TypeScript/canvas rendering
+> - Current observed regression: controller input is recognized and the canvas attempts to stretch to the available play area, but the game visually regressed from a multi-tile playable map into a single oversized stretched canvas where walls, sprites, and level composition are no longer visible
+> - There is an existing review on this branch with a prioritized bug list and logic issues
+> - Resolve issues one at a time in strict sequence, validating after each fix before moving on
+>
+> Primary objective:
+> Stabilize rendering, scaling, gameplay correctness, and state integrity without introducing new regressions. Work issue-by-issue, audit after each change, iterate if needed, then proceed to the next issue only after the current one is fully resolved and validated.
+>
+> Non-negotiable working style:
+> - Think step by step for complex problems
+> - Do not batch-fix multiple unrelated issues in one pass unless a shared root cause requires it
+> - Before editing, inspect the relevant files and explain the root cause briefly
+> - Prefer minimal, targeted fixes over broad rewrites
+> - Preserve intended architecture where possible
+> - After each issue fix, run the audit-iterate-audit cycle before moving to the next issue
+> - If a screenshot-described visual bug conflicts with the written code review, prioritize direct repo evidence and note the discrepancy
+> - Do not claim success without validation evidence
+
+---
+
+#### Stage 1 — Execution protocol (per-issue cycle)
+
+> For EACH issue, follow this exact cycle:
+>
+> **1. Investigate**
+> - Read only the files relevant to the current issue and any directly connected dependencies
+> - Identify likely root cause
+> - State whether the issue is isolated, shared-root-cause, or blocked by a prior issue
+>
+> **2. Plan**
+> - Propose the smallest safe patch
+> - Note any side effects, invariants, or follow-up checks
+>
+> **3. Implement**
+> - Apply the fix cleanly
+> - Keep naming semantic and consistent with the existing codebase
+>
+> **4. Audit**
+> Run all relevant validation for that issue, such as:
+> - typecheck (`npx tsc --noEmit`)
+> - lint if configured
+> - targeted runtime inspection
+> - local dev startup
+> - browser validation where appropriate
+> - screenshot comparison where visual behavior matters
+> - console error review
+> - path/import verification
+>
+> **5. Iterate**
+> - If the audit fails or reveals partial breakage, fix the issue again immediately
+> - Re-run the audit
+> - Repeat until the issue is resolved or you can prove it is blocked by a different root cause
+>
+> **6. Report**
+> After each issue, provide:
+> - what was wrong
+> - what changed
+> - evidence from validation
+> - any remaining risk
+> - whether it is safe to move to the next issue
+>
+> **7. Then and only then proceed to the next issue**
+
+---
+
+#### Stage 2 — Issue 0 (rendering regression triage — resolve first)
+
+> Before addressing numbered issues: determine whether the current branch has a rendering/scaling/root-canvas regression that is upstream of the listed review issues.
+>
+> If a visual regression exists (stretched canvas, missing walls, invisible sprites):
+> - Isolate and fix that rendering regression first as **Issue 0**
+> - Validate that the map, walls, tiles, and sprites are visible again
+> - Then continue through the numbered issue list in sequence
+>
+> If the visual regression is caused by a recent responsive-scaling change, canvas sizing bug, transform bug, DPR bug, viewport calculation bug, CSS container bug, or draw-coordinate bug, treat that as Issue 0 and resolve it before Issue 1.
+
+---
+
+#### Stage 3 — Issues 1–5 (RNG integrity, save/load correctness, pickup placement, visual dead code)
+
+> Process these issues in order. Do not proceed to the next until audit passes.
+>
+> **Issue 1 — weaponDamage() RNG consumption**
+> `weaponDamage()` consumes a `combatRng.next()` call on every damage calculation, including when crit chance is zero, breaking forked stream isolation.
+> Goal: only consume RNG when a crit roll is actually needed.
+>
+> **Issue 2 — buyMysteryBox / rollLoot shared lootCounter**
+> `buyMysteryBox()` and `rollLoot()` share `lootCounter` with different seed multipliers, creating seed collision risk and coupling.
+> Goal: make loot generation deterministic, understandable, and safe for future expansion.
+>
+> **Issue 3 — saveGame hp validation**
+> `saveGame()` serializes `hp` before validation; `loadSavedGame()` does not validate numeric fields. Corrupted or tampered `localStorage` data is accepted verbatim.
+> Goal: clamp and validate saved state; prevent impossible or corrupted state from being restored into active play.
+>
+> **Issue 4 — findGroundY top-down scan**
+> `findGroundY()` scans top-down and returns the ceiling tile's Y, not the floor, causing pit-rescued pickups to spawn offscreen above the room.
+> Goal: ensure pit rescue and pickup placement always lands on reachable ground.
+>
+> **Issue 5 — drawPickups dead fillStyle**
+> `drawPickups()` has a dead `fillStyle` assignment for opened chests — the first assignment is immediately overwritten by a second, so the opened/closed chest colors are never applied.
+> Goal: remove dead assignment and restore intended opened/closed chest visual logic.
+
+---
+
+#### Stage 4 — Issues 6–8 (UI correctness, modal coupling, minimap state)
+
+> **Issue 6 — GameMenuModal weapon diff hardcoded**
+> `diff` in `GameMenuModal` is always `+8 ATK / +3 DEF` regardless of actual weapon stats. The computation uses a boolean cast rather than real values.
+> Goal: compute actual deltas from current and secondary equipment data surfaced in the snapshot.
+>
+> **Issue 7 — setUiModalOpen clears unrelated overlays**
+> `setUiModalOpen(false)` unconditionally clears `inventoryOpen`, `helpOpen`, and `shopOpen`, silently closing in-game overlays that were not opened by the external modal.
+> Goal: decouple modal state transitions so closing one UI layer does not incorrectly wipe unrelated UI state.
+>
+> **Issue 8 — respawn() minimap cleared-state inconsistency**
+> `respawn()` calls `roomStates.clear()` so enemies respawn, but the minimap `cleared` field is computed from `roomStates`, causing all previously-cleared rooms to show as uncleared immediately after respawn.
+> Goal: make minimap and room progression state internally consistent after respawn.
+
+---
+
+#### Stage 5 — Issues 9–13 (RNG bias, pity fragility, mount race, gamepad safety, fetch hardening)
+
+> **Issue 9 — generateSeedPhrase modulo bias**
+> `generateSeedPhrase()` uses `h() % 16` and `h() % 10000` — both exhibit modulo bias since 2³² is not evenly divisible by 16 or 10000.
+> Goal: remove avoidable bias using the project's safer integer-generation approach already present in `Rng.int`.
+>
+> **Issue 10 — lootPity hardcoded rarity check**
+> `lootPity` only resets on `"rare"` or `"epic"`. Any future rarity tier above epic would silently continue accumulating pity after a high-tier drop.
+> Goal: replace hardcoded rarity strings with tier-aware or rule-based logic so future rarities don't require edits here.
+>
+> **Issue 11 — ResizeObserver / Game init mount race**
+> `ResizeObserver` and `Game` initialization run in separate `useEffect`s. Both fire synchronously at mount, but canvas sizing may not be DPR-correct before `game.start()` completes on slow loads.
+> Goal: make first-render sizing deterministic; ensure canvas dimensions and DPR scaling are correct before or during startup.
+>
+> **Issue 12 — Gamepad polling loop post-unmount setState**
+> The gamepad `useEffect` (deps `[]`) runs a `requestAnimationFrame` loop. On unmount, the last queued frame can call `setMenuOpen` after the component is gone. React 18 Strict Mode double-invokes effects, making this reliably triggerable in development.
+> Goal: eliminate post-unmount state updates and make Strict Mode behavior safe.
+>
+> **Issue 13 — probeLootService missing resp.ok check**
+> `probeLootService()` calls `resp.json()` without checking `resp.ok` first. A 500 with a non-JSON body throws, is silently caught, and sets `lootSource = "client-fallback"` with no warning log, making API misconfigurations invisible.
+> Goal: harden error handling and improve debuggability without breaking fallback behavior.
+
+---
+
+#### Stage 6 — Required output format per issue
+
+> For each issue use exactly this structure:
+>
+> ```
+> ## Issue N: <short title>
+>
+> ### Investigation
+> - relevant files
+> - root cause
+> - whether blocked by another issue
+>
+> ### Patch plan
+> - concise fix description
+> - risk notes
+>
+> ### Implementation
+> - summary of code changes
+>
+> ### Audit
+> - commands run
+> - runtime checks performed
+> - browser or screenshot findings if applicable
+> - result: pass / fail
+>
+> ### Iteration
+> - what was adjusted after audit, or "no further iteration required"
+>
+> ### Status
+> - resolved / partially resolved / blocked
+> - remaining risk
+> - safe to proceed: yes / no
+> ```
+
+---
+
+#### Stage 7 — Success criteria and final report
+
+> Success criteria:
+> - Canvas and viewport behavior are stable
+> - Tiles, walls, sprites, and gameplay visuals render correctly
+> - Input still works
+> - No new type or runtime errors introduced
+> - Each numbered issue is individually addressed with validation evidence
+>
+> Final output: a concise end report listing:
+> - issues fixed
+> - files changed
+> - validations performed
+> - unresolved risks
+> - recommended next audit targets
+
+**Why it works / design notes:**
+- Breaking the prompt into numbered stages lets you hand off one stage at a time if the session context limit is hit, or run all stages as a single briefing for a capable long-context model.
+- The Issue 0 rendering-regression gate prevents wasted effort patching RNG while the canvas is broken.
+- The per-issue audit cycle prevents the agent from "fixing" ten issues and then discovering they introduced two new type errors across all of them simultaneously.
+- The explicit output format makes each issue's resolution reviewable in isolation and creates a ready-made changelog.
+- Separating identity/context (Stage 0), process (Stage 1), and issue groups (Stages 2–5) allows prompt reuse: Stages 0–1 are reusable boilerplate for any multi-issue debugging session; only Stages 2–5 are project-specific.
+
+---
+
 ## Prompts that didn't work as well
 
 ### Vague "make it better" UI prompt
