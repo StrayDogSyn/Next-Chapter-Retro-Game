@@ -12,6 +12,7 @@ export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasP
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const shellRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const gameRef = useRef<Game | null>(null);
   const [displaySize, setDisplaySize] = useState<{ width: number; height: number }>({
     width: VIEW_W,
     height: VIEW_H,
