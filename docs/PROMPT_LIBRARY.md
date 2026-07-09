@@ -109,8 +109,6 @@ _Add new prompts below as they prove reusable. Prompts that failed are just as v
 
 Full brief: [UI_REFACTOR_BRIEF.md](UI_REFACTOR_BRIEF.md)
 
-Historical handoff variant: [ui-refactor-brief-2026-07-08.md](archive/historical/session-briefs/ui-refactor-brief-2026-07-08.md) — responsive canvas scaling, header/footer HUD chrome, arrow-key reliability investigation, and GIF transparency fixes.
-
 ---
 
 ### Bug-fix / code review prompt
@@ -581,6 +579,250 @@ Output style:
 - The per-issue audit cycle prevents the agent from "fixing" ten issues and then discovering they introduced two new type errors across all of them simultaneously.
 - The explicit output format makes each issue's resolution reviewable in isolation and creates a ready-made changelog.
 - Separating identity/context (Stage 0), process (Stage 1), and issue groups (Stages 2–5) allows prompt reuse: Stages 0–1 are reusable boilerplate for any multi-issue debugging session; only Stages 2–5 are project-specific.
+
+---
+
+### Sequential sprints orchestration prompt suite
+
+**Used for:** Translating a prioritized code-review bug list into structured single-issue engineering sprints, handed to an agent one sprint at a time with mandatory audit gates between each
+
+**Tool:** Any capable long-context agent (Gemini Pro, Claude, GPT-4o) / Windsurf Cascade
+
+**Effectiveness:** ⭐⭐⭐⭐⭐ (to be updated after first complete run)
+
+**Prompt (hand each sprint separately — do not batch):**
+
+---
+
+#### Sprint 1 — Canvas scaling, coordinate space, and tile rendering restoration
+
+```markdown
+# Sprint 1: Canvas Scale Matching & Environment Layer Fix
+
+## Objective
+Fix the canvas configuration so the retro play area correctly expands to fill the inner
+viewport area dynamically without stretching or blurring. Restore visual visibility to
+missing walls, floors, and platforms.
+
+## Execution Requirements
+1. Dynamic Viewport Bounds Synchronization: Inside lib/game/game.ts (or the resize
+   callback in GameCanvas.tsx), align the internal buffer to physical pixels each frame:
+     const rect = canvas.getBoundingClientRect();
+     canvas.width = rect.width;
+     canvas.height = rect.height;
+
+2. Virtual Coordinate Transformation: Enforce a fixed virtual resolution (e.g., 640×352).
+   Scale all canvas draws by multiplying the context coordinate map scale:
+     const scaleX = canvas.width / VIRTUAL_WIDTH;
+     const scaleY = canvas.height / VIRTUAL_HEIGHT;
+     ctx.scale(scaleX, scaleY);
+
+3. Camera Coordinates Offset Restoration: Confirm all environmental tiles are drawn using
+   camera-offset coordinates (tile.x - camera.x, tile.y - camera.y).
+
+4. Solid Graphical Fallback: If a texture atlas or tile asset fails to resolve, substitute
+   a colored fill (ctx.fillStyle = '#1e293b') so solid geometry remains visible.
+
+## Verification Checklist
+- Run npx tsc --noEmit and confirm zero type errors.
+- Run python scripts/project-status.py and confirm no syntax crashes.
+- Verify walls, floors, and tile geometry are rendered and correctly bounded in the viewport.
+```
+
+---
+
+#### Sprint 2 — Player sprite inversion and character orientation repair
+
+```markdown
+# Sprint 2: Player Sprite Orientation Mirroring Logic
+
+## Objective
+Repair the player sprite rendering pipeline so the character mirrors left/right
+directions correctly based on movement velocity.
+
+## Execution Requirements
+1. Ensure the player entity retains a stateful facing direction (facingRight: boolean
+   or equivalent facing: -1 | 1 already present in the codebase).
+
+2. Wrap the character draw call in a ctx.save() / ctx.restore() block. Apply a
+   ctx.translate + ctx.scale(-1, 1) transform only when facing left:
+     ctx.save();
+     if (!player.facingRight) {
+       ctx.translate(player.x + player.width, player.y);
+       ctx.scale(-1, 1);
+       ctx.drawImage(sheet, sx, sy, sw, sh, 0, 0, drawW, drawH);
+     } else {
+       ctx.drawImage(sheet, sx, sy, sw, sh, player.x, player.y, drawW, drawH);
+     }
+     ctx.restore();
+
+3. Verify the existing drawSheetAnim helper already handles flip via the `flip`
+   parameter before adding a second transform path — avoid creating a parallel
+   sprite-drawing system.
+
+## Verification Checklist
+- Run npx tsc --noEmit.
+- Move the player left and right in the browser; confirm the sprite mirrors correctly
+  and does not break on direction change.
+```
+
+---
+
+#### Sprint 3 — RNG branch isolation and shared counter seed collision (Issues 1 & 2)
+
+```markdown
+# Sprint 3: Deterministic Stream Isolation & Seed Collision Resolution
+
+## Objective
+Fix RNG leakage in weapon damage calculations and resolve the shared lootCounter
+seed collision between buyMysteryBox() and rollLoot().
+
+## Execution Requirements
+1. Combat RNG Leak Fix (Issue 1):
+   In lib/game/game.ts → weaponDamage(), guard the combatRng.next() call so it is
+   only consumed when a crit roll is actually possible:
+     const critPct = this.stat("critChance") + (this.weapon.effect === "crit" ? 10 : 0);
+     if (critPct > 0 && this.combatRng.next() * 100 < critPct) dmg *= 2;
+
+2. Counter De-confliction (Issue 2):
+   buyMysteryBox() and rollLoot() both increment the shared lootCounter with
+   different multipliers (104729 vs 7919), creating collision risk. Isolate shop
+   purchases onto a separate counter (e.g., shopLootCounter) so the two seed
+   sequences are fully independent.
+
+## Verification Checklist
+- Run npx tsc --noEmit.
+- Confirm that loading the same run seed twice produces identical crit outcomes and
+  identical loot sequences across both the kill-drop and shop-purchase paths.
+```
+
+---
+
+#### Sprint 4 — State validation, pit-rescue floor scan, and dead draw call (Issues 3, 4, & 5)
+
+```markdown
+# Sprint 4: Storage Sanitation, Pit Coordinates Scan, and Palette Rendering
+
+## Objective
+Harden save/load state, fix the bottom-up floor scan in findGroundY, and remove the
+dead fillStyle assignment in drawPickups.
+
+## Execution Requirements
+1. Save/Load Input Range Checks (Issue 3):
+   In saveGame(), clamp hp to [1, maxHp()] before serializing if saving mid-play.
+   In loadSavedGame(), validate all numeric fields (hp, coins, xp, level) — reject
+   or clamp values that are NaN, negative, or outside plausible bounds before
+   assigning to live state.
+
+2. Bottom-Up Floor Scan (Issue 4):
+   Rewrite findGroundY() to scan from ROOM_H - 1 downward to 0 so it finds the
+   highest floor row rather than the first ceiling row:
+     private findGroundY(x: number): number {
+       const col = Math.floor(x / TILE);
+       for (let row = ROOM_H - 1; row >= 0; row--) {
+         if (this.isSolidTile(this.tileAt(col, row)) || this.tileAt(col, row) === T_PLATFORM) {
+           return row * TILE;
+         }
+       }
+       return VIEW_H / 2;
+     }
+
+3. Remove Dead fillStyle (Issue 5):
+   In drawPickups() chest case, the first ctx.fillStyle assignment is immediately
+   overwritten by the second. Remove the dead first line and confirm the remaining
+   single assignment correctly distinguishes opened vs. closed chest color.
+
+## Verification Checklist
+- Run npx tsc --noEmit.
+- Drop a pickup into a pit and confirm rescue places it on the floor, not the ceiling.
+- Open and close a chest; confirm opened/closed chest colors differ as intended.
+- Save at a shrine, reload the page, confirm HP and coins are restored correctly.
+- Tamper the localStorage JSON (set hp to -999) and confirm the game does not restore
+  a dead/invalid player state.
+```
+
+---
+
+#### Sprint 5 — UI wiring, modal lifecycle, minimap state, RNG bias, and component cleanup (Issues 6–13)
+
+```markdown
+# Sprint 5: Equipment Snapshot Comparison, Navigation Overlay, and Loop Cleanup
+
+## Objective
+Wire real weapon deltas into the menu modal, fix modal state coupling, preserve
+minimap cleared-room state through respawn, remove seed modulo bias, and resolve
+React component lifecycle safety issues.
+
+## Execution Requirements
+1. Real Weapon Diff (Issue 6):
+   In components/GameMenuModal.tsx, replace the hardcoded atkDelta / defDelta
+   constants with computed values from snapshot data:
+     const atkDelta = Math.round((snapshot.secondary.damage ?? 0) - (snapshot.weapon related damage));
+   Use whatever damage/speed fields are present in HudSnapshot. If the snapshot does
+   not yet expose these fields, add them before fixing the modal.
+
+2. Modal State Decoupling (Issue 7):
+   In setUiModalOpen(open: boolean), only close in-game overlays (inventoryOpen,
+   helpOpen, shopOpen) when open is TRUE (the external modal is opening and should
+   take focus). When open is FALSE, leave in-game overlay state untouched.
+
+3. Minimap Cleared-State After Respawn (Issue 8):
+   After respawn() calls roomStates.clear(), the minimap computes cleared from
+   the now-empty map, showing all rooms as uncleared. Track cleared rooms in a
+   separate Set<string> (clearedRooms) that is NOT wiped on respawn, and use
+   that set for the minimap cleared field instead of re-deriving from roomStates.
+
+4. Seed Modulo Bias Fix (Issue 9):
+   In lib/game/rng.ts → generateSeedPhrase(), replace h() % SEED_WORDS.length and
+   h() % 10000 with the existing Rng.int(min, max) method or equivalent rejection
+   sampling to remove modulo bias.
+
+5. Pity Tier-Aware Reset (Issue 10):
+   In rollLoot(), replace the hardcoded rarity === "rare" || rarity === "epic" check
+   with a tier-based comparison using the RARITIES map so any future rarity above
+   the common/uncommon tier automatically resets pity without code changes here.
+
+6. ResizeObserver / Game Init Race (Issue 11):
+   In GameCanvas.tsx, ensure canvas dimensions are set to DPR-correct values before
+   game.start() is called. Either merge the resize logic into the same useEffect that
+   creates the Game instance, or call updateCanvasSize() synchronously before start().
+
+7. Gamepad Loop Post-Unmount Safety (Issue 12):
+   In the gamepad useEffect, introduce a mounted flag and check it before calling
+   setMenuOpen inside the rAF callback:
+     let mounted = true;
+     // inside rAF callback:
+     if (!mounted) return;
+     // cleanup:
+     return () => { mounted = false; cancelAnimationFrame(frame); };
+
+8. probeLootService resp.ok Check (Issue 13):
+   Before calling resp.json() in fetchOrFallbackRoll() and the probe path, check
+   resp.ok. If false, log a console.warn with the status code and throw so the
+   catch block falls back cleanly instead of trying to parse an HTML error page.
+
+## Verification Checklist
+- Run npx tsc --noEmit — zero errors required before moving on.
+- Run npm run build — confirm production build is clean.
+- Open the in-game menu with a secondary weapon equipped; verify the ATK/DEF diff
+  shows real numbers, not always +8/+3.
+- Open the external React menu, close it, and confirm the in-game inventory state
+  is unchanged.
+- Die and respawn; confirm the minimap still shows previously-cleared rooms as cleared.
+- Unmount and remount GameCanvas in React Strict Mode (dev); confirm no console
+  warnings about setState on unmounted component.
+- Trigger a /api/loot 500 response (stop the Python service); confirm a console.warn
+  is logged and the game falls back to the client roller without crashing.
+```
+
+---
+
+**Why it works / design notes:**
+- Sprint boundaries map directly to related bug groups: rendering first (Sprints 1–2), then game-logic correctness (Sprints 3–4), then UI and infrastructure hardening (Sprint 5). Each sprint is independently auditable.
+- Handing sprints one at a time prevents an agent from silently carrying a broken intermediate state forward across unrelated fixes and discovering the failures only at the end.
+- Each sprint's verification checklist is written as concrete observable outcomes (visual confirmation, specific localStorage tamper test, Strict Mode remount check) rather than just "run tsc" — this forces the agent to demonstrate behavior, not just compilation health.
+- Sprint 2 explicitly guards against creating a parallel sprite-draw system, which is the failure mode documented in the "Vague make it better UI prompt" anti-pattern entry below.
+- The separation of Sprints 1–2 (rendering) from Sprints 3–5 (logic) mirrors the Issue 0 rendering gate from the prior staged prompt entry — both patterns enforce the same discipline from different angles.
 
 ---
 
