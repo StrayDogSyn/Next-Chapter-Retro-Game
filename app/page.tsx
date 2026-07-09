@@ -5,38 +5,15 @@ import { GameCanvas } from "@/components/GameCanvas";
 import { StartMenu } from "@/components/StartMenu";
 import { Game, type HudSnapshot } from "@/lib/game/game";
 
-type LevelPayload = {
-  ok: boolean;
-  source: string;
-  level: {
-    seed: string;
-    platforms: Array<{ x: number; y: number; width: number }>;
-  };
-  error?: string;
-};
-
 export default function Home() {
   const [gameStarted, setGameStarted] = useState(false);
   const [continueFromSave, setContinueFromSave] = useState(false);
   const [hasSave, setHasSave] = useState(false);
-  const [levelData, setLevelData] = useState<LevelPayload | null>(null);
   const [snapshot, setSnapshot] = useState<HudSnapshot | null>(null);
   const [controlsOpen, setControlsOpen] = useState(false);
 
   useEffect(() => {
     setHasSave(Game.hasSave());
-  }, []);
-
-  useEffect(() => {
-    async function loadLevelData() {
-      const response = await fetch("/api/procedural-level", { cache: "no-store" });
-      const payload = (await response.json()) as LevelPayload;
-      setLevelData(payload);
-    }
-
-    loadLevelData().catch(() => {
-      setLevelData(null);
-    });
   }, []);
 
   return (
@@ -103,15 +80,6 @@ export default function Home() {
           </section>
         ) : null}
 
-        {!gameStarted ? (
-          <div className="python-status" role="status" aria-live="polite">
-            <strong>Python Service:</strong>{" "}
-            {levelData
-              ? `${levelData.source} (${levelData.level.platforms.length} platforms)`
-              : "Waiting for response..."}
-            {" · loot rolling: see HUD indicator in-game"}
-          </div>
-        ) : null}
       </section>
     </main>
   );
