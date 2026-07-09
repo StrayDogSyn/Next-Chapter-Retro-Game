@@ -105,7 +105,7 @@ const GAMEPAD_BUTTON_BINDINGS: Record<number, InputAction> = {
   15: "right", // D-pad right
 };
 
-const STICK_DEADZONE = 0.25;
+const STICK_DEADZONE = 0.2;
 
 function applyDeadzone(value: number, deadzone: number): number {
   if (Math.abs(value) <= deadzone) return 0;

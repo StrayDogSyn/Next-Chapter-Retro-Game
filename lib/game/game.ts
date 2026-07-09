@@ -42,6 +42,9 @@ import { loadAssetManifest, resolveManifestAsset, type AssetManifest } from "./a
 
 export const VIEW_W = ROOM_W * TILE; // 640
 export const VIEW_H = ROOM_H * TILE; // 352
+const COYOTE_TIME_S = 0.1;
+const JUMP_BUFFER_S = 0.12;
+const HITSTOP_S = 0.05;
 
 // ─────────────────────────── types ───────────────────────────
 
@@ -134,6 +137,7 @@ type DamageOptions = {
   effect?: WeaponInstance["effect"];
   bypassStatusMult?: boolean;
   applyOnHitEffects?: boolean;
+  causedByPlayerHit?: boolean;
 };
 
 export type HudSnapshot = {
@@ -263,6 +267,8 @@ export class Game {
   private onGround = false;
   private jumpsUsed = 0;
   private coyoteT = 0;
+  private jumpBufferT = 0;
+  private hitstopT = 0;
   private hp = 100;
   private iframes = 0;
   private attackCooldown = 0;
@@ -753,6 +759,12 @@ export class Game {
       return;
     }
 
+    if (this.hitstopT > 0) {
+      this.hitstopT = Math.max(0, this.hitstopT - dt);
+      this.pushSnapshot(dt);
+      return;
+    }
+
     if (this.phase === "dead" || this.phase === "victory") {
       if (this.input.state.pressed.jump || this.input.state.pressed.interact) {
         this.respawn();
@@ -772,6 +784,7 @@ export class Game {
   private updatePlayer(dt: number) {
     const input = this.input.state;
 
+    if (this.jumpBufferT > 0) this.jumpBufferT -= dt;
     if (this.iframes > 0) this.iframes -= dt;
     if (this.attackCooldown > 0) this.attackCooldown -= dt;
     if (this.attackAnimT > 0) this.attackAnimT -= dt;
@@ -801,22 +814,28 @@ export class Game {
 
     // jumping (coyote time + optional double jump)
     if (this.onGround) {
-      this.coyoteT = 0.1;
+      this.coyoteT = COYOTE_TIME_S;
       this.jumpsUsed = 0;
     } else if (this.coyoteT > 0) {
       this.coyoteT -= dt;
     }
-    if (input.pressed.jump) {
+    const consumeJump = (useGroundJump: boolean) => {
+      this.pvy = this.jumpVelocity();
+      this.jumpsUsed = useGroundJump ? 1 : this.jumpsUsed + 1;
+      this.coyoteT = 0;
+      this.jumpBufferT = 0;
+      this.audio.play("jump", 0.7);
+      this.onGround = false;
+    };
+    if (input.pressed.jump) this.jumpBufferT = JUMP_BUFFER_S;
+    if (this.jumpBufferT > 0) {
       const canGroundJump = this.onGround || this.coyoteT > 0;
       // Air-jump requires: not a ground jump, double-jump upgrade, and at least
       // one prior jump already consumed (prevents a free air-jump when knocked
       // airborne with jumpsUsed still at 0).
       const canAirJump = !canGroundJump && this.jumpsUsed >= 1 && this.jumpsUsed < this.maxJumps();
       if (canGroundJump || canAirJump) {
-        this.pvy = this.jumpVelocity();
-        this.jumpsUsed = canGroundJump ? 1 : this.jumpsUsed + 1;
-        this.coyoteT = 0;
-        this.audio.play("jump", 0.7);
+        consumeJump(canGroundJump);
       }
     }
     // variable jump height
@@ -841,6 +860,7 @@ export class Game {
     this.pvx = body.vx;
     this.pvy = body.vy;
     this.onGround = result.onGround;
+    if (this.jumpBufferT > 0 && this.onGround) consumeJump(true);
 
     // AST-005: footstep cadence while walking on solid ground
     if (this.onGround && Math.abs(this.pvx) > 10 && this.dashT <= 0) {
@@ -857,8 +877,7 @@ export class Game {
     const midCol = Math.floor((this.px + this.pw / 2) / TILE);
     const feetRow = Math.floor((this.py + this.ph) / TILE);
     if (this.tileAt(midCol, feetRow) === T_SPIKE && this.iframes <= 0) {
-      this.damagePlayer(12);
-      this.pvy = -260;
+      this.damagePlayer(12, { x: this.pvx * -0.2, y: -220 });
     }
 
     // attack
@@ -917,7 +936,10 @@ export class Game {
     for (const enemy of enemies) {
       if (enemy.hp <= 0) continue;
       if (rectsOverlap(hitbox, enemy)) {
-        this.damageEnemy(enemy, this.weaponDamage(), { effect: this.weapon.effect });
+        this.damageEnemy(enemy, this.weaponDamage(), {
+          effect: this.weapon.effect,
+          causedByPlayerHit: true,
+        });
       }
     }
   }
@@ -968,6 +990,9 @@ export class Game {
     }
     if (enemy.hp > 0 && options.effect) {
       this.applyStatus(options.effect, enemy, scaled);
+    }
+    if (options.causedByPlayerHit) {
+      this.hitstopT = Math.max(this.hitstopT, HITSTOP_S);
     }
     if (enemy.hp <= 0) {
       this.onEnemyKilled(enemy);
@@ -1020,12 +1045,16 @@ export class Game {
     }
   }
 
-  private damagePlayer(amount: number) {
+  private damagePlayer(amount: number, knockback?: { x: number; y: number }) {
     if (this.iframes > 0 || this.phase !== "playing") return;
     const reduced = amount * (1 - Math.min(60, this.stat("defense")) / 100);
     this.hp -= reduced;
     this.iframes = 0.8;
     this.audio.play("hit", 0.9);
+    if (knockback) {
+      this.pvx = knockback.x;
+      this.pvy = Math.min(this.pvy, knockback.y);
+    }
     if (this.stat("thorns") > 0) {
       // thorns damages nearby enemies
       const enemies = this.roomState(this.roomId).enemies;
@@ -1232,7 +1261,8 @@ export class Game {
                 h: enemy.h,
               };
               if (rectsOverlap(clawBox, { x: this.px, y: this.py, w: this.pw, h: this.ph })) {
-                this.damagePlayer(20);
+                const dir = Math.sign(this.px + this.pw / 2 - (enemy.x + enemy.w / 2)) || 1;
+                this.damagePlayer(20, { x: dir * 190, y: -200 });
               }
             }
             if (enemy.stateTime > 0.9) {
@@ -1286,9 +1316,8 @@ export class Game {
         this.iframes <= 0 &&
         rectsOverlap(enemy, { x: this.px, y: this.py, w: this.pw, h: this.ph })
       ) {
-        this.damagePlayer(enemy.touchDamage);
-        this.pvx = Math.sign(this.px - enemy.x) * 180;
-        this.pvy = -180;
+        const dir = Math.sign(this.px + this.pw / 2 - (enemy.x + enemy.w / 2)) || 1;
+        this.damagePlayer(enemy.touchDamage, { x: dir * 180, y: -180 });
       }
     }
 
@@ -1333,7 +1362,10 @@ export class Game {
       if (p.friendly) {
         for (const enemy of enemies) {
           if (enemy.hp > 0 && pointInRect(p.x, p.y, enemy)) {
-            this.damageEnemy(enemy, p.damage, { effect: p.effect });
+            this.damageEnemy(enemy, p.damage, {
+              effect: p.effect,
+              causedByPlayerHit: true,
+            });
             return false;
           }
         }
@@ -1341,7 +1373,8 @@ export class Game {
         this.iframes <= 0 &&
         pointInRect(p.x, p.y, { x: this.px, y: this.py, w: this.pw, h: this.ph })
       ) {
-        this.damagePlayer(p.damage);
+        const dir = Math.sign(this.px + this.pw / 2 - p.x) || 1;
+        this.damagePlayer(p.damage, { x: dir * 160, y: -140 });
         return false;
       }
       return true;

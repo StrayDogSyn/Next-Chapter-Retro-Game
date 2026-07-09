@@ -109,6 +109,8 @@ _Add new prompts below as they prove reusable. Prompts that failed are just as v
 
 Full brief: [UI_REFACTOR_BRIEF.md](UI_REFACTOR_BRIEF.md)
 
+Historical handoff variant: [ui-refactor-brief-2026-07-08.md](archive/historical/session-briefs/ui-refactor-brief-2026-07-08.md) — responsive canvas scaling, header/footer HUD chrome, arrow-key reliability investigation, and GIF transparency fixes.
+
 ---
 
 ### Bug-fix / code review prompt
