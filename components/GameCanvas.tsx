@@ -21,18 +21,16 @@ export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasP
   const gamepadMenuPressedRef = useRef(false);
 
   useEffect(() => {
-    const stage = stageRef.current;
     const canvas = canvasRef.current;
-    if (!stage || !canvas) return;
+    const stage = stageRef.current;
+    if (!canvas || !stage) return;
 
     const updateCanvasSize = () => {
       const rect = stage.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return;
-
       const dpr = window.devicePixelRatio || 1;
       const pixelWidth = Math.max(1, Math.floor(rect.width * dpr));
       const pixelHeight = Math.max(1, Math.floor(rect.height * dpr));
-
       if (gameRef.current) {
         gameRef.current.resizeViewport(pixelWidth, pixelHeight);
       } else if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
@@ -41,28 +39,8 @@ export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasP
       }
     };
 
-    const observer = new ResizeObserver(updateCanvasSize);
-    observer.observe(stage);
+    // Ensure deterministic first frame sizing before starting the game loop.
     updateCanvasSize();
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const stage = stageRef.current;
-    if (!canvas || !stage) return;
-
-    // Issue 11: size the canvas to DPR-correct dimensions before the game loop
-    // starts so the first frame is never rendered at the default VIEW_W×VIEW_H.
-    const rect = stage.getBoundingClientRect();
-    if (rect.width > 0 && rect.height > 0) {
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
-      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
-    }
 
     const game = new Game(canvas);
     gameRef.current = game;
@@ -71,9 +49,12 @@ export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasP
       onSnapshot(snap);
     };
     void game.start(continueFromSave);
+    const observer = new ResizeObserver(updateCanvasSize);
+    observer.observe(stage);
     handleFocus();
 
     return () => {
+      observer.disconnect();
       game.destroy();
       gameRef.current = null;
     };

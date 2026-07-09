@@ -1572,7 +1572,7 @@ export class Game {
     // certainty would let testers farm pity deliberately.
     const luck = this.stat("luck") + Math.min(300, this.lootPity * Game.PITY_LUCK_PER_MISS);
     const drop = await this.fetchOrFallbackRoll(seed, luck, enemyLevel);
-    const pityReset = RARITIES[drop.rarity].weight <= RARITIES["uncommon"].weight;
+    const pityReset = rarityAtLeast(drop.rarity, "rare");
     if (pityReset) {
       this.lootPity = 0;
     } else {
@@ -2433,4 +2433,10 @@ function clampNumber(value: unknown, min: number, max: number, fallback: number)
 
 function isUpgradeId(value: string): value is UpgradeId {
   return value in UPGRADE_DEFS;
+}
+
+const RARITY_ORDER: Rarity[] = ["common", "uncommon", "rare", "epic"];
+
+function rarityAtLeast(rarity: Rarity, minimum: Rarity): boolean {
+  return RARITY_ORDER.indexOf(rarity) >= RARITY_ORDER.indexOf(minimum);
 }
