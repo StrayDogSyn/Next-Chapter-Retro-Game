@@ -1358,8 +1358,8 @@ export class Game {
   }
 
   /**
-   * Nearest solid/platform floor Y for a given column, scanning downward from
-   * the top of the room. Falls back to the room's vertical center if the
+    * Nearest solid/platform floor Y for a given column, scanning upward from
+    * the bottom of the room. Falls back to the room's vertical center if the
    * column is a sheer drop with no floor (open bottom edge) so pit rescue
    * always has somewhere to land instead of despawning the item.
    */

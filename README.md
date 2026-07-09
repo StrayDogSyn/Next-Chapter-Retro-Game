@@ -139,10 +139,6 @@ uvicorn main:app --reload  # http://localhost:8000
 
 The canvas keeps its internal 640×352 resolution but scales to fit the viewport while preserving aspect ratio and crisp pixel art.
 
-| 800 px window | 2560 px window |
-| --- | --- |
-| ![800px](assets/img/screenshots/task1-resize-800.png) | ![2560px](assets/img/screenshots/task1-resize-2560.png) |
-
 ### Playtest
 
 ![Playtest](assets/img/screenshots/playtest01.png)
