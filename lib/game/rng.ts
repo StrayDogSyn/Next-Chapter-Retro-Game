@@ -111,11 +111,19 @@ export class Rng {
   }
 }
 
+/** Bias-free integer in [0, n) using rejection sampling over a 32-bit hash generator. */
+function unbiasedInt(gen: () => number, n: number): number {
+  const limit = Math.floor(0x100000000 / n) * n;
+  let v: number;
+  do { v = gen(); } while (v >= limit);
+  return v % n;
+}
+
 /** Human-shareable seed like "WOLF-4207" for the death screen / bug reports. */
 export function generateSeedPhrase(entropy: string = `${Date.now()}`): string {
   const h = xmur3(entropy);
-  const word = SEED_WORDS[h() % SEED_WORDS.length];
-  const num = h() % 10000;
+  const word = SEED_WORDS[unbiasedInt(h, SEED_WORDS.length)];
+  const num = unbiasedInt(h, 10000);
   return `${word}-${num.toString().padStart(4, "0")}`;
 }
 

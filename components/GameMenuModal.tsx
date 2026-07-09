@@ -24,9 +24,9 @@ export function GameMenuModal({ open, snapshot, onClose }: Props) {
 
   const diff = useMemo(() => {
     if (!snapshot?.secondary) return null;
-    const atkDelta = Math.round((snapshot.secondary ? 1 : 0) * 8);
-    const defDelta = snapshot.secondary ? 3 : 0;
-    return { atkDelta, defDelta };
+    const atkDelta = Math.round(snapshot.secondary.damage - snapshot.weapon.damage);
+    const speedDelta = Math.round((snapshot.secondary.speed - snapshot.weapon.speed) * 10) / 10;
+    return { atkDelta, speedDelta };
   }, [snapshot]);
 
   if (!open || !snapshot) return null;
@@ -66,8 +66,8 @@ export function GameMenuModal({ open, snapshot, onClose }: Props) {
                   <div style={{ color: (diff?.atkDelta ?? 0) >= 0 ? "#74e09a" : "#ef6f6f" }}>
                     ATK {(diff?.atkDelta ?? 0) >= 0 ? `+${diff?.atkDelta ?? 0}` : diff?.atkDelta}
                   </div>
-                  <div style={{ color: (diff?.defDelta ?? 0) >= 0 ? "#74e09a" : "#ef6f6f" }}>
-                    DEF {(diff?.defDelta ?? 0) >= 0 ? `+${diff?.defDelta ?? 0}` : diff?.defDelta}
+                  <div style={{ color: (diff?.speedDelta ?? 0) >= 0 ? "#74e09a" : "#ef6f6f" }}>
+                    SPD {(diff?.speedDelta ?? 0) >= 0 ? `+${diff?.speedDelta ?? 0}` : diff?.speedDelta}/s
                   </div>
                 </div>
               ) : null}

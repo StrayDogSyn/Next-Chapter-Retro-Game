@@ -142,8 +142,8 @@ export type HudSnapshot = {
   shield: number;
   maxShield: number;
   coins: number;
-  weapon: { name: string; rarity: string; color: string; rolledBy: string };
-  secondary: { name: string; rarity: string; color: string } | null;
+  weapon: { name: string; rarity: string; color: string; rolledBy: string; damage: number; speed: number };
+  secondary: { name: string; rarity: string; color: string; damage: number; speed: number } | null;
   roomName: string;
   zone: ZoneId;
   gamepad: string | null;
@@ -224,6 +224,7 @@ export class Game {
   private world = loadWorld();
   private roomCoords = computeRoomCoords(this.world);
   private visitedRooms = new Set<string>([START_ROOM]);
+  private clearedRooms = new Set<string>();
   private roomStates = new Map<string, RoomState>();
   private roomId = START_ROOM;
   private meta: SpriteMeta | null = null;
@@ -434,9 +435,11 @@ export class Game {
 
   setUiModalOpen(open: boolean) {
     this.externalMenuOpen = open;
-    this.inventoryOpen = false;
-    this.helpOpen = false;
-    this.shopOpen = false;
+    if (open) {
+      this.inventoryOpen = false;
+      this.helpOpen = false;
+      this.shopOpen = false;
+    }
     if (open && this.phase === "playing") {
       this.phase = "paused";
       this.externalMenuPaused = true;
@@ -451,6 +454,11 @@ export class Game {
   private async probeLootService() {
     try {
       const resp = await fetch(`/api/loot?seed=${this.runSeed}&luck=0&enemyLevel=1`);
+      if (!resp.ok) {
+        console.warn(`[loot-probe] HTTP ${resp.status} — falling back to client roller`);
+        this.lootSource = "client-fallback";
+        return;
+      }
       const payload = await resp.json();
       this.lootSource = payload.ok ? "python-service" : "client-fallback";
     } catch {
@@ -1357,7 +1365,7 @@ export class Game {
    */
   private findGroundY(x: number): number {
     const col = Math.floor(x / TILE);
-    for (let row = 0; row < ROOM_H; row++) {
+    for (let row = ROOM_H - 1; row >= 0; row--) {
       if (this.isSolidTile(this.tileAt(col, row)) || this.tileAt(col, row) === T_PLATFORM) {
         return row * TILE;
       }
@@ -1564,7 +1572,8 @@ export class Game {
     // certainty would let testers farm pity deliberately.
     const luck = this.stat("luck") + Math.min(300, this.lootPity * Game.PITY_LUCK_PER_MISS);
     const drop = await this.fetchOrFallbackRoll(seed, luck, enemyLevel);
-    if (drop.rarity === "rare" || drop.rarity === "epic") {
+    const pityReset = RARITIES[drop.rarity].weight <= RARITIES["uncommon"].weight;
+    if (pityReset) {
       this.lootPity = 0;
     } else {
       this.lootPity += 1;
@@ -1582,6 +1591,10 @@ export class Game {
         `/api/loot?seed=${seed}&luck=${luck}&enemyLevel=${enemyLevel}`,
         { signal: abort.signal },
       );
+      if (!resp.ok) {
+        console.warn(`[loot] HTTP ${resp.status} from /api/loot — using client fallback`);
+        throw new Error(`HTTP ${resp.status}`);
+      }
       const payload = await resp.json();
       if (payload.ok && payload.drop) {
         this.lootSource = "python-service";
@@ -1628,6 +1641,10 @@ export class Game {
   private respawn() {
     this.hp = this.maxHp();
     this.phase = "playing";
+    // Snapshot cleared state before wiping room states so the minimap survives respawn.
+    for (const [id, state] of this.roomStates) {
+      if (state.enemies.every((e) => e.hp <= 0)) this.clearedRooms.add(id);
+    }
     this.roomStates.clear(); // enemies respawn; upgrades/weapons/flags are kept
     this.musicMode = "none";
     this.spawnIntoRoom(START_ROOM, "spawnPoint");
@@ -1756,7 +1773,7 @@ export class Game {
       this.upgrades = normalizedUpgrades;
       this.flags = data.flags;
       const visited = Array.isArray(data.visitedRooms)
-        ? data.visitedRooms.filter((id): id is string => typeof id === "string" && this.world.has(id))
+        ? data.visitedRooms.filter((id: unknown): id is string => typeof id === "string" && this.world.has(id))
         : [];
       this.visitedRooms = new Set<string>(visited);
       this.visitedRooms.add(roomId);
@@ -1852,12 +1869,16 @@ export class Game {
         rarity: this.weapon.rarity,
         color: RARITIES[this.weapon.rarity].color,
         rolledBy: this.weapon.rolledBy,
+        damage: this.weapon.damage + this.shopAtkBonus,
+        speed: this.weapon.speed,
       },
       secondary: this.secondary
         ? {
             name: this.secondary.name,
             rarity: this.secondary.rarity,
             color: RARITIES[this.secondary.rarity].color,
+            damage: this.secondary.damage,
+            speed: this.secondary.speed,
           }
         : null,
       roomName: `${this.room().name} (${this.roomId})`,
@@ -1899,7 +1920,7 @@ export class Game {
           x: coord.x,
           y: coord.y,
           visited: this.visitedRooms.has(room.id),
-          cleared: state ? state.enemies.every((e) => e.hp <= 0) : false,
+          cleared: this.clearedRooms.has(room.id) || (state ? state.enemies.every((e) => e.hp <= 0) : false),
           current: room.id === this.roomId,
           boss: room.boss,
         };
@@ -2342,7 +2363,6 @@ export class Game {
           ctx.fillRect(x + 10, y + 2, 6, 12);
           break;
         case "chest":
-          ctx.fillStyle = pickup.opened ? "#57534e" : "#92400e";
           ctx.fillStyle = pickup.opened ? "#78716c" : "#b45309";
           ctx.fillRect(x, y, 20, 6);
           ctx.fillStyle = "#facc15";

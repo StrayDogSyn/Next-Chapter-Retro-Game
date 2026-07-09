@@ -52,7 +52,17 @@ export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasP
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const stage = stageRef.current;
+    if (!canvas || !stage) return;
+
+    // Issue 11: size the canvas to DPR-correct dimensions before the game loop
+    // starts so the first frame is never rendered at the default VIEW_W×VIEW_H.
+    const rect = stage.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+    }
 
     const game = new Game(canvas);
     gameRef.current = game;
@@ -116,7 +126,9 @@ export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasP
 
   useEffect(() => {
     let frame = 0;
+    let mounted = true;
     const poll = () => {
+      if (!mounted) return;
       const pads = navigator.getGamepads ? navigator.getGamepads() : [];
       const firstConnected = Array.from(pads).find((pad) => pad && pad.connected);
       const pressed = Boolean(
@@ -133,7 +145,10 @@ export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasP
     };
 
     frame = requestAnimationFrame(poll);
-    return () => cancelAnimationFrame(frame);
+    return () => {
+      mounted = false;
+      cancelAnimationFrame(frame);
+    };
   }, []);
 
   const copySeed = async () => {
