@@ -99,6 +99,17 @@ REQUEST_DELAY_SECONDS = 1.5  # be polite to both APIs
 # OPENGAMEART SCRAPER
 # ---------------------------------------------------------------------------
 
+
+# A second class of thumbnail slipped past the original /styles/ filter:
+# some OGA submissions attach their small "-preview.png"/"prev.png"
+# companion image directly under /sites/default/files/ (no /styles/ path
+# at all), and when no size-labeled link exists that file becomes the
+# last/only candidate. Confirmed in practice: lpc_beetle, lpc_goblin,
+# lpc_golem, monkey_lad_in_magical_planet, and rpg_enemies_11_dragons were
+# all downloaded from URLs matching this pattern (see manifest_bulk.csv).
+PREVIEW_FILENAME_RE = re.compile(r"prev(?:iew)?\.[a-zA-Z0-9]+$", re.IGNORECASE)
+
+
 def find_oga_download_link(page_url: str) -> str | None:
     """
     OpenGameArt file links live under /sites/default/files/... — but that
@@ -112,7 +123,9 @@ def find_oga_download_link(page_url: str) -> str | None:
     includes a file size, e.g. "DarkSaber.zip 19.9 Mb" or "werewolf.png
     7 Kb". We prioritize that signal first, then fall back to preferred
     extensions, then the LAST non-thumbnail candidate (attachments
-    typically appear after body content, not before it).
+    typically appear after body content, not before it) — but candidates
+    whose filename itself looks like a preview/prev image are deprioritized
+    to dead last, since a same-page real attachment should win instead.
     """
     resp = requests.get(page_url, headers=HEADERS, timeout=20)
     resp.raise_for_status()
@@ -135,10 +148,18 @@ def find_oga_download_link(page_url: str) -> str | None:
     if not candidates:
         return None
 
+    non_preview = [c for c in candidates if not PREVIEW_FILENAME_RE.search(c)]
+
     preferred_ext = (".zip", ".wav", ".ogg", ".mp3", ".rar", ".7z")
-    for c in candidates:
+    for c in non_preview:
         if c.lower().endswith(preferred_ext):
             return c
+    if non_preview:
+        return non_preview[-1]
+
+    # Every candidate looks like a preview image — there's nothing better
+    # on the page. Return it anyway (caller tags it as preview-only rather
+    # than a generic size-based guess).
     return candidates[-1]
 
 
@@ -166,7 +187,10 @@ def download_oga_asset(page_url: str, save_stem: str, dest_dir: Path) -> dict:
     dest_path.write_bytes(file_resp.content)
 
     size_kb = len(file_resp.content) / 1024
-    if size_kb < 20 and ext in (".png", ".jpg", ".jpeg", ".gif"):
+    if PREVIEW_FILENAME_RE.search(file_url):
+        note = f"{file_url}  [CONFIRMED PREVIEW IMAGE — not the real asset, re-fetch from the page manually]"
+        result.update(filename=filename, status="downloaded-preview-only", note=note)
+    elif size_kb < 20 and ext in (".png", ".jpg", ".jpeg", ".gif"):
         note = f"{file_url}  [WARNING: only {size_kb:.1f}KB — likely a thumbnail, verify manually]"
         result.update(filename=filename, status="downloaded-unverified", note=note)
     else:
