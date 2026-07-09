@@ -16,9 +16,11 @@ export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasP
   const shellRef = useRef<HTMLDivElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
-  const [snapshot, setSnapshot] = useState<HudSnapshot | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const gamepadMenuPressedRef = useRef(false);
+  const gameRef = useRef<Game | null>(null);
+  const [displaySize, setDisplaySize] = useState<{ width: number; height: number }>({
+    width: VIEW_W,
+    height: VIEW_H,
+  });
 
   useEffect(() => {
     const canvas = canvasRef.current;
