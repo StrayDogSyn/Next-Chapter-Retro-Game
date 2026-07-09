@@ -92,6 +92,16 @@ After each work session, update `README.md` with:
 - **Reasoning:** Multiple overlapping documentation files were causing confusion
 - **Implementation:** This consolidated WORKFLOW.md file
 
+### ADR-008: Seeded Deterministic RNG (no external randomness APIs)
+- **Decision:** All gameplay randomness derives from one per-run seed phrase (e.g. `WOLF-4207`) via `lib/game/rng.ts` (xmur3 + sfc32); subsystems use forked streams (`combat`, `loot`, `shop`, `vfx`). Rejected: external randomness API calls at runtime — wrong tool on static hosting (latency, rate limits, offline death, and no reproducibility).
+- **Reasoning:** *Before:* `runSeed = Math.floor(Math.random() * 1e6)` — unreproducible runs, useless bug reports. *After:* seed phrase surfaced in HUD state → shareable runs, daily-challenge capability (`dailySeed()`), and "seed X, room 3" bug reports that replay exactly. Stream forking means opening an extra chest cannot shift combat crit sequences. Pity timer rides the existing luck formula (identical on Python + fallback paths per ADR-003) as bonus effective luck — +15 per sub-rare drop, capped at +300, reset on rare+ — so pity works on both roll paths with zero roller changes.
+- **Implementation:** `lib/game/rng.ts`; `game.ts` root `Rng` + forked streams replacing all `Math.random()` call sites; `rollLoot()` pity accounting; `seed` field in HUD snapshot. Verified: same-seed sequence match, stream isolation, `tsc --strict`, longest rare+ drought 18 over 2,000 simulated opens.
+
+### ADR-009: Assets Served From public/assets/extracted (build-time extraction)
+- **Decision:** Asset zips in `assets/` are unpacked by `scripts/asset-extract.py` into `public/assets/extracted/<kebab-slug>/` with a generated `manifest.json`; the game discovers assets from the manifest instead of hardcoding paths.
+- **Reasoning:** Next.js only serves files under `public/` — anything loaded from repo-root `assets/` works in local screenshots and ships blank on GitHub Pages. Manifest paths are public-relative so the Pages `BASE_PATH` prefix applies cleanly. Extraction guards against zip-slip and strips `__MACOSX`/`Thumbs.db` junk.
+- **Implementation:** `scripts/asset-extract.py`; 10 packs / 652 files extracted 2026-07-08.
+
 ---
 
 ## Effective Prompts for This Project
