@@ -1,4 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+
+// The Python service is not available during static export (GitHub Pages).
+// force-static lets Next.js pre-render this route; the service call fails
+// gracefully and the client uses its ADR-003 fallback roll.
+export const dynamic = "force-static";
 
 /**
  * Proxy to the Python loot service (ADR-001: loot rolling lives in Python).
@@ -9,11 +14,11 @@ import { NextResponse } from "next/server";
  * degraded-mode fallback roll (ADR-003) so gameplay never hard-blocks on the
  * second service being up.
  */
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const seed = url.searchParams.get("seed") ?? "0";
-  const luck = url.searchParams.get("luck") ?? "0";
-  const enemyLevel = url.searchParams.get("enemyLevel") ?? "1";
+export async function GET(request: NextRequest) {
+  const { searchParams } = request.nextUrl;
+  const seed = searchParams.get("seed") ?? "0";
+  const luck = searchParams.get("luck") ?? "0";
+  const enemyLevel = searchParams.get("enemyLevel") ?? "1";
 
   const pythonService = process.env.PYTHON_SERVICE_URL ?? "http://127.0.0.1:8000";
 

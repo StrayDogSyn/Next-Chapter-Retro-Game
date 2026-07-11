@@ -1,7 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
+// The Python service is not available during static export (GitHub Pages).
+// force-static lets Next.js pre-render this route; the service call fails
+// gracefully and the client uses its ADR-003 fallback roll.
+export const dynamic = "force-static";
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = request.nextUrl;
   const seed = Number(searchParams.get("seed") ?? "42");
   const quantityRaw = Number(searchParams.get("quantity") ?? "5");
   const luck = Number(searchParams.get("luck") ?? "0");
