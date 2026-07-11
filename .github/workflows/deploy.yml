@@ -27,14 +27,12 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: Next-Chapter-Retro-Game/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        working-directory: Next-Chapter-Retro-Game
         run: npm ci
 
       - name: Build (static export)
-        working-directory: Next-Chapter-Retro-Game
         run: npm run build
         env:
           NODE_ENV: production
@@ -42,7 +40,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: Next-Chapter-Retro-Game/out
+          path: out
 
   deploy:
     needs: build
