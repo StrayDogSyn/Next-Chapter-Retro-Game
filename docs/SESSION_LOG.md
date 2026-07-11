@@ -25,6 +25,22 @@ Full chronological record of every AI-paired session on this project. The summar
 
 ## Entries
 
+### 2026-07-11 — Fix pre-existing build break: browser now calls python-service directly (ADR-008)
+
+- **Tool used:** Claude Code
+- **Goal:** Resolve the `npm run build` failure logged as a VERIFICATION FAILURE in the previous entry — static export (`output: "export"`, for GitHub Pages) can't run Next.js API routes that read `request.url` at runtime.
+- **Prompt summary:** User chose "move Python-proxy calls client-side" over "drop static export" when offered the choice.
+- **What the agent produced:**
+  - Repo-wide grep confirmed only `/api/loot` had any caller (`lib/game/game.ts`, 2 call sites: `probeLootService`, `fetchOrFallbackRoll`); `/api/generate-loot` and `/api/procedural-level` were unused.
+  - Auto-mode classifier paused an `rm -rf` covering all three routes, since only `/api/loot`'s migration had been shown and the user's approval didn't explicitly name deleting the two unused ones — asked the user directly via AskUserQuestion; confirmed to delete all three (`generate-loot` independently breaks the build the same way, so leaving it would keep `npm run build` red).
+  - Added `lib/game/loot-client.ts` — browser fetches `python-service`'s `/loot/roll` directly via `NEXT_PUBLIC_PYTHON_SERVICE_URL`, same request/response shape the deleted route used, so `game.ts`'s two call sites changed minimally.
+  - Added CORS (`CORSMiddleware`) to `python-service/main.py` for `localhost:3000`, `127.0.0.1:3000`, and `https://straydogsyn.github.io` (derived from `git remote -v`), since this is now a cross-origin browser request instead of server-to-server.
+  - Updated `scripts/tests/test_regression_contracts.py` (was pinning `app/api/generate-loot/route.ts`'s contents — rewrote to pin `loot-client.ts` instead), `docs/ARCHITECTURE.md` (diagram + data-flow text), and `README.md`. Logged as ADR-008 in `DECISIONS.md`.
+- **Human review/changes:** confirmed scope (delete all 3 routes) via AskUserQuestion after the classifier pause; no other changes requested.
+- **Outcome:** ✅ merged — `npm run build` exit 0 (confirmed real exit code this time, not piped through `tail`), `npm test` 12/12, `python -m unittest scripts.tests.test_regression_contracts` 2/2, `python scripts/project-status.py` exit 0.
+- **Time saved vs. hand-writing (rough estimate):** moderate — the trickiest part (finding that 2 of 3 API routes were dead code and one independently duplicated the build failure) came from a repo-wide grep an agent runs reflexively; easy to miss by hand and ship a half-fix.
+- **Anything worth remembering:** the deployed GitHub Pages site still can't reach a Python service anywhere (python-service only runs locally today) — the game will always fall through to `client-fallback` loot on the live deployed site until python-service is hosted somewhere public and `NEXT_PUBLIC_PYTHON_SERVICE_URL` is set in `.github/workflows/deploy.yml`. That's graceful (ADR-003), not silently broken, but it's real Phase 5 territory in `MASTER_BUILD_SPEC.md`, not resolved here.
+
 ### 2026-07-11 — Phase 0 increment: add vitest test runner; discovered pre-existing build break
 
 - **Tool used:** Claude Code

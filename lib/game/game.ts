@@ -26,6 +26,7 @@ import {
   T_SPIKE,
 } from "./levelLoader";
 import { ROOM_H, ROOM_W, START_ROOM, TILE, type ZoneId } from "./world";
+import { fetchLootRoll } from "./loot-client";
 import {
   describeLoot,
   fallbackRoll,
@@ -452,18 +453,8 @@ export class Game {
   }
 
   private async probeLootService() {
-    try {
-      const resp = await fetch(`/api/loot?seed=${this.runSeed}&luck=0&enemyLevel=1`);
-      if (!resp.ok) {
-        console.warn(`[loot-probe] HTTP ${resp.status} — falling back to client roller`);
-        this.lootSource = "client-fallback";
-        return;
-      }
-      const payload = await resp.json();
-      this.lootSource = payload.ok ? "python-service" : "client-fallback";
-    } catch {
-      this.lootSource = "client-fallback";
-    }
+    const result = await fetchLootRoll(this.runSeed, 0, 1);
+    this.lootSource = result.ok ? "python-service" : "client-fallback";
   }
 
   // ─────────────────────── room handling ───────────────────────
@@ -1583,27 +1574,18 @@ export class Game {
 
   private async fetchOrFallbackRoll(seed: number, luck: number, enemyLevel: number): Promise<LootDrop> {
     const abort = new AbortController();
+    // Timeout so a hung request degrades to the fallback instead of a drop
+    // that never lands (fetch has no default timeout).
     const timer = setTimeout(() => abort.abort(), 3000);
     try {
-      // Timeout so a hung request degrades to the fallback instead of a drop
-      // that never lands (fetch has no default timeout).
-      const resp = await fetch(
-        `/api/loot?seed=${seed}&luck=${luck}&enemyLevel=${enemyLevel}`,
-        { signal: abort.signal },
-      );
-      if (!resp.ok) {
-        console.warn(`[loot] HTTP ${resp.status} from /api/loot — using client fallback`);
-        throw new Error(`HTTP ${resp.status}`);
+      const result = await fetchLootRoll(seed, luck, enemyLevel, abort.signal);
+      if (!result.ok) {
+        console.warn(`[loot] ${result.error} from python-service — using client fallback`);
+        this.lootSource = "client-fallback";
+        return fallbackRoll(seed, luck, enemyLevel);
       }
-      const payload = await resp.json();
-      if (payload.ok && payload.drop) {
-        this.lootSource = "python-service";
-        return payload.drop as LootDrop;
-      }
-      throw new Error(payload.error ?? "loot service unavailable");
-    } catch {
-      this.lootSource = "client-fallback";
-      return fallbackRoll(seed, luck, enemyLevel);
+      this.lootSource = "python-service";
+      return result.drop;
     } finally {
       clearTimeout(timer);
     }

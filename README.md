@@ -88,9 +88,7 @@ The Next.js app owns rendering, input, and UI. The Python service owns logic tha
 <details>
 <summary><strong>Frontend ↔ backend integration</strong></summary>
 
-- Next.js API routes proxy requests to the Python FastAPI service
-- `/api/procedural-level` fetches platform layouts from the Python level generator
-- `/api/loot` rolls rarity-weighted weapon drops from the Python loot service
+- The browser calls the Python FastAPI service directly (`lib/game/loot-client.ts` → `/loot/roll`) — no Next.js API-route proxy, since the site deploys as a static export with no server at runtime (ADR-008); python-service has CORS enabled for the dev and GitHub Pages origins
 - Client-side fallback mirrors the loot tables for offline resilience; every drop is tagged `python-service` or `client-fallback`
 
 </details>
@@ -113,6 +111,8 @@ source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn main:app --reload  # http://localhost:8000
 ```
+
+The browser fetches the Python service directly at `NEXT_PUBLIC_PYTHON_SERVICE_URL` (defaults to `http://127.0.0.1:8000` if unset — fine for local dev). Set it as a build-time env var if you deploy python-service somewhere other than localhost.
 
 ## Project Structure
 

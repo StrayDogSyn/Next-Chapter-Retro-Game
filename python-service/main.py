@@ -12,6 +12,7 @@ Owns the procedural / random-generation game logic per ADR-001:
 from random import Random
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from loot_tables import (
     BASE_WEAPONS,
@@ -22,6 +23,22 @@ from loot_tables import (
 )
 
 app = FastAPI(title="Retro Game Python Service")
+
+# ADR-008: the browser calls this service directly (no Next.js proxy route,
+# since the frontend is a static export with no server at runtime), so CORS
+# must allow the deployed origins explicitly.
+ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://straydogsyn.github.io",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/health")
