@@ -25,6 +25,18 @@ Full chronological record of every AI-paired session on this project. The summar
 
 ## Entries
 
+### 2026-07-11 — Phase 0 increment: add vitest test runner; discovered pre-existing build break
+
+- **Tool used:** Claude Code
+- **Goal:** Close the single hard blocker identified in the same-day audit below — no JS test runner installed, so `npm test` (a universal gate in every future Step 3 of `MASTER_BUILD_SPEC.md`'s loop) failed immediately.
+- **Prompt summary:** User picked "fix the test-runner gap" from three options (test runner / Neon persistence / narrative layer) after reviewing the audit.
+- **What the agent produced:** Installed `vitest` as a devDependency, added `"test": "vitest run"` to `package.json`, wrote `lib/game/rng.test.ts` — 12 tests covering the RNG's core guarantees: same-seed determinism, different-seed divergence, `.fork()` stream independence (proved by consuming 5000 draws from a "layout" fork and showing a sibling "loot" fork is untouched — the exact property the spec's two-stream RNG rule and this project's procgen depend on), and `int()`/`pick()`/`shuffle()` bounds/purity. Logged as ADR-007 in `DECISIONS.md`.
+- **VERIFICATION FAILURE (discovered, not introduced):** `npm run build` fails with exit 1. Confirmed via `git stash` + rebuild that this predates this session — already broken at commit `e35cbbc` ("update configuration for GitHub Pages deployment"), which added `output: "export"` to `next.config.mjs`. Static export is incompatible with `app/api/loot/route.ts` and `app/api/generate-loot/route.ts` (both call `new URL(request.url)`, which needs a live Node server; static export has none). This means `.github/workflows/deploy.yml`, added in the same commit, is currently failing on every push to `main`. **Not fixed in this session** — resolving it means picking one of: (a) drop static export and host somewhere with a Node runtime, or (b) keep static export and move the Python-service proxy calls client-side (CORS/exposed-URL tradeoffs). That's an architecture decision for the user, not something to patch silently.
+- **Human review/changes:** flagged to user immediately after this entry for a decision on the build-break fix.
+- **Outcome:** 🟡 partial — the test-runner increment itself is ✅ (`npm test`: 12/12 passing, `python scripts/project-status.py`: exit 0); `npm run build` remains ❌ from a pre-existing, separately-caused regression.
+- **Time saved vs. hand-writing (rough estimate):** N/A.
+- **Anything worth remembering:** the build failure was almost missed in this same session — an initial check piped `npm run build` through `tail` and echoed `$?`, which silently reported `tail`'s exit code (0) instead of `npm run build`'s (1). Caught by re-running with the pipe removed. A live example of exactly the failure mode `MASTER_BUILD_SPEC.md`'s Prime Directive exists to prevent — worth remembering when writing future verification commands in this repo: never pipe a gate command through anything before checking `$?`.
+
 ### 2026-07-11 — Adopted MASTER_BUILD_SPEC.md; Phase 0 ground-truth audit against the Phase 0-8 scheme
 
 - **Tool used:** Claude Code
