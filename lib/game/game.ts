@@ -27,6 +27,8 @@ import {
 } from "./levelLoader";
 import { ROOM_H, ROOM_W, START_ROOM, TILE, type ZoneId } from "./world";
 import { fetchLootRoll } from "./loot-client";
+import { getOrCreatePlayerId } from "./player-identity";
+import { loadFromServer, registerPlayer, saveToServer } from "./save-client";
 import {
   describeLoot,
   fallbackRoll,
@@ -153,6 +155,7 @@ export type HudSnapshot = {
   upgrades: Partial<Record<UpgradeId, number>>;
   phase: "playing" | "paused" | "dead" | "victory";
   lootSource: string;
+  saveSource: string;
   /** Shareable run seed — show on death screen for bug reports / challenges */
   seed: string;
   respawnHoldPct: number;
@@ -248,6 +251,7 @@ export class Game {
   // pity: consecutive drops below rare; feeds effective luck in rollLoot()
   private lootPity = 0;
   private lootSource = "unknown";
+  private saveSource = "unknown";
   private message = "";
   private messageT = 0;
   private phase: "playing" | "paused" | "dead" | "victory" = "playing";
@@ -414,7 +418,10 @@ export class Game {
 
     await this.audio.loadAll(audioEntries);
 
-    const loaded = continueFromSave && this.loadSavedGame();
+    const playerId = getOrCreatePlayerId();
+    if (playerId) void registerPlayer(playerId);
+
+    const loaded = continueFromSave && (await this.loadSavedGame());
     if (!loaded) this.spawnIntoRoom(START_ROOM, "spawnPoint");
     void this.probeLootService();
     this.loop.start(
@@ -1714,6 +1721,14 @@ export class Game {
     } catch (error) {
       console.warn("[save] failed to write localStorage", error);
     }
+    // Best-effort server mirror (ADR-009) - localStorage above is always the
+    // source of truth; this never blocks or throws into the caller.
+    const playerId = getOrCreatePlayerId();
+    if (playerId) {
+      void saveToServer(playerId, data).then((ok) => {
+        this.saveSource = ok ? "python-service" : "client-fallback";
+      });
+    }
   }
 
   static hasSave(): boolean {
@@ -1760,39 +1775,39 @@ export class Game {
       if (d.version !== 1 || typeof d.roomId !== "string") return false;
 
       const roomId = this.world.has(d.roomId) ? d.roomId : START_ROOM;
-      const level = Math.round(clampNumber(data.level, 1, 999, 1));
-      const xpToNext = Math.round(clampNumber(data.xpToNext, 1, 1_000_000, Math.round(level * 100 * 1.5)));
-      const xp = Math.round(clampNumber(data.xp, 0, xpToNext, 0));
+      const level = Math.round(clampNumber(d.level, 1, 999, 1));
+      const xpToNext = Math.round(clampNumber(d.xpToNext, 1, 1_000_000, Math.round(level * 100 * 1.5)));
+      const xp = Math.round(clampNumber(d.xp, 0, xpToNext, 0));
       const maxHpAtLevel = 100 + (level - 1) * 3;
 
       this.level = level;
       this.xpToNext = xpToNext;
       this.xp = xp;
-      this.hp = Math.round(clampNumber(data.hp, 0, maxHpAtLevel, maxHpAtLevel));
-      this.coins = Math.round(clampNumber(data.coins, 0, 999_999, 0));
-      this.weapon = data.weapon;
-      this.secondary = data.secondary;
-      const upgradesInput = data.upgrades && typeof data.upgrades === "object" ? data.upgrades : {};
+      this.hp = Math.round(clampNumber(d.hp, 0, maxHpAtLevel, maxHpAtLevel));
+      this.coins = Math.round(clampNumber(d.coins, 0, 999_999, 0));
+      this.weapon = d.weapon as WeaponInstance;
+      this.secondary = d.secondary as WeaponInstance | null;
+      const upgradesInput = d.upgrades && typeof d.upgrades === "object" ? d.upgrades : {};
       const normalizedUpgrades: Partial<Record<UpgradeId, number>> = {};
       for (const [id, value] of Object.entries(upgradesInput as Record<string, unknown>)) {
         if (!isUpgradeId(id)) continue;
         normalizedUpgrades[id] = Math.round(clampNumber(value, 0, 999, 0));
       }
       this.upgrades = normalizedUpgrades;
-      this.flags = data.flags;
-      const visited = Array.isArray(data.visitedRooms)
-        ? data.visitedRooms.filter((id: unknown): id is string => typeof id === "string" && this.world.has(id))
+      this.flags = d.flags as typeof this.flags;
+      const visited = Array.isArray(d.visitedRooms)
+        ? d.visitedRooms.filter((id: unknown): id is string => typeof id === "string" && this.world.has(id))
         : [];
       this.visitedRooms = new Set<string>(visited);
       this.visitedRooms.add(roomId);
-      this.shopAtkBonus = clampNumber(data.shopAtkBonus, 0, 999, 0);
-      const x = clampNumber(data.px, 0, VIEW_W - this.pw, 0);
-      const y = clampNumber(data.py, 0, VIEW_H - this.ph, 0);
+      this.shopAtkBonus = clampNumber(d.shopAtkBonus, 0, 999, 0);
+      const x = clampNumber(d.px, 0, VIEW_W - this.pw, 0);
+      const y = clampNumber(d.py, 0, VIEW_H - this.ph, 0);
       this.spawnIntoRoom(roomId, { x, y });
       this.hp = Math.min(this.hp, this.maxHp());
       return true;
     } catch (error) {
-      console.warn("[save] failed to load localStorage save", error);
+      console.warn("[save] failed to apply save data", error);
       return false;
     }
   }
@@ -1905,6 +1920,7 @@ export class Game {
       upgrades: { ...this.upgrades },
       phase: this.phase,
       lootSource: this.lootSource,
+      saveSource: this.saveSource,
       seed: this.seedPhrase,
       respawnHoldPct: Math.min(1, this.respawnHoldT / Game.RESPAWN_HOLD_SECONDS),
       level: this.level,

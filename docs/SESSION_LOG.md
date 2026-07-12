@@ -39,6 +39,26 @@ An incident entry never doubles as the fix record — the fix gets its own dated
 
 ## Entries
 
+### 2026-07-12 — Phase 5 from scratch: Neon persistence (players, run_state, anonymous UUID identity)
+
+- **Tool used:** Claude Code
+- **Goal:** A "beta release" prompt assumed a persistence layer, ~30 ADRs, and a merged "integration session" already existed. Audit (git log, grep for `player_id`/`run_state`/`DATABASE_URL`/`alembic` across real source, `docs/DECISIONS.md` ADR count) showed none of that existed - only 8 ADRs, zero persistence code anywhere outside third-party `.venv` files. User chose "build Phase 5 from scratch now" over descoping the beta or stopping at the one real, confirmed bug the prompt also surfaced (root-absolute asset paths breaking under the GitHub Pages base path - not addressed this session, still open).
+- **What the agent produced:**
+  - Found the user's existing (empty except Neon's demo table) "Metroidvania" Neon project via the Neon MCP tools rather than provisioning a new one. Schema (`players`, `run_state` - see ADR-009 for the full design and why it mirrors the client's JSONB save shape instead of normalizing columns) proposed via `prepare_database_migration`, reviewed on a temporary branch, applied via `complete_database_migration` only after explicit user confirmation.
+  - `python-service/db.py`, three new endpoints (`/players/register`, `/save`, `/load`), Alembic wired to `DATABASE_URL_DIRECT` (`python-service/alembic/`), `psycopg[binary]` swapped in for the originally-planned `asyncpg` after `asyncpg` failed to build (no wheel for this machine's Python 3.14 on Windows, needs MSVC Build Tools that aren't installed).
+  - Frontend: `lib/game/player-identity.ts` (UUID in localStorage), `lib/game/save-client.ts` (same direct-to-service pattern as `loot-client.ts`), refactored `game.ts`'s `loadSavedGame()` into an async server-first/localStorage-fallback flow plus a shared `applySaveData()` helper, wired best-effort server mirroring into `saveGame()`.
+  - `python-service/tests/test_persistence.py`: 5 integration tests against the real Neon DB (idempotent registration, two-UUID isolation, load-before-save, save-without-registration rejected, save upserts not duplicates) - each test cleans up its own rows in `tearDown`.
+- **Verification (evidence, not narration):**
+  - `curl` round trip: register (same UUID twice → same `playerId`), load with no save (`{"ok":false}`), save, load again (`{"ok":true,"saveData":{...}}`) - all pasted in the turn.
+  - Two distinct UUIDs → `SELECT p.id, p.client_uuid, r.save_data FROM players p LEFT JOIN run_state r ...` returned 2 rows with correctly isolated `save_data`.
+  - Real browser test (Playwright, not just curl): booted the actual game against a live `npm run dev` + live `uvicorn`, confirmed `/players/register` fires on boot and returns 200 - initially failed with a CORS error (`ALLOWED_ORIGINS` only listed port 3000; Next fell back to 3001 because a stale process from an earlier session was still holding 3000 - the auto-mode classifier correctly blocked killing that PID since it wasn't verifiably this session's own process, so the allowlist was widened to cover 3001 too instead, a legitimate robustness fix either way). After the fix, confirmed via `mcp__Neon__run_sql` that the exact UUID generated in the browser's `localStorage` landed as a real row in Neon.
+  - `python -m unittest tests.test_persistence -v`: 5/5 passing. `npm test`: 12/12. `npm run build`: exit 0.
+  - All test rows (4 player rows created across curl + browser + automated tests) deleted from Neon before finishing - confirmed `SELECT count(*)` on both tables returns 0.
+- **Human review/changes:** confirmed Neon schema apply after temp-branch review; explicitly authorized fetching live connection strings via MCP (classifier had blocked it by default - "credential materialization" risk) rather than pasting them in blind; confirmed test-row cleanup.
+- **Outcome:** ✅ merged - full persistence loop (register → save → load, with graceful client-fallback) verified end-to-end against the real hosted database, not a local/mocked one.
+- **Time saved vs. hand-writing (rough estimate):** high - the Neon MCP tools (temp-branch migration review, direct SQL verification) turned what's normally a slow, error-prone manual dashboard-and-`psql` workflow into a few reviewable tool calls.
+- **Anything worth remembering:** the CORS/port-3001 failure is a good example of "verify against the live system, not the code" - the code review would have looked correct (env var, correct default) but the actual `.env` file's explicit `ALLOWED_ORIGINS` value silently shadowed the code-level default I'd "fixed" first, and only a real browser network capture caught that the fix hadn't actually taken effect. Also: this session confirmed (again) that the leaked Neon password from the 2026-07-11 security-cleanup entry is still unrotated - the fresh connection string fetched via MCP had the identical password. Not blocking for local dev, but must happen before this ever goes publicly live.
+
 ### 2026-07-11 — Root-caused "free-floating sprites": two independent bugs, no engine needed
 
 - **Tool used:** Claude Code

@@ -128,4 +128,23 @@ _(Renumbered from a duplicate "ADR-003" during the 2026-07-08 merge-conflict cle
 
 ---
 
+## ADR-009: Anonymous UUID identity + JSONB run persistence on Neon
+
+- **Date:** 2026-07-12
+- **Status:** Accepted
+- **Originated from:** Agent proposal (a "beta release" prompt assumed this layer already existed and asked to add anonymous identity on top of it; audit showed zero persistence code anywhere in the repo, so this ADR covers building the whole layer, not just identity)
+- **Context:** Needed cross-session save persistence without an accounts system for a beta. The client already had a mature, versioned localStorage save format (`Game.SAVE_KEY`, `version: 1`, built in `saveGame()`/`loadSavedGame()` in `game.ts`) - the natural design was to mirror that shape server-side rather than inventing a normalized schema that would drift from it.
+- **Decision:**
+  - **Identity:** `lib/game/player-identity.ts` generates a `crypto.randomUUID()` on first boot, stored in `localStorage` under `ncrg:playerId`. No accounts, no login. Known limitation: clearing browser storage orphans the server-side save (acceptable for a beta; real auth is post-beta).
+  - **Schema (Neon project "Metroidvania", `shy-tree-32297595`):** two tables only. `players(id, client_uuid UNIQUE, created_at)` and `run_state(player_id PRIMARY KEY, save_data JSONB, updated_at)` - one row per player, upserted on save (`ON CONFLICT (player_id) DO UPDATE`), matching the client's single-slot save design. `save_data` stores the client's save object verbatim (whatever shape `version: 1` currently is) rather than normalizing hp/coins/xp/etc. into columns - one shape to keep in sync, not two.
+  - **Backend:** `python-service/db.py` (sync `psycopg` per-request connections against `DATABASE_URL_POOLED` - Neon's own PgBouncer already pools, no second pool on top). Three endpoints: `POST /players/register` (idempotent), `POST /save`, `GET /load`. Alembic (`python-service/alembic/`) migrates against `DATABASE_URL_DIRECT`; the initial schema was applied via the Neon MCP `prepare_database_migration`/`complete_database_migration` tools (reviewed on a temp branch first) and the matching Alembic revision was `stamp`ed rather than re-run.
+  - **Frontend:** `lib/game/save-client.ts` (same direct-to-service pattern as `loot-client.ts`, ADR-008 - no Next.js proxy route, static export has no server at runtime). `game.ts`'s `loadSavedGame()` became async: tries the server first, falls back to localStorage on any failure/timeout (3s `AbortController`, same pattern as loot rolls). `saveGame()` still always writes localStorage first (unchanged, source of truth), then best-effort mirrors to the server. `HudSnapshot.saveSource` tracks `"python-service" | "client-fallback"` for a future degraded-mode indicator, mirroring the existing `lootSource` field.
+- **Alternatives considered:**
+  - Normalized SQL columns per save field (hp, coins, xp, ...) - rejected: doubles the places the save shape needs to change, no benefit at this scale.
+  - `asyncpg` for the runtime driver (what `MASTER_BUILD_SPEC.md` originally suggested) - rejected: no prebuilt wheel for this machine's Python 3.14 on Windows, and building from source needs MSVC Build Tools that aren't installed. `psycopg[binary]==3.3.4` has prebuilt wheels and was a drop-in swap.
+  - Accounts/login for the beta - deferred; adds real scope (password/OAuth handling) for a beta that just needs cross-session continuity.
+- **Consequences:** Verified end-to-end against the real Neon project: two distinct UUIDs produce isolated `run_state` rows (SELECT pasted in `SESSION_LOG.md`), and a real browser boot (Playwright, not just curl) actually registers and lands a row. CORS (`ALLOWED_ORIGINS`, ADR-008) needed both `:3000` and `:3001` added - Next dev falls back to 3001 whenever 3000 is occupied, and the allowlist is exact-match. Deferred/out of scope here: rate limiting or abuse guards on the write endpoints (this service isn't publicly hosted yet - fine for local dev, must be addressed before any public deploy), and `meta_progression`/`settings` tables (nothing in the client persists those concepts yet - added if/when it does).
+
+---
+
 _Add new ADRs as decisions are made — including ones where you overrode an agent's suggestion. Those are often the most interesting entries for a reviewer._

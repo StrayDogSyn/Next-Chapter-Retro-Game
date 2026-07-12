@@ -43,7 +43,11 @@ app = FastAPI(title="Retro Game Python Service")
 # must allow the deployed origins explicitly. Overridable via ALLOWED_ORIGINS
 # (comma-separated) for hosts where the deploy origin isn't known ahead of
 # time; falls back to the known dev + GitHub Pages origins.
-_default_origins = "http://localhost:3000,http://127.0.0.1:3000,https://straydogsyn.github.io"
+_default_origins = (
+    "http://localhost:3000,http://127.0.0.1:3000,"
+    "http://localhost:3001,http://127.0.0.1:3001,"  # Next.js falls back here if 3000 is busy
+    "https://straydogsyn.github.io"
+)
 ALLOWED_ORIGINS = [
     origin.strip()
     for origin in os.environ.get("ALLOWED_ORIGINS", _default_origins).split(",")
