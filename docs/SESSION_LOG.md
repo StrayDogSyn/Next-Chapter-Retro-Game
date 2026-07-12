@@ -21,6 +21,20 @@ Full chronological record of every AI-paired session on this project. The summar
 - **Anything worth remembering:**
 ```
 
+### Incident entry variant (for agent failures, false completions, verification catches)
+Use heading format `### YYYY-MM-DD — [incident] <title>` with fields:
+**What happened / Root cause of the failure / Resolution / Status of the underlying bug** (OPEN or FIXED-see-entry-dated-X).
+An incident entry never doubles as the fix record — the fix gets its own dated entry with verification evidence.
+
+```markdown
+### YYYY-MM-DD — [incident] <title>
+
+- **What happened:** What the agent did wrong and why it mattered.
+- **Root cause of the failure:** The underlying reason (pattern-match, skipped audit, unverified claim, etc.).
+- **Resolution:** What corrective action was taken (prompt rejection, redirect, re-run, etc.).
+- **Status of the underlying bug:** OPEN — [brief description of what remains] / FIXED — see entry dated YYYY-MM-DD.
+```
+
 ---
 
 ## Entries
@@ -37,13 +51,22 @@ Full chronological record of every AI-paired session on this project. The summar
 - **Outcome:** ✅ both root causes fixed and verified, no engine/dependency/camera introduced, consistent with ADR-002 and ADR-004.
 - **Anything worth remembering:** neither bug was in `game.ts`'s rendering math, which the original Phaser suggestion (and my own early hypotheses about the world-to-screen transform) assumed was the likely culprit. One was pure CSS layout (a `flex: 1` with no flex parent — a very ordinary mistake, easy to miss without measuring computed styles directly), the other was stale crop coordinates surviving a source-asset swap. Screenshots alone were **not** enough to fully diagnose this — the CSS fix alone produced a visually-plausible-but-still-wrong result (entities floating with no ground), which could easily have been mistaken for "fixed" without the pixel-opacity check on `tiles.png`. Measure computed layout and sample actual pixel data before concluding a visual bug is understood.
 
-### Agent pattern-match failure — Phaser prescribed for a hand-rolled-canvas symptom
+### 2026-07-12 — [incident] Agent pattern-match failure — Phaser prescribed for a hand-rolled-canvas symptom
 
-- **Tool used:** VS Code agent (prior thread, not this session)
-- **What happened:** Asked to diagnose "sprites rendering free-floating / detached from the background," an agent prescribed a Phaser solution (`Phaser.Types.Core.GameConfig`, `make.tilemap`, `addTilesetImage`, camera-follow) — without first checking whether Phaser is even a dependency, or reading `docs/DECISIONS.md`. It is not (`grep -i phaser package.json` is empty), and ADR-002 (no game engine) and ADR-004 (single-screen rooms, no scrolling camera) are both accepted decisions the suggestion silently violated. A Tiled/camera/engine migration is a rewrite proposal, not a bug fix, for a symptom that almost certainly lives in this project's own coordinate math (spritemeta frame rects, entity anchor convention, or the world-to-screen transform — see the corrective diagnosis below).
-- **Root cause of the failure:** classic pattern-matching — "sprite positioning bug" retrieved a stock Phaser/Tiled answer from training data instead of being derived from this repo's actual rendering pipeline. Ground-truth audit (stack check, ADR read) was skipped entirely.
-- **Resolution:** corrective prompt issued rejecting the engine detour outright and requiring an evidence-first diagnosis inside the existing hand-rolled canvas architecture (see the following entry for the actual root cause and fix).
-- **Anything worth remembering:** this project documents agentic failures as capstone content — this is the second one on record (the first: multi-tool completion-claim drift, 2026-07-07 asset-sourcing entry). The through-line both times: check the actual codebase/dependencies before proposing a fix, not after.
+- **What happened:** VS Code Copilot, given the "sprites free-floating" symptom, prescribed
+  a Phaser + Tiled tilemap fix (`Phaser.Types.Core.GameConfig`, `addTilesetImage`,
+  camera follow) for a project where Phaser is not a dependency, ADR-002 forbids
+  engines, and ADR-004 forbids scrolling cameras.
+- **Root cause of the failure:** symptom-level pattern matching to the most common
+  tutorial stack, with no audit of package.json or DECISIONS.md before prescribing.
+- **Resolution:** corrective prompt issued rejecting the engine detour and requiring
+  an evidence-first diagnosis inside the existing architecture (three-contract method:
+  spritemeta geometry / anchor convention / world-to-screen transform).
+- **Status of the underlying bug:** OPEN as of this entry. Investigation in progress
+  points at vertical clipping — ROOM_H (22) × tile size exceeds the canvas element's
+  height, likely cutting the floor row. Root cause and fix will be logged in a
+  separate dated entry when verified; do not treat this incident entry as evidence
+  the render bug is resolved.
 
 ### 2026-07-11 — Fix pre-existing build break: browser now calls python-service directly (ADR-008)
 
