@@ -1724,16 +1724,42 @@ export class Game {
     }
   }
 
-  /** Restores a shrine save, if one exists and parses cleanly. Returns whether it was applied. */
-  private loadSavedGame(): boolean {
+  /**
+   * Restores a shrine save, if one exists and parses cleanly. Tries the
+   * server save first (ADR-009 - keyed on the anonymous player id), falling
+   * back to the localStorage save if the server is unreachable or has
+   * nothing for this player. Returns whether a save was applied.
+   */
+  private async loadSavedGame(): Promise<boolean> {
+    const playerId = getOrCreatePlayerId();
+    if (playerId) {
+      const remote = await loadFromServer(playerId);
+      if (remote && this.applySaveData(remote)) {
+        this.saveSource = "python-service";
+        return true;
+      }
+    }
     if (typeof localStorage === "undefined") return false;
     try {
       const raw = localStorage.getItem(Game.SAVE_KEY);
       if (!raw) return false;
       const data = JSON.parse(raw);
-      if (!data || data.version !== 1 || typeof data.roomId !== "string") return false;
+      const applied = this.applySaveData(data);
+      if (applied) this.saveSource = "client-fallback";
+      return applied;
+    } catch (error) {
+      console.warn("[save] failed to load localStorage save", error);
+      return false;
+    }
+  }
 
-      const roomId = this.world.has(data.roomId) ? data.roomId : START_ROOM;
+  private applySaveData(data: unknown): boolean {
+    try {
+      if (!data || typeof data !== "object") return false;
+      const d = data as Record<string, unknown>;
+      if (d.version !== 1 || typeof d.roomId !== "string") return false;
+
+      const roomId = this.world.has(d.roomId) ? d.roomId : START_ROOM;
       const level = Math.round(clampNumber(data.level, 1, 999, 1));
       const xpToNext = Math.round(clampNumber(data.xpToNext, 1, 1_000_000, Math.round(level * 100 * 1.5)));
       const xp = Math.round(clampNumber(data.xp, 0, xpToNext, 0));
