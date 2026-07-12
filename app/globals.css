@@ -221,6 +221,16 @@ body {
 }
 
 .game-canvas-stage {
+  /* #game-stage-viewport (the parent) is position:relative, not a flex
+     container, so flex:1 here is dead weight - it never constrains height.
+     Block width auto-fills the parent, but block height auto-sizes to
+     content, so without this explicit height the stage (and the canvas
+     inside it, which reads height:100% of *this* element) grew taller than
+     #game-stage-viewport's own aspect-ratio-locked box and got silently
+     cropped by its overflow:hidden - the bottom of every room (ground,
+     platforms, the player) was rendered but clipped off-screen. See
+     SESSION_LOG "Free-floating sprites" entry. */
+  height: 100%;
   flex: 1;
   min-height: 0;
   display: flex;
