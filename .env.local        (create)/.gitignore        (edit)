@@ -1,0 +1,3 @@
+DATABASE_URL=postgresql://neondb_owner:npg_Th6pOQ2tnSCV@ep-winter-term-at0en60p-pooler.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+
+.env.local
