@@ -39,6 +39,19 @@ An incident entry never doubles as the fix record — the fix gets its own dated
 
 ## Entries
 
+### 2026-07-13 — D2: asset-path fix for GitHub Pages base path (ADR-011)
+
+- **Tool used:** Claude Code
+- **Goal:** Fix the confirmed real bug flagged (but never fixed) across two prior sessions' Playwright console logs: root-absolute `/sprites`, `/audio`, `/assets/manifest.json` fetches bypass Next's `basePath`/`assetPrefix` and 404 once served from GitHub Pages' `/Next-Chapter-Retro-Game/` subpath.
+- **What the agent produced:**
+  - `lib/game/asset-url.ts`: `assetUrl(path)` prefixes with `NEXT_PUBLIC_BASE_PATH`. Routed every root-absolute reference in `game.ts` and `assetManifest.ts` through it.
+  - Investigated the `/assets/manifest.json` 404 specifically (per the prompt's request to fix-or-remove, not just prefix): the file didn't exist at the fetched path at all, only a stale `public/assets/extracted/manifest.json` predating `asset-extract.py`'s dual-write and its `filesByStem` indexing feature - so even a successful fetch would have resolved nothing (`filesByStem` was empty). Regenerated via the script's own `build_manifest()` directly (no re-extraction needed, it only walks already-extracted files) - now 652 stem entries at both paths.
+  - `.github/workflows/deploy.yml`: added `NEXT_PUBLIC_BASE_PATH=/Next-Chapter-Retro-Game` to the build step's env. Verified `next.config.mjs`'s `basePath`/`assetPrefix` were already correct from earlier work - not duplicated.
+- **Verification:** `grep` confirms zero remaining root-absolute asset fetches outside the helper (the `audioFiles` map's literals are commented as deliberately-unprefixed raw lookup values, prefixed once at the point of use - documented in ADR-011 rather than wrapping all 21 individually). Real Pages rehearsal: production build, `out/` copied into a nested `Next-Chapter-Retro-Game/` subdirectory, served locally (`npx serve`), driven with Playwright - zero asset 404s, canvas renders with full parity to local dev (screenshot: player, bat, ground/platform tiles, moon/mountain background, HUD all correct). One rehearsal build was silently corrupted by Git Bash's automatic POSIX-path conversion turning the inline `NEXT_PUBLIC_BASE_PATH=/Next-Chapter-Retro-Game` into `C:/Program Files/Git/Next-Chapter-Retro-Game` before Next.js read it - caught via `[error] Fetch API cannot load file:///C:/Program Files/Git/...` in the browser console, not a passing-looking build log; the real rebuild used PowerShell instead, which doesn't do that conversion. `npm test`: 20/20 (unchanged). `npm run build`: exit 0.
+- **Human review/changes:** none yet - reporting this turn.
+- **Outcome:** ✅ merged - the deployed GitHub Pages site will now actually load its sprites, audio, and asset manifest instead of 404ing on all of them.
+- **Anything worth remembering:** a passing `npm run build` says nothing about whether an env var actually reached the bundle correctly - only driving the built output in a browser (with console/network capture) caught the Git Bash path-mangling. Any future session building with a `NEXT_PUBLIC_*` value that starts with `/` from this project's Bash tool should use PowerShell instead, or verify the compiled bundle contains the literal expected string before trusting the build.
+
 ### 2026-07-13 — D1: save-trigger coverage (room transition, level-up, equip) + death/respawn semantics
 
 - **Tool used:** Claude Code

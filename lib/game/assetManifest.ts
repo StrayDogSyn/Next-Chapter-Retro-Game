@@ -1,3 +1,5 @@
+import { assetUrl } from "./asset-url";
+
 export type AssetManifest = {
   generatedAt: string;
   note: string;
@@ -19,7 +21,7 @@ export async function loadAssetManifest(): Promise<AssetManifest | null> {
   if (cachedManifest !== undefined) return cachedManifest;
 
   try {
-    const response = await fetch("/assets/manifest.json", { cache: "no-store" });
+    const response = await fetch(assetUrl("/assets/manifest.json"), { cache: "no-store" });
     if (!response.ok) {
       cachedManifest = null;
       return null;
@@ -45,9 +47,9 @@ export function resolveManifestAsset(
   if (preferredExts.length > 0) {
     for (const ext of preferredExts) {
       const match = options.find((value) => value.toLowerCase().endsWith(ext.toLowerCase()));
-      if (match) return `/${match}`;
+      if (match) return assetUrl(`/${match}`);
     }
   }
 
-  return `/${options[0]}`;
+  return assetUrl(`/${options[0]}`);
 }

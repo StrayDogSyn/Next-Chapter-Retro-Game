@@ -26,6 +26,7 @@ import {
   T_SPIKE,
 } from "./levelLoader";
 import { ROOM_H, ROOM_W, START_ROOM, TILE, type ZoneId } from "./world";
+import { assetUrl } from "./asset-url";
 import { fetchLootRoll } from "./loot-client";
 import { getOrCreatePlayerId } from "./player-identity";
 import { loadFromServer, registerPlayer, saveToServer } from "./save-client";
@@ -343,7 +344,7 @@ export class Game {
   async start(continueFromSave = false) {
     this.assetManifest = await loadAssetManifest();
 
-    const metaResp = await fetch("/sprites/spritemeta.json");
+    const metaResp = await fetch(assetUrl("/sprites/spritemeta.json"));
     this.meta = (await metaResp.json()) as SpriteMeta;
 
     const sheetNames = [
@@ -379,11 +380,14 @@ export class Game {
             };
             img.src =
               resolveManifestAsset(this.assetManifest, name, [".png", ".webp", ".jpg", ".jpeg"]) ??
-              `/sprites/${name}.png`;
+              assetUrl(`/sprites/${name}.png`);
           }),
       ),
     );
 
+    // Deliberately unprefixed here (ADR-011) - these are raw fallback paths,
+    // prefixed via assetUrl() below where audioEntries is built. Never fetch
+    // one of these literals directly.
     const audioFiles: Record<string, string> = {
       jump: "/audio/jump.wav",
       hit: "/audio/hit.wav",
@@ -413,7 +417,7 @@ export class Game {
       Object.entries(audioFiles).map(([id, fallbackPath]) => {
         const stem = fallbackPath.split("/").pop()?.split(".")[0] ?? id;
         const resolved = resolveManifestAsset(this.assetManifest, stem, [".wav", ".ogg", ".mp3", ".flac"]);
-        return [id, resolved ?? fallbackPath];
+        return [id, resolved ?? assetUrl(fallbackPath)];
       }),
     );
 
