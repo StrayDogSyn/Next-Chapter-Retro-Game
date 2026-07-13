@@ -99,6 +99,14 @@ class PersistenceTest(unittest.TestCase):
         load = self.client.get("/load", params={"client_uuid": client_uuid}).json()
         self.assertEqual(load["saveData"]["coins"], 2)
 
+    def test_oversized_save_payload_is_rejected(self) -> None:
+        client_uuid = str(uuid.uuid4())
+        self._register(client_uuid)
+        # ADR-012: MAX_SAVE_BODY_BYTES is 64KB - pad well past it.
+        oversized = {"version": 1, "padding": "x" * (70 * 1024)}
+        resp = self.client.post("/save", json={"client_uuid": client_uuid, "save_data": oversized})
+        self.assertEqual(resp.status_code, 413)
+
 
 if __name__ == "__main__":
     unittest.main()

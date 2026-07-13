@@ -10,6 +10,8 @@ A retro-inspired full-stack showcase blending SNES-style 2D sprite art, open-sou
 
 > Built for the **Next Chapter bootcamp** capstone submission.
 
+**Beta status:** not yet publicly live — see [docs/BETA_TESTING.md](docs/BETA_TESTING.md) for current status, what's blocking it, and (once live) the URL and how to file bugs.
+
 ---
 
 ## Table of Contents

@@ -21,9 +21,13 @@ from typing import Any
 
 import psycopg
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
@@ -60,6 +64,26 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
+# ADR-012: public-exposure hardening ahead of hosting. Per-IP limits on the
+# write endpoints only - reads (/loot/*, /generate-level) are cheap, stateless,
+# and not worth gating. Deferred: per-player quotas, auth - out of scope for
+# a beta with no accounts.
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+MAX_SAVE_BODY_BYTES = 64 * 1024  # generous for the current save shape (ADR-009)
+
+
+@app.middleware("http")
+async def cap_request_body_size(request: Request, call_next):
+    if request.method == "POST" and request.url.path == "/save":
+        content_length = request.headers.get("content-length")
+        if content_length is not None and content_length.isdigit():
+            if int(content_length) > MAX_SAVE_BODY_BYTES:
+                return JSONResponse(status_code=413, content={"detail": "save payload too large"})
+    return await call_next(request)
 
 
 @app.get("/health")
@@ -178,7 +202,8 @@ def _find_player_id(conn: psycopg.Connection, client_uuid: uuid.UUID) -> int | N
 
 
 @app.post("/players/register")
-def register_player(body: RegisterRequest) -> dict[str, object]:
+@limiter.limit("20/minute")
+def register_player(request: Request, body: RegisterRequest) -> dict[str, object]:
     """Idempotent: same client_uuid always resolves to the same player row."""
     with get_connection() as conn:
         conn.execute(
@@ -193,7 +218,8 @@ def register_player(body: RegisterRequest) -> dict[str, object]:
 
 
 @app.post("/save")
-def save_run(body: SaveRequest) -> dict[str, object]:
+@limiter.limit("30/minute")
+def save_run(request: Request, body: SaveRequest) -> dict[str, object]:
     """Upserts the one active run for this player (mirrors the client's
     single-slot localStorage save - see Game.saveGame() in game.ts)."""
     with get_connection() as conn:

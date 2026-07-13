@@ -177,4 +177,33 @@ _(Renumbered from a duplicate "ADR-003" during the 2026-07-08 merge-conflict cle
 
 ---
 
+## ADR-012: Hosting plan (Render) + public-exposure hardening ahead of deploy
+
+- **Date:** 2026-07-13
+- **Status:** Accepted, **not yet deployed** - blocked on Neon credential rotation (Gate Zero, see the 2026-07-11 security-cleanup SESSION_LOG entry - still unrotated as of this ADR).
+- **Originated from:** Agent proposal, done ahead of hosting specifically so D3 becomes "click deploy" once the credential is rotated, not "start engineering."
+- **Context:** `python-service` has never been hosted anywhere but localhost. Once it's reachable from the public internet, the write endpoints (`/players/register`, `/save`) are exposed to anyone, not just this game's client - needed rate limiting and a size cap before that's true, not after.
+- **Decision:**
+  - **Host:** Render free tier (`render.yaml` at repo root, `rootDir: python-service`). Build installs `requirements.txt`; `preDeployCommand: alembic upgrade head` runs migrations against `DATABASE_URL_DIRECT` before each deploy; `uvicorn main:app --host 0.0.0.0 --port $PORT` serves. Env var **names** are declared in `render.yaml` (`sync: false`), **values** are set directly in Render's dashboard - never in this repo, never in chat (the agent verified variable names exist via `grep`, never printed values, consistent with the Gate Zero credential-handling rule).
+  - **Rate limiting:** `slowapi`, per-IP (`get_remote_address`), `20/minute` on `/players/register`, `30/minute` on `/save`. Reads (`/loot/*`, `/generate-level`, `/load`) are ungated - cheap, stateless, no reason to throttle a beta tester's own polling.
+  - **Request-size cap:** a small ASGI middleware rejects `POST /save` with `Content-Length > 64KB` (413) before the body is even parsed - generous headroom over the current save shape (a few hundred bytes typically). Checks the `Content-Length` header only, not a true streaming byte-count - a client that omits the header or lies about it and sends more body than declared isn't caught by this. Acceptable for a beta with no adversarial traffic expected; a real streaming limit is more machinery than this scope warrants.
+  - **Tests:** `tests/test_persistence.py` gained `test_oversized_save_payload_is_rejected` (413 for a 70KB payload). Rate limiting was verified live instead of in the automated suite (a 20-requests-in-a-loop test would be slow and flaky in CI) - 25 rapid `/players/register` calls against a local server returned exactly 20×200 then 5×429, matching the configured limit precisely.
+- **Alternatives considered:**
+  - Deferring rate limiting until after a real abuse incident - rejected; the whole point of doing this ahead of D3 is to not be improvising security under live-traffic pressure.
+  - A true streaming body-size limit (reading the ASGI body iterator incrementally) - rejected as disproportionate machinery for a beta-scale service; the `Content-Length` check catches the honest case and is one middleware function.
+- **Consequences:** Deferred, explicitly out of scope here: per-player quotas, real auth (no accounts exist - ADR-009), and the Content-Length spoofing gap noted above. All should be revisited if this ever moves past beta traffic levels. `render.yaml`'s `preDeployCommand` running Alembic on every deploy means a bad migration blocks the deploy rather than shipping broken schema - intentional, matches the project's evidence-over-narration ethos applied to infrastructure.
+
+---
+
+## ADR-013: Degraded-mode HUD indicator
+
+- **Date:** 2026-07-13
+- **Status:** Accepted
+- **Originated from:** Agent proposal - `HudSnapshot.lootSource`/`saveSource` (ADR-008/ADR-009) already tracked online-vs-fallback state but nothing surfaced it to the player, so a beta tester experiencing degraded mode would have no way to know or report it.
+- **Decision:** `components/GameHudOverlay.tsx` renders a small status chip in the intel panel - a dot + label ("online" / "offline mode" / "connecting…"), computed as offline if *either* `lootSource` or `saveSource` reads `"client-fallback"`. The `title` attribute exposes both raw values (`loot: ... · save: ...`) for anyone who opens devtools or takes a screenshot for a bug report. Always visible (not just when degraded) so testers can screenshot the "online" state too, as a baseline for comparison.
+- **Alternatives considered:** Only showing the indicator when degraded (hide when fine) - rejected; a bug report screenshot showing "everything looked normal, indicator absent" is weaker evidence than one showing "online" explicitly.
+- **Consequences:** Verified live (Playwright, no python-service running): chip reads "offline mode" with `title="loot: client-fallback · save: unknown"` - `saveSource` stays `"unknown"` until an actual save attempt happens, which is correct (no save had fired yet in that test), not a bug.
+
+---
+
 _Add new ADRs as decisions are made — including ones where you overrode an agent's suggestion. Those are often the most interesting entries for a reviewer._

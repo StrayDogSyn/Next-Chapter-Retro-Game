@@ -372,6 +372,37 @@ body {
   font-size: 0.73rem;
 }
 
+.hud-status-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  color: #9fb2c7;
+  white-space: nowrap;
+}
+
+.hud-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4ade80; /* lit brass lamp: online */
+  box-shadow: 0 0 4px rgba(74, 222, 128, 0.8);
+}
+
+.hud-status-chip.pending .hud-status-dot {
+  background: #6b7280;
+  box-shadow: none;
+}
+
+.hud-status-chip.offline .hud-status-dot {
+  background: #78716c; /* dimmed brass lamp: fallback mode */
+  box-shadow: none;
+}
+
+.hud-status-chip.offline {
+  color: #d6a35c;
+}
+
 .hud-actions {
   display: flex;
   gap: 0.35rem;
