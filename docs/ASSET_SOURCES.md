@@ -12,6 +12,18 @@ Use **CC0 1.0 / public-domain** assets wherever possible. Keep attribution notes
 
 ---
 
+## `assets/sprites/` provenance (2026-07-13, user-attested)
+
+The ~70 files directly under `assets/sprites/` (`space_merc.png`, `char-sheet-*.png`, `oga-swm-*.png`, `mainchar-*`, etc.) predate this project's tracked download pipeline (`scripts/asset-fetch.py`/`asset-extract.py`) and had no per-file entry in `CREDITS.md`, `manifest.csv`, or `manifest_bulk.csv`. The user confirmed these were sourced from three free/open platforms:
+
+- https://opengameart.org (CC0/OGA-BY/CC-BY/CC-BY-SA per-asset, verified as the platform's licensing model)
+- https://itch.io/game-assets/free/tag-sprites (the "free" tag specifically; per-creator license stated on each item page)
+- Freesound.org, for the audio equivalent (a Google share link resolved here)
+
+**This is site-level attestation, not per-file page URLs** — the exact item page for any individual file in this set was not preserved at download time. The `oga-swm-` filename prefix is consistent with genuine OpenGameArt provenance (a common naming convention for that platform's submissions). Treat CREDITS.md entries sourced from this note as "platform confirmed, exact page unknown" rather than a fully verified citation — if a specific file's exact source page is ever found, upgrade its CREDITS.md row accordingly.
+
+---
+
 ## Recommended asset directories
 
 ```text

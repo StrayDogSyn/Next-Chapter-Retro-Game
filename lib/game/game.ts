@@ -417,6 +417,12 @@ export class Game {
       growl: "/audio/growl.mp3",
       magic: "/audio/magic.mp3",
       step: "/audio/step.mp3",
+      // ADR-015: first extracted-pack stem wired via resolveManifestAsset
+      // (100-cc0-sfx, CC0) rather than a curated public/audio file - no
+      // fallback file exists at this path on purpose, stem-match is the
+      // only path (falls through to no sound if unmatched, same as any
+      // other audio id would if its file were ever missing).
+      shrineChime: "/audio/bell_01.mp3",
     };
 
     const audioEntries = Object.fromEntries(
@@ -453,12 +459,17 @@ export class Game {
   }
 
   setUiModalOpen(open: boolean) {
+    const wasOpen = this.externalMenuOpen;
     this.externalMenuOpen = open;
     if (open) {
       this.inventoryOpen = false;
       this.helpOpen = false;
       this.shopOpen = false;
     }
+    // Bug fix (Windsurf review): whatever key was "just pressed" at the
+    // moment the menu closes (e.g. attack) must not leak into gameplay the
+    // instant control returns to it.
+    if (wasOpen && !open) this.input.flushPressed();
     if (open && this.phase === "playing") {
       this.phase = "paused";
       this.externalMenuPaused = true;
@@ -1703,7 +1714,7 @@ export class Game {
   private activateShrine() {
     this.hp = this.maxHp();
     this.saveGame();
-    this.audio.play("chest", 0.9);
+    this.audio.play("shrineChime", 0.8);
     this.showMessage("GAME SAVED");
   }
 
