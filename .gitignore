@@ -43,6 +43,9 @@ python-service/__pycache__/
 .asset-tmp/
 STATUS.txt
 
+# duplicate backup of assets/, not source of truth
+/assets.zip
+
 # portable node runtime (local tooling, not project code)
 node-portable/
 

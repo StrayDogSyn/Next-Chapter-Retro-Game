@@ -23,6 +23,9 @@ export function GameFooter({ snapshot }: GameFooterProps) {
         <span className="hud-chip">
           Xbox: left stick or D-pad move, A jump, X/RB/RT attack, B/LT dodge, Y/LB swap, START pause
         </span>
+        <span className="hud-chip">
+          Touch: arcade pad/button overlay or tactical tap mode with pinch zoom and hotbar
+        </span>
       </div>
       <div className="hud-line">
         <span className="hud-chip" style={{ color: gamepad ? "#4ade80" : "#9fb2c7" }}>

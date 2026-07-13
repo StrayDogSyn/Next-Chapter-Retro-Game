@@ -50,6 +50,7 @@ import {
 } from "./items";
 import { Rng, generateSeedPhrase } from "./rng";
 import { loadAssetManifest, resolveManifestAsset, type AssetManifest } from "./assetManifest";
+import type { TouchInputManager } from "./touchInput";
 
 export const VIEW_W = ROOM_W * TILE; // 640
 export const VIEW_H = ROOM_H * TILE; // 352
@@ -193,6 +194,11 @@ export type MinimapRoom = {
   boss: boolean;
 };
 
+type GameOptions = {
+  seedOverride?: string;
+  touchInput?: TouchInputManager | null;
+};
+
 // ─────────────────────── enemy definitions ───────────────────────
 
 const ENEMY_DEFS: Record<
@@ -230,6 +236,8 @@ const BOSS_NAMES: Record<string, string> = {
 export class Game {
   private ctx: CanvasRenderingContext2D;
   private camera = { x: 0, y: 0 };
+  private cameraZoom = 1;
+  private manualCameraPan = { x: 0, y: 0 };
   private loop = new GameLoop();
   private input: InputManager;
   private audio = new AudioManager();
@@ -328,18 +336,20 @@ export class Game {
   private shopOpen = false;
   private shopSelection = 0;
   private shopAtkBonus = 0;
+  private touchInput: TouchInputManager | null = null;
 
   onSnapshot: ((snap: HudSnapshot) => void) | null = null;
 
-  constructor(canvas: HTMLCanvasElement, seedOverride?: string) {
+  constructor(canvas: HTMLCanvasElement, options: GameOptions = {}) {
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("2d context unavailable");
     this.ctx = ctx;
     ctx.imageSmoothingEnabled = false;
-    this.input = new InputManager(window);
+    this.touchInput = options.touchInput ?? null;
+    this.input = new InputManager(window, this.touchInput);
 
     // ADR-017: daily seed / enter-seed mode override the random default.
-    this.seedPhrase = seedOverride ?? generateSeedPhrase();
+    this.seedPhrase = options.seedOverride ?? generateSeedPhrase();
     this.rng = new Rng(this.seedPhrase);
     this.combatRng = this.rng.fork("combat");
     this.lootRng = this.rng.fork("loot");
@@ -774,6 +784,7 @@ export class Game {
 
   private update(dt: number) {
     this.input.update();
+    this.applyTouchTacticalFrame();
     if (this.externalMenuOpen) {
       this.pushSnapshot(dt);
       return;
@@ -2044,10 +2055,12 @@ export class Game {
   private updateCamera() {
     const roomWidth = ROOM_W * TILE;
     const roomHeight = ROOM_H * TILE;
-    const targetX = this.px + this.pw / 2 - VIEW_W / 2;
-    const targetY = this.py + this.ph / 2 - VIEW_H / 2;
-    const maxX = Math.max(0, roomWidth - VIEW_W);
-    const maxY = Math.max(0, roomHeight - VIEW_H);
+    const visibleW = VIEW_W / this.cameraZoom;
+    const visibleH = VIEW_H / this.cameraZoom;
+    const targetX = this.px + this.pw / 2 - visibleW / 2 + this.manualCameraPan.x;
+    const targetY = this.py + this.ph / 2 - visibleH / 2 + this.manualCameraPan.y;
+    const maxX = Math.max(0, roomWidth - visibleW);
+    const maxY = Math.max(0, roomHeight - visibleH);
     this.camera.x = Math.min(Math.max(0, targetX), maxX);
     this.camera.y = Math.min(Math.max(0, targetY), maxY);
   }
@@ -2066,6 +2079,7 @@ export class Game {
     this.updateCamera();
     this.drawBackground();
     ctx.save();
+    ctx.scale(this.cameraZoom, this.cameraZoom);
     ctx.translate(-this.camera.x, -this.camera.y);
     this.drawTiles();
     this.drawInteractables();
@@ -2086,6 +2100,63 @@ export class Game {
     if (this.helpOpen) this.drawHelpOverlay();
     if (this.inventoryOpen) this.drawInventoryOverlay();
     if (this.shopOpen) this.drawShopOverlay();
+  }
+
+  private applyTouchTacticalFrame() {
+    if (!this.touchInput || this.touchInput.getScheme() !== "tacticalTap") return;
+    const frame = this.touchInput.consumeTacticalFrame();
+    if (frame.zoomDelta !== 1) {
+      this.cameraZoom = clampNumber(this.cameraZoom * frame.zoomDelta, 0.85, 1.75, 1);
+    }
+    if (frame.panDelta) {
+      const visibleW = VIEW_W / this.cameraZoom;
+      const visibleH = VIEW_H / this.cameraZoom;
+      this.manualCameraPan.x += frame.panDelta.x * visibleW;
+      this.manualCameraPan.y += frame.panDelta.y * visibleH;
+      this.manualCameraPan.x = clampNumber(this.manualCameraPan.x, -visibleW * 0.35, visibleW * 0.35, 0);
+      this.manualCameraPan.y = clampNumber(this.manualCameraPan.y, -visibleH * 0.35, visibleH * 0.35, 0);
+    } else {
+      this.manualCameraPan.x *= 0.82;
+      this.manualCameraPan.y *= 0.82;
+      if (Math.abs(this.manualCameraPan.x) < 0.5) this.manualCameraPan.x = 0;
+      if (Math.abs(this.manualCameraPan.y) < 0.5) this.manualCameraPan.y = 0;
+    }
+    if (frame.tap) this.handleTacticalTap(frame.tap.x, frame.tap.y);
+    if (frame.quickSlotAction === "pause") {
+      this.phase = this.phase === "paused" ? "playing" : "paused";
+    }
+  }
+
+  private handleTacticalTap(normX: number, normY: number) {
+    const visibleW = VIEW_W / this.cameraZoom;
+    const visibleH = VIEW_H / this.cameraZoom;
+    const worldX = this.camera.x + visibleW * normX;
+    const worldY = this.camera.y + visibleH * normY;
+
+    const enemy = this.roomState(this.roomId).enemies.find((candidate) => pointInRect(worldX, worldY, candidate));
+    if (enemy) {
+      this.facing = enemy.x >= this.px ? 1 : -1;
+      this.input.state.pressed.attack = true;
+      return;
+    }
+
+    const interactable = this.roomState(this.roomId).interactables.find((candidate) =>
+      pointInRect(worldX, worldY, { x: candidate.x - 8, y: candidate.y - 8, w: candidate.w + 16, h: candidate.h + 16 }),
+    );
+    if (interactable) {
+      this.input.state.pressed.interact = true;
+      return;
+    }
+
+    if (worldY < this.py - TILE && this.onGround) {
+      this.input.state.pressed.jump = true;
+      return;
+    }
+
+    const dx = worldX - (this.px + this.pw / 2);
+    this.input.state.axisX = clampNumber(dx / 96, -1, 1, 0);
+    this.input.state.held.left = this.input.state.axisX < -0.15;
+    this.input.state.held.right = this.input.state.axisX > 0.15;
   }
 
   private drawShopOverlay() {

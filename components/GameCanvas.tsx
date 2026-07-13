@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { Game, VIEW_W, VIEW_H, type HudSnapshot } from "@/lib/game/game";
 import { GameHudOverlay } from "@/components/GameHudOverlay";
 import { GameMenuModal } from "@/components/GameMenuModal";
+import { TouchControlsOverlay } from "@/components/TouchControlsOverlay";
+import { TouchInputManager, type TouchControlScheme, type TouchRenderState } from "@/lib/game/touchInput";
 
 type GameCanvasProps = {
   onSnapshot: (snapshot: HudSnapshot) => void;
@@ -18,8 +20,22 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const gamepadMenuPressedRef = useRef(false);
+  const touchInputRef = useRef<TouchInputManager | null>(null);
   const [snapshot, setSnapshot] = useState<HudSnapshot | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [touchScheme, setTouchScheme] = useState<TouchControlScheme>("virtualGamepad");
+  const [touchState, setTouchState] = useState<TouchRenderState>({
+    scheme: "virtualGamepad",
+    active: false,
+    joystick: { baseX: 0, baseY: 0, knobX: 0, knobY: 0, radius: 64, engaged: false },
+    buttons: [],
+    hotbar: [],
+  });
+  const [touchCapable, setTouchCapable] = useState(false);
+
+  useEffect(() => {
+    setTouchCapable(typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0));
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -38,12 +54,21 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
         canvas.width = pixelWidth;
         canvas.height = pixelHeight;
       }
+      touchInputRef.current?.setViewportRect(rect);
     };
 
     // Ensure deterministic first frame sizing before starting the game loop.
     updateCanvasSize();
 
-    const game = new Game(canvas, seedOverride);
+    const touchInput = new TouchInputManager({
+      scheme: touchScheme,
+      onRenderStateChange: setTouchState,
+    });
+    touchInput.setViewportRect(stage.getBoundingClientRect());
+    touchInput.bind(stage);
+    touchInputRef.current = touchInput;
+
+    const game = new Game(canvas, { seedOverride, touchInput });
     gameRef.current = game;
     game.onSnapshot = (snap) => {
       setSnapshot(snap);
@@ -57,9 +82,11 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
     return () => {
       observer.disconnect();
       game.destroy();
+      touchInput.destroy();
+      touchInputRef.current = null;
       gameRef.current = null;
     };
-  }, [onSnapshot, continueFromSave, seedOverride]);
+  }, [onSnapshot, continueFromSave, seedOverride, touchScheme]);
 
   const handleFocus = () => {
     shellRef.current?.focus();
@@ -89,6 +116,10 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
   useEffect(() => {
     gameRef.current?.setUiModalOpen(menuOpen);
   }, [menuOpen]);
+
+  useEffect(() => {
+    touchInputRef.current?.setScheme(touchScheme);
+  }, [touchScheme]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -150,9 +181,20 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
       onMouseDown={handleFocus}
       onTouchStart={handleFocus}
     >
-      <button type="button" className="fullscreen-toggle" onClick={toggleFullscreen}>
-        fullscreen
-      </button>
+      <div className="stage-toolbar">
+        {touchCapable ? (
+          <button
+            type="button"
+            className="fullscreen-toggle"
+            onClick={() => setTouchScheme((current) => (current === "virtualGamepad" ? "tacticalTap" : "virtualGamepad"))}
+          >
+            {touchScheme === "virtualGamepad" ? "tactical" : "arcade"}
+          </button>
+        ) : null}
+        <button type="button" className="fullscreen-toggle" onClick={toggleFullscreen}>
+          fullscreen
+        </button>
+      </div>
       <div
         id="game-stage-viewport"
         className="relative w-full aspect-video bg-slate-950 overflow-hidden"
@@ -171,6 +213,7 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
             }}
           />
         </div>
+        <TouchControlsOverlay state={touchState} visible={touchCapable} />
         <GameHudOverlay snapshot={snapshot} onToggleMenu={() => setMenuOpen((open) => !open)} onCopySeed={copySeed} />
         <GameMenuModal open={menuOpen} snapshot={snapshot} onClose={() => setMenuOpen(false)} />
       </div>

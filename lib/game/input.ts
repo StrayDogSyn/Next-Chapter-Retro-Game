@@ -29,6 +29,8 @@ export type InputAction =
   | "help"
   | "inventory";
 
+import type { TouchInputManager } from "./touchInput";
+
 export type InputState = {
   /** True while the control is held this frame. */
   held: Record<InputAction, boolean>;
@@ -135,6 +137,7 @@ export class InputManager {
   private gamepadIndex: number | null = null;
   private windowTarget: Window;
   private documentTarget: Document;
+  private touchInput: TouchInputManager | null;
   private debug = false;
   private lastDebugFrame = "";
 
@@ -207,9 +210,10 @@ export class InputManager {
     }
   };
 
-  constructor(target: Window) {
+  constructor(target: Window, touchInput: TouchInputManager | null = null) {
     this.windowTarget = target;
     this.documentTarget = target.document;
+    this.touchInput = touchInput;
     this.debug = this.documentTarget.location.search.includes("inputDebug=1");
 
     // Keyboard listeners on document are more reliable than window for focus
@@ -231,6 +235,14 @@ export class InputManager {
   update() {
     const merged = { ...this.keyboardHeld };
     let axisX = 0;
+
+    const touchFrame = this.touchInput?.consumeGameplayFrame() ?? null;
+    if (touchFrame) {
+      for (const [action, held] of Object.entries(touchFrame.held) as Array<[InputAction, boolean]>) {
+        if (held) merged[action] = true;
+      }
+      axisX = touchFrame.axisX;
+    }
 
     const pad = this.pollGamepad();
     if (pad) {
@@ -255,7 +267,8 @@ export class InputManager {
     if (!merged.left && !merged.right) axisX = 0;
 
     for (const action of ACTIONS) {
-      this.state.pressed[action] = merged[action] && !this.previousHeld[action];
+      const touchPressed = touchFrame?.pressed[action] ?? false;
+      this.state.pressed[action] = touchPressed || (merged[action] && !this.previousHeld[action]);
       this.state.held[action] = merged[action];
       this.previousHeld[action] = merged[action];
     }

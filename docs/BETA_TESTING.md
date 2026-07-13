@@ -30,9 +30,11 @@ glance; hover it for the raw `lootSource`/`saveSource` values.
 
 ## Known limitations
 
-- **Desktop-first.** No touch controls; keyboard + Xbox-style gamepad only.
-  Mobile/tablet is untested and likely broken - not a bug report unless
-  something crashes outright.
+- **Touch controls are beta-quality.** Mobile now exposes an arcade overlay
+  and a tactical touch mode toggle, but the tactical mode is gesture-driven
+  camera/tap control layered onto the existing platformer, not a dedicated
+  grid-tactics ruleset. Report misfires, accidental browser gestures, and
+  orientation-specific layout issues.
 - **Cold-start delay (once hosted):** the Python backend will run on a free
   hosting tier that sleeps after ~15 minutes idle. The *first* loot roll or
   save after a period of inactivity may take several seconds while it wakes
