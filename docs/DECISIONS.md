@@ -218,4 +218,14 @@ _(Renumbered from a duplicate "ADR-003" during the 2026-07-08 merge-conflict cle
 
 ---
 
+## ADR-015: Asset-utilization convention (condensed pass, shipping-priority session)
+
+- **Date:** 2026-07-13
+- **Status:** Accepted, minimal scope this session
+- **Context:** Of 652 extracted-pack audio/image stems (`public/assets/manifest.json`), only 4 (0.6%) were wired via `resolveManifestAsset()` stem-matching before this session. A full utilization pass was scoped for a later session in favor of shipping; this ADR just fixes the *convention* and lands one example.
+- **Decision:** New audio IDs that should pull from an extracted pack (rather than a curated `public/audio/*` file) use a fallback path whose filename stem exactly matches a `filesByStem` key (e.g. `shrineChime: "/audio/bell_01.mp3"` matches the pack's real `bell_01.ogg` via stem, not extension). No file needs to exist at the literal fallback path — `resolveManifestAsset()` finding a stem match means the fallback is never read. Every first-use of a pack gets a `CREDITS.md` row citing the pack's license (verified via `assets/manifest_bulk.csv`, not assumed).
+- **Consequences:** `shrineChime` (100-cc0-sfx pack, CC0) is the first of these — the shrine save chime, previously reusing the `chest` sound. Utilization is still ~0.7% (5/652) - the bulk of this work (per-zone ambience, per-enemy hurt/death variety, rarity-tiered pickup audio, UI sounds) is explicitly deferred to the next session, prioritized in the outstanding H0-U5 prompt's own ordering.
+
+---
+
 _Add new ADRs as decisions are made — including ones where you overrode an agent's suggestion. Those are often the most interesting entries for a reviewer._

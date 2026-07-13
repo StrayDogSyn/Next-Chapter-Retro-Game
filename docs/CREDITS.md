@@ -45,6 +45,7 @@ Ground truth inputs used for this list:
 | `assets/sounds/beast_growl_generic.mp3` | `growl.mp3` | https://freesound.org/s/366671/ | downloaded |
 | `assets/sounds/bulk/magic_spell_cast_magspel_dark_magic_wand_spell_cast_005_gmcm.mp3` | `magic.mp3` | https://freesound.org/s/855440/ | skipped-exists |
 | `assets/sounds/bulk/footstep_stone_fx_006_footstep_stone_r_wav.mp3` | `step.mp3` | https://freesound.org/s/390763/ | skipped-exists |
+| `public/assets/extracted/100-cc0-sfx/bell_01.ogg` | `shrineChime` (via `resolveManifestAsset()` stem match, ADR-015) | https://opengameart.org/content/100-cc0-sfx | CC0 |
 
 ## Notes
 

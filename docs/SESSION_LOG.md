@@ -39,6 +39,12 @@ An incident entry never doubles as the fix record — the fix gets its own dated
 
 ## Entries
 
+### 2026-07-13 — Hero sprite swap SKIPPED: assets/sprites/ has no documented provenance
+
+- **Goal:** a prompt asked to swap the player hero to `space_merc.png`. Checked `docs/CREDITS.md`, `docs/ASSET_SOURCES.md`, `assets/manifest.csv`, `assets/manifest_bulk.csv` for its license/source — zero hits. Broadened to the whole `assets/sprites/` directory (~70 files: `char-sheet-*`, `oga-swm-*`, `space_merc.png`, and more) per user redirect — none of these appear in any provenance-tracking doc either. This is a completely separate, untracked asset pool from `assets/img/bulk/*` and `assets/sounds/bulk/*`, which DO have real manifest/CREDITS.md tracking (the extracted-pack pipeline `scripts/asset-fetch.py`/`asset-extract.py` covers those; `assets/sprites/` was apparently populated some other way, outside that pipeline, with no paper trail).
+- **Decision:** kept the existing hero sprite (`public/sprites/hero.png`, properly credited in `CREDITS.md` — sourced from `assets/img/bulk/hero_0.png`, https://opengameart.org/content/hero-0). Did not integrate any `assets/sprites/*` file as a shipped, public-facing asset without a verifiable license. Flagged for a future session: either source real provenance for specific `assets/sprites/*` files worth keeping, or remove the ones that can't be verified.
+- **Outcome:** 🟡 partial by design — this was an explicit scope cut in favor of shipping (user confirmed: finish shipping this session, treat broader quality/asset work as next session).
+
 ### 2026-07-13 — Accepted risk: Neon credential rotation waived by user for hosting
 
 User explicitly waived rotating the credential leaked/cleaned up in the `0fc8f0f` incident, choosing to proceed with hosting on the current value rather than delay launch. Rotation remains available anytime via the Neon dashboard + a corresponding Render env var update — no code change required when it happens. No credential value logged here or anywhere in this session.
