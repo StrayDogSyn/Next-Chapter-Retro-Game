@@ -459,12 +459,17 @@ export class Game {
   }
 
   setUiModalOpen(open: boolean) {
+    const wasOpen = this.externalMenuOpen;
     this.externalMenuOpen = open;
     if (open) {
       this.inventoryOpen = false;
       this.helpOpen = false;
       this.shopOpen = false;
     }
+    // Bug fix (Windsurf review): whatever key was "just pressed" at the
+    // moment the menu closes (e.g. attack) must not leak into gameplay the
+    // instant control returns to it.
+    if (wasOpen && !open) this.input.flushPressed();
     if (open && this.phase === "playing") {
       this.phase = "paused";
       this.externalMenuPaused = true;

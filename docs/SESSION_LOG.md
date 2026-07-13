@@ -39,6 +39,17 @@ An incident entry never doubles as the fix record — the fix gets its own dated
 
 ## Entries
 
+### 2026-07-13 — Menu-close input leak fixed; G4 deploy wiring (hosted service live)
+
+- **Tool used:** Claude Code
+- **Goal:** fix two Windsurf review findings, then wire the deploy pipeline for the now-live Render-hosted `python-service` (https://ncrg-python-service.onrender.com, health-verified: `{"status":"ok"}`, HTTP 200).
+- **Bug 1 — menu-close input leak (fixed):** `InputManager.update()` computes the edge-detected `pressed` state every frame regardless of whether a UI overlay is open (necessarily, so the close/cancel key itself still registers). Whatever action was "just pressed" the instant a menu closed (e.g. attack, bound to keyboard X / gamepad X) would fire in gameplay the moment control returned to it. Added `InputManager.flushPressed()` (clears `pressed` without touching `held`/`previousHeld`, so a still-held key correctly reports not-pressed next frame with no re-trigger), called from `Game.setUiModalOpen()` on the open→closed transition. 3 new tests (`lib/game/input.test.ts`) using a minimal fake `Window`/`Document` rather than pulling in jsdom.
+- **Bug 2 — duplicated per-stem gain table:** could not locate this anywhere in the current codebase after a thorough search (multiple keyword variants, all file types, after pulling the two newest remote commits). The only "gain" in the audio path is `audioManager.ts`'s single `sfxGainValue`/`musicGainValue` — not per-stem, not duplicated. User confirmed: skip rather than block launch; likely from a Windsurf branch not merged here, or already resolved by a prior auto-synced commit.
+- **G4 wiring:** `NEXT_PUBLIC_PYTHON_SERVICE_URL` (the Render URL) and `NEXT_PUBLIC_BUILD_SHA` (`${{ github.sha }}`) added to `deploy.yml`'s build env. Build SHA now rendered in `GameFooter` (`v<short-sha>`, "dev" in local builds) for bug reports. Merged two more remote commits that landed mid-session (`6d9c1de` removed a `configure-pages` `enablement: true` that a prior Copilot-bot fix had added but wasn't needed; `a85c913` combined `render.yaml`'s build/pre-deploy commands — the human user's own commit, not a bot).
+- **Verification:** `npm test` 37/37 (34 prior + 3 new), `npm run build` exit 0, Python persistence + regression tests unaffected, hosted service health-checked live before wiring its URL into the pipeline.
+- **Noted but not fixed (not mine to fix):** the `ALLOWED_ORIGINS` value pasted for Render's dashboard has a typo — `http//localhost:3000` (missing a colon) — doesn't affect the production GitHub Pages origin check, but would break CORS for anyone testing local dev against the hosted service. Flagged to the user; lives in Render's dashboard, not this repo.
+- **Outcome:** ✅ bug 1 fixed and tested; bug 2 not found, explicitly skipped per user; deploy.yml wired and ready to push (pending user go-ahead).
+
 ### 2026-07-13 — assets/sprites/ provenance resolved for the oga-swm-* pack; hero swap still deferred
 
 - **Goal:** user provided general source attestation for `assets/sprites/` (OpenGameArt.org, itch.io free-sprites tag, Freesound.org) and asked to utilize the folder's assets. Documented the site-level attestation in `docs/ASSET_SOURCES.md` (honest about granularity — no per-file page URLs preserved at download time).
