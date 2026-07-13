@@ -14,8 +14,7 @@ services:
     region: oregon
     plan: free
     rootDir: python-service
-    buildCommand: pip install -r requirements.txt
-    preDeployCommand: alembic upgrade head
+    buildCommand: pip install -r requirements.txt && alembic upgrade head
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL_POOLED
