@@ -100,4 +100,81 @@ _(Renumbered from a duplicate "ADR-003" during the 2026-07-08 merge-conflict cle
 
 ---
 
+## ADR-007: vitest as the JS/TS test runner
+
+- **Date:** 2026-07-11
+- **Status:** Accepted
+- **Originated from:** Agent suggestion, during Phase 0 audit against `docs/MASTER_BUILD_SPEC.md`
+- **Context:** `package.json` had no `test` script and no JS test framework installed at all — `npm test` failed immediately with "Missing script." `docs/MASTER_BUILD_SPEC.md`'s verification loop requires `npm test` to pass as a universal gate on every future increment, so this was the single hard blocker to running that loop as written. Note: this repo already had one ADR-numbering collision (see ADR-006's note) from two parallel sessions both claiming "ADR-003" — this entry uses the next free number rather than whatever number `MASTER_BUILD_SPEC.md`'s per-phase prose suggests, to avoid repeating that.
+- **Decision:** Installed `vitest` as a devDependency, added `"test": "vitest run"`, and wrote the first real test file (`lib/game/rng.test.ts`) covering the seeded RNG's determinism and `.fork()` stream-independence guarantees — the property the procgen design (and the spec's two-stream RNG rule) depends on.
+- **Alternatives considered:**
+  - Jest — heavier config for an ESM/Next.js 14 + TypeScript project; vitest's Vite-based transform needs near-zero config here.
+  - No config file — vitest runs `**/*.test.ts` out of the box; skipped adding `vitest.config.ts` until a real need (jsdom environment, path aliases in tests) appears.
+- **Consequences:** `npm test` now exits 0 (12/12 passing) and is a trustworthy gate going forward. Does not touch the Python test suite (`scripts/tests/test_regression_contracts.py`), which remains separate.
+
+---
+
+## ADR-008: Browser calls the Python service directly; Next.js API-route proxy removed
+
+- **Date:** 2026-07-11
+- **Status:** Accepted (supersedes the API-route-proxy half of ADR-001; the "Python owns loot rolling" isolation itself is unchanged)
+- **Originated from:** Agent suggestion, user confirmed via AskUserQuestion after being offered the alternative (drop static export instead)
+- **Context:** `e35cbbc` added `output: "export"` to `next.config.mjs` for GitHub Pages hosting, which broke `npm run build`: static export has no server to run Next.js Route Handlers against at runtime, and `app/api/loot/route.ts` + `app/api/generate-loot/route.ts` both called `request.url`, which errored during prerender. A repo-wide grep showed only `/api/loot` had any caller (`lib/game/game.ts`, 2 call sites); `/api/generate-loot` and `/api/procedural-level` were unused dead code that happened to share (or, for procedural-level, quietly mask) the same incompatibility.
+- **Decision:** Deleted all three `app/api/*` routes. Added `lib/game/loot-client.ts`, which the browser calls directly against the Python service (`NEXT_PUBLIC_PYTHON_SERVICE_URL`, default `http://127.0.0.1:8000`) — same request/response shape the deleted `/api/loot` route used, so `game.ts`'s call sites changed minimally. Added CORS (`fastapi.middleware.cors.CORSMiddleware`) to `python-service/main.py` allowing the local dev origins and `https://straydogsyn.github.io`, since this is now a cross-origin browser request instead of a server-to-server one.
+- **Alternatives considered:**
+  - Drop `output: "export"` and host somewhere with a Node runtime (Vercel, Railway) — keeps the proxy-route pattern intact, but gives up the already-wired GitHub Pages deploy workflow. Rejected by the user in favor of keeping static hosting.
+  - Keep the unused `generate-loot`/`procedural-level` routes as dead code and only fix `/api/loot` — rejected because `generate-loot` independently fails the build the same way, so `npm run build` would still be red.
+- **Consequences:** `npm run build` passes again. The Python service must now be reachable from wherever the static site is actually loaded (browser-to-service, not build-server-to-service) — for the deployed GitHub Pages site this means python-service needs to be hosted somewhere public and `NEXT_PUBLIC_PYTHON_SERVICE_URL` set at build time in `.github/workflows/deploy.yml`; until then the deployed site will always fall through to `client-fallback` loot rolls (this is graceful, not broken — see ADR-003). That deployment gap is real Phase 5 (persistence/hosting) territory per `MASTER_BUILD_SPEC.md`, not resolved by this ADR. CORS origins in `main.py` are a hardcoded list, not env-driven — revisit if the Pages URL or a custom domain changes.
+
+---
+
+## ADR-009: Anonymous UUID identity + JSONB run persistence on Neon
+
+- **Date:** 2026-07-12
+- **Status:** Accepted
+- **Originated from:** Agent proposal (a "beta release" prompt assumed this layer already existed and asked to add anonymous identity on top of it; audit showed zero persistence code anywhere in the repo, so this ADR covers building the whole layer, not just identity)
+- **Context:** Needed cross-session save persistence without an accounts system for a beta. The client already had a mature, versioned localStorage save format (`Game.SAVE_KEY`, `version: 1`, built in `saveGame()`/`loadSavedGame()` in `game.ts`) - the natural design was to mirror that shape server-side rather than inventing a normalized schema that would drift from it.
+- **Decision:**
+  - **Identity:** `lib/game/player-identity.ts` generates a `crypto.randomUUID()` on first boot, stored in `localStorage` under `ncrg:playerId`. No accounts, no login. Known limitation: clearing browser storage orphans the server-side save (acceptable for a beta; real auth is post-beta).
+  - **Schema (Neon project "Metroidvania", `shy-tree-32297595`):** two tables only. `players(id, client_uuid UNIQUE, created_at)` and `run_state(player_id PRIMARY KEY, save_data JSONB, updated_at)` - one row per player, upserted on save (`ON CONFLICT (player_id) DO UPDATE`), matching the client's single-slot save design. `save_data` stores the client's save object verbatim (whatever shape `version: 1` currently is) rather than normalizing hp/coins/xp/etc. into columns - one shape to keep in sync, not two.
+  - **Backend:** `python-service/db.py` (sync `psycopg` per-request connections against `DATABASE_URL_POOLED` - Neon's own PgBouncer already pools, no second pool on top). Three endpoints: `POST /players/register` (idempotent), `POST /save`, `GET /load`. Alembic (`python-service/alembic/`) migrates against `DATABASE_URL_DIRECT`; the initial schema was applied via the Neon MCP `prepare_database_migration`/`complete_database_migration` tools (reviewed on a temp branch first) and the matching Alembic revision was `stamp`ed rather than re-run.
+  - **Frontend:** `lib/game/save-client.ts` (same direct-to-service pattern as `loot-client.ts`, ADR-008 - no Next.js proxy route, static export has no server at runtime). `game.ts`'s `loadSavedGame()` became async: tries the server first, falls back to localStorage on any failure/timeout (3s `AbortController`, same pattern as loot rolls). `saveGame()` still always writes localStorage first (unchanged, source of truth), then best-effort mirrors to the server. `HudSnapshot.saveSource` tracks `"python-service" | "client-fallback"` for a future degraded-mode indicator, mirroring the existing `lootSource` field.
+- **Alternatives considered:**
+  - Normalized SQL columns per save field (hp, coins, xp, ...) - rejected: doubles the places the save shape needs to change, no benefit at this scale.
+  - `asyncpg` for the runtime driver (what `MASTER_BUILD_SPEC.md` originally suggested) - rejected: no prebuilt wheel for this machine's Python 3.14 on Windows, and building from source needs MSVC Build Tools that aren't installed. `psycopg[binary]==3.3.4` has prebuilt wheels and was a drop-in swap.
+  - Accounts/login for the beta - deferred; adds real scope (password/OAuth handling) for a beta that just needs cross-session continuity.
+- **Consequences:** Verified end-to-end against the real Neon project: two distinct UUIDs produce isolated `run_state` rows (SELECT pasted in `SESSION_LOG.md`), and a real browser boot (Playwright, not just curl) actually registers and lands a row. CORS (`ALLOWED_ORIGINS`, ADR-008) needed both `:3000` and `:3001` added - Next dev falls back to 3001 whenever 3000 is occupied, and the allowlist is exact-match. Deferred/out of scope here: rate limiting or abuse guards on the write endpoints (this service isn't publicly hosted yet - fine for local dev, must be addressed before any public deploy), and `meta_progression`/`settings` tables (nothing in the client persists those concepts yet - added if/when it does).
+
+---
+
+## ADR-010: Save-trigger map + death/respawn persistence semantics
+
+- **Date:** 2026-07-12
+- **Status:** Accepted
+- **Originated from:** Agent proposal, following up on ADR-009 - persistence existed but `saveGame()` had exactly one call site (`activateShrine()`), so most progress was never actually persisted.
+- **Context:** Needed to decide both *where* `saveGame()` fires and, specifically, what happens to the save when the player dies. `respawn()` already existed and does NOT touch persistence at all: on death it heals to full, clears per-room enemy state (marking already-cleared rooms as cleared so the minimap survives), and teleports to `START_ROOM` - keeping level/weapon/upgrades/flags in memory. `runSeed`/`seedPhrase` are set once at `Game` construction and never touched by `respawn()`, so the seed-persistence contract the death screen already relies on ("press JUMP to rise again", same seed) was never at risk.
+- **Decision:**
+  - **Save triggers**, in addition to the existing shrine save: **room transition** (`goToRoom()` - the primary checkpoint, frequent enough that "continue" resumes near where the player left off), **level-up** (`awardXp()` - once per XP award even if it rolls over multiple levels, not once per level), and **weapon equip** (`applyLoot()`'s auto-equip branch only - not stash/scrap/upgrade-stat-pickup, which are far more frequent and less worth a save+network round-trip each).
+  - **Death does NOT save.** `respawn()` is unchanged - no `saveGame()` call added there. The player's most recent real save is whatever their last room transition/level-up/equip/shrine produced, which for continuous play is at most a few seconds to one room stale. This avoids ever persisting a `phase: "dead"` mid-respawn state, and keeps `respawn()`'s existing "reset to `START_ROOM`, keep progression" behavior as the single source of truth for what death means in a live session - persistence only matters for *resuming a session*, not for in-session death.
+  - **Extracted `buildSaveData()`** (`lib/game/save-data.ts`) out of `saveGame()`'s inline object-construction so the clamping/shape logic is unit-testable (`save-data.test.ts`, 8 tests) without a running `Game` instance. `applySaveData()` (the load-side, already extracted in ADR-009's work) is unchanged.
+- **Alternatives considered:**
+  - Saving on every loot pickup (not just equip) - rejected as save-spam; upgrades/scraps are frequent and don't warrant a network round-trip each.
+  - Persisting death state and restoring "you were mid-death" on reload - rejected as needless complexity for a case `respawn()` already resolves cleanly in-session.
+- **Consequences:** More frequent `saveGame()` calls means more frequent best-effort `/save` POSTs (ADR-009) - still fire-and-forget with a 3s timeout, never blocking gameplay, but worth watching if it becomes chatty once hosted publicly (ties into D3's rate-limiting work). `visitedRooms`/`upgrades` filtering (dropping anything not in the current `world`/`isUpgradeId`) still happens at the `saveGame()` call site, not inside `buildSaveData()`, which stays a pure function of its input.
+
+---
+
+## ADR-011: `assetUrl()` helper for GitHub Pages base-path correctness
+
+- **Date:** 2026-07-13
+- **Status:** Accepted
+- **Originated from:** Agent proposal - a confirmed real bug (root-absolute `fetch("/sprites/...")`, `fetch("/audio/...")`, `fetch("/assets/manifest.json")` calls bypass Next.js's `basePath`/`assetPrefix`, which only cover Next's own routing) flagged across two prior sessions' Playwright console logs but never fixed.
+- **Context:** `next.config.mjs` already sets `basePath`/`assetPrefix` to `/Next-Chapter-Retro-Game` in production (predates this session). That only rewrites paths Next.js itself generates (page routes, `next/image`, etc.) - plain runtime `fetch()`/`Image().src` calls using literal strings like `"/sprites/hero.png"` are invisible to that mechanism and 404 once the site is actually served from a subpath, as GitHub Pages does.
+- **Decision:** `lib/game/asset-url.ts` exports `assetUrl(path)`, prefixing with `process.env.NEXT_PUBLIC_BASE_PATH` (empty in dev, `/Next-Chapter-Retro-Game` in the production build via `deploy.yml`). Every root-absolute asset reference in `game.ts` and `assetManifest.ts` now routes through it - the spritemeta fetch, the per-sprite-sheet fallback path, `resolveManifestAsset()`'s two return paths, and the audio fallback-path resolution. The `audioFiles` map's ~21 literal `/audio/*.wav`/`.mp3` strings are deliberately left unprefixed *as the map itself* (commented in `game.ts`) - they're raw lookup keys/fallback values that get run through `assetUrl()` once at the point of use, not fetched directly; wrapping all 21 individually would be pure churn for the same runtime result.
+- **Also fixed in the same pass (root cause of the `/assets/manifest.json` 404 itself):** `public/assets/manifest.json` didn't exist - only a stale `public/assets/extracted/manifest.json` did, predating `asset-extract.py`'s dual-write of both a canonical and "legacy" copy, and predating that script's `filesByStem` indexing feature entirely (the stale file's `filesByStem` was empty, so even a successful fetch would have resolved nothing). Regenerated via the script's own `build_manifest()` (no zip re-extraction needed - it only walks already-extracted files on disk) - now 652 stem entries, written to both paths.
+- **Alternatives considered:** Wrapping every literal individually for grep-friendliness - rejected as noise for the audio map specifically, since the prefix is applied exactly once regardless either way; documented instead.
+- **Consequences:** Verified via a genuine Pages rehearsal, not just local dev: production build (`NEXT_PUBLIC_BASE_PATH=/Next-Chapter-Retro-Game`), `out/` copied into a `Next-Chapter-Retro-Game/` subdirectory, served locally, driven with Playwright - zero asset 404s, canvas renders full parity with local dev (sprites, tiles, HUD). One build attempt was invalidated by Git Bash's automatic POSIX-path conversion silently mangling the inline `NEXT_PUBLIC_BASE_PATH=/Next-Chapter-Retro-Game` env var into a Windows filesystem path (`C:/Program Files/Git/Next-Chapter-Retro-Game`) before Next.js ever saw it - the rebuild that actually validated this ADR was run via PowerShell, which doesn't do that conversion. Worth remembering for any future build invoked with an env var starting with `/` from this project's Bash tool.
+
+---
+
 _Add new ADRs as decisions are made — including ones where you overrode an agent's suggestion. Those are often the most interesting entries for a reviewer._

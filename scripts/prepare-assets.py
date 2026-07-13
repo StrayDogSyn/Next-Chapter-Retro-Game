@@ -348,16 +348,25 @@ def main() -> None:
     WIRED.append("assets/img/bulk/dirt_platformer_tiles.png")
     T = 16
     tile_at = lambda cx, cy: dirt.crop((cx * T, cy * T, (cx + 1) * T, (cy + 1) * T))
-    # (col,row) coords verified visually against a labeled grid overlay this session
+    # dirt_platformer_tiles.png is 256x96 = 16 cols x 6 rows (valid row indices
+    # 0-5 only). The coordinates this replaced referenced rows up to 11 -
+    # entirely out of bounds, so PIL silently cropped fully-transparent
+    # regions for 7 of these 8 tiles (only the old "topLeft" (0,4) was ever
+    # in-bounds). That produced a tiles.png where every solid/platform tile
+    # was invisible - the floor and platforms never rendered (see SESSION_LOG
+    # "Free-floating sprites" entry). Re-picked against the actual 16x6 grid,
+    # verified opaque (>90% non-transparent pixels) via a grid-overlay render.
+    # This source doesn't have distinct auto-tile corner art, so topLeft
+    # doubles as the generic top edge; there's no true corner/wall variety.
     tiles = [
-        ("top", (2, 10)),
-        ("fill", (2, 11)),
-        ("topLeft", (0, 4)),
-        ("topRight", (15, 6)),
-        ("wallLeft", (4, 8)),
-        ("wallRight", (1, 7)),
-        ("platform", (7, 8)),
-        ("fillDark", (7, 11)),
+        ("top", (0, 0)),
+        ("fill", (0, 1)),
+        ("topLeft", (0, 0)),
+        ("topRight", (5, 0)),
+        ("wallLeft", (0, 2)),
+        ("wallRight", (4, 1)),
+        ("platform", (8, 0)),
+        ("fillDark", (9, 1)),
     ]
     sheet = Image.new("RGBA", (len(tiles) * T, T), (0, 0, 0, 0))
     for i, (_, (cx, cy)) in enumerate(tiles):
