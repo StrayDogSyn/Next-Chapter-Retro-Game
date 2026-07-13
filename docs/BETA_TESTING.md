@@ -1,23 +1,18 @@
 # Beta Testing
 
-**Status as of 2026-07-13: not yet live.** GitHub Pages is not enabled for
-this repository yet (`Settings → Pages → Source → GitHub Actions` needs to
-be set once), so every deploy has failed at the final "Deploy to GitHub
-Pages" step even though the build itself succeeds. The Python backend
-(loot rolling, save persistence) isn't hosted anywhere public yet either
-(see `docs/DECISIONS.md` ADR-012 - blocked on rotating a leaked database
-credential, tracked in `SESSION_LOG.md`'s 2026-07-11 security entry).
+**Live now:** **https://straydogsyn.github.io/Next-Chapter-Retro-Game/**
 
-**Live URL:** `https://straydogsyn.github.io/Next-Chapter-Retro-Game/` -
-placeholder until the above is resolved. This document will be updated
-with real status the moment it is.
-
-Once live, the game is expected to run in **degraded mode** at first (no
-hosted backend yet): client-side loot rolls and browser-local saves only,
-by design (see ADR-003 and ADR-009) - not a bug. The HUD's status chip
-(top-right, next to the seed/menu buttons) shows "online" vs "offline mode"
-so you can tell which mode you're in at a glance; hover it for the raw
-`lootSource`/`saveSource` values.
+The Python backend (loot rolling, save persistence) is hosted on Render
+and connected. Loot rolls come from the live service and runs persist to
+Neon across sessions/devices via an anonymous per-browser identity (no
+account needed) - see ADR-009. If the backend is ever briefly unreachable
+(e.g. a cold start after idle - Render's free tier sleeps after ~15
+minutes idle, so the very first request after a quiet period can take
+30-60 seconds), the game runs in **degraded mode**: client-side loot rolls
+and browser-local saves only, by design (ADR-003/ADR-009) - not a bug. The
+HUD's status chip (top-right, next to the seed/menu buttons) shows
+"online" vs "offline mode" so you can tell which mode you're in at a
+glance; hover it for the raw `lootSource`/`saveSource` values.
 
 ## What we're testing
 
@@ -52,8 +47,7 @@ so you can tell which mode you're in at a glance; hover it for the raw
 ## Filing a bug
 
 Include, if visible:
-- **Version** (short commit SHA, shown in the footer once wired - if you
-  don't see one yet, note the approximate date/time instead)
+- **Version** (short commit SHA, shown in the footer as `v<sha>`)
 - **Seed** (death screen, or the "seed" button in the HUD - copies to
   clipboard)
 - **Room** you were in

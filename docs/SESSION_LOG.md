@@ -39,6 +39,16 @@ An incident entry never doubles as the fix record — the fix gets its own dated
 
 ## Entries
 
+### 2026-07-13 — First successful public deploy: https://straydogsyn.github.io/Next-Chapter-Retro-Game/ is live
+
+- **Tool used:** Claude Code
+- **Goal:** get the actual live site up after confirming GitHub Pages had never been enabled (prior entry) - user enabled it via Settings.
+- **What happened:** `has_pages` flipped to `true` (API-confirmed). The exact same `deploy.yml` that had been failing at "Setup Pages" (no site to configure) needed a fresh push to re-run against the now-enabled site - working tree was clean, so used an empty commit (`884ba2c`) specifically to retrigger, not a content change. Also merged two more mid-session Copilot-agent commits (`94fb07a`, `a992d30`) that turned out to be a history-rewriting rebase PR with no net content diff on the workflow files - confirmed via `git diff` before trusting that.
+- **Result:** Actions run `29272649659` completed **success** (build + deploy both green, first time ever for this repo). `curl https://straydogsyn.github.io/Next-Chapter-Retro-Game/` returns HTTP 200 with the correct page title.
+- **Degraded-mode live verification (my responsibility per the user's Claude-Code/Chrome division of labor - request-blocking needs Playwright, not a manual browser session):** ran the prepared script against the real production URL. Baseline: chip reads "online", real loot roll + player registration succeed against the hosted Render service. Blocked (`page.route(...).abort()` on the service origin): a real `/save` attempt fails as expected, `saveSource` flips to `client-fallback`, chip reads "offline mode", and `localStorage`'s save still writes correctly (`roomId: R02`) - gameplay never stalls. Unblocked: chip returns to "online", subsequent `/save` succeeds. Screenshot confirms a fully-rendered live scene (swamp/mangrove zone, two bats, player at 36/100 HP from real combat during the automated walk, HUD/status chip all correct). This incidentally also produced real evidence for smoke-test steps 2-4 (fresh UUID registered, loot from the hosted service, a save landing in the live Neon DB with `roomId: R07`) - 2 test rows (ids 79, 80) confirmed via `mcp__Neon__run_sql` and deleted after, with explicit user confirmation per this session's established cleanup pattern.
+- **Remaining smoke-test steps (1, 5, 7 - boot/asset-404 check, refresh-restores-from-server, death/respawn continuity) are explicitly the "Chrome" session's job**, per the user's stated division of labor - not attempted here to avoid duplicating that work.
+- **Outcome:** ✅ the site is genuinely, verifiably live and the full stack (Pages → Render → Neon) round-trips correctly, including graceful degradation. Awaiting the Chrome session's report for the remaining steps before tagging `beta-0.1.0`.
+
 ### 2026-07-13 — Menu-close input leak fixed; G4 deploy wiring (hosted service live)
 
 - **Tool used:** Claude Code
