@@ -39,6 +39,18 @@ An incident entry never doubles as the fix record — the fix gets its own dated
 
 ## Entries
 
+### 2026-07-13 — Accepted risk: Neon credential rotation waived by user for hosting
+
+User explicitly waived rotating the credential leaked/cleaned up in the `0fc8f0f` incident, choosing to proceed with hosting on the current value rather than delay launch. Rotation remains available anytime via the Neon dashboard + a corresponding Render env var update — no code change required when it happens. No credential value logged here or anywhere in this session.
+
+### 2026-07-13 — F0/F1: double-jump audit found it already built; capped jumpPower instead (ADR-014)
+
+- **Tool used:** Claude Code
+- **Goal:** A prompt asked to build double-jump as an AV2-style binary-gate-plus-upgradeable-stat system. F0's audit found it already existed almost entirely — see ADR-014 for the full finding. Rescoped to just the real gap (capping `jumpPower`) per user confirmation.
+- **What the agent produced:** `lib/game/jump-physics.ts` (pure module: `jumpVelocity`, `maxJumps`, `tickGroundedState`, `resolveJumpPress`), `game.ts` refactored to delegate to it, 14 new vitest cases including the explicit coyote-consumes-first-jump-not-second edge case. ADR-014.
+- **Verification:** `npm test`: 34/34 (12 rng + 8 save-data + 14 jump-physics). `npm run build`: exit 0. Math checked: base jump 3.78 tiles, capped-max jumpPower 5.81 tiles, double-jump reach assumption 7 tiles — margin preserved.
+- **Outcome:** ✅ merged. Superseded by a follow-up prompt shifting priority to shipping the beta live this session (space-merc hero swap, hosting, deploy) — F2 (asset utilization) and F3 (replayability) from the original prompt are deferred, not abandoned.
+
 ### 2026-07-13 — E0 finding + E1-E3: degraded-mode indicator, hosting prep, tester docs
 
 - **Tool used:** Claude Code

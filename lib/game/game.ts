@@ -27,6 +27,12 @@ import {
 } from "./levelLoader";
 import { ROOM_H, ROOM_W, START_ROOM, TILE, type ZoneId } from "./world";
 import { assetUrl } from "./asset-url";
+import {
+  jumpVelocity as jumpPhysicsJumpVelocity,
+  maxJumps as jumpPhysicsMaxJumps,
+  resolveJumpPress,
+  tickGroundedState,
+} from "./jump-physics";
 import { fetchLootRoll } from "./loot-client";
 import { getOrCreatePlayerId } from "./player-identity";
 import { loadFromServer, registerPlayer, saveToServer } from "./save-client";
@@ -686,11 +692,11 @@ export class Game {
   }
 
   private jumpVelocity(): number {
-    return -330 * (1 + this.stat("jumpPower") / 100);
+    return -jumpPhysicsJumpVelocity(this.stat("jumpPower"));
   }
 
   private maxJumps(): number {
-    return 1 + (this.stat("doubleJump") > 0 ? 1 : 0);
+    return jumpPhysicsMaxJumps(this.stat("doubleJump") > 0);
   }
 
   private attackSpeed(): number {
@@ -815,23 +821,24 @@ export class Game {
       if (ax > 0) this.facing = 1;
     }
 
-    // jumping (coyote time + optional double jump)
-    if (this.onGround) {
-      this.coyoteT = 0.1;
-      this.jumpsUsed = 0;
-    } else if (this.coyoteT > 0) {
-      this.coyoteT -= dt;
-    }
+    // jumping (coyote time + optional double jump) — state machine lives in
+    // jump-physics.ts (ADR-014) so the coyote/double-jump edge cases are
+    // unit-testable without a canvas-backed Game.
+    const grounded = tickGroundedState(
+      { onGround: this.onGround, coyoteT: this.coyoteT, jumpsUsed: this.jumpsUsed },
+      dt,
+    );
+    this.coyoteT = grounded.coyoteT;
+    this.jumpsUsed = grounded.jumpsUsed;
     if (input.pressed.jump) {
-      const canGroundJump = this.onGround || this.coyoteT > 0;
-      // Air-jump requires: not a ground jump, double-jump upgrade, and at least
-      // one prior jump already consumed (prevents a free air-jump when knocked
-      // airborne with jumpsUsed still at 0).
-      const canAirJump = !canGroundJump && this.jumpsUsed >= 1 && this.jumpsUsed < this.maxJumps();
-      if (canGroundJump || canAirJump) {
+      const resolution = resolveJumpPress(
+        { onGround: this.onGround, coyoteT: this.coyoteT, jumpsUsed: this.jumpsUsed },
+        this.maxJumps(),
+      );
+      this.coyoteT = resolution.coyoteT;
+      this.jumpsUsed = resolution.jumpsUsed;
+      if (resolution.jumped) {
         this.pvy = this.jumpVelocity();
-        this.jumpsUsed = canGroundJump ? 1 : this.jumpsUsed + 1;
-        this.coyoteT = 0;
         this.audio.play("jump", 0.7);
       }
     }

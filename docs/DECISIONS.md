@@ -206,4 +206,16 @@ _(Renumbered from a duplicate "ADR-003" during the 2026-07-08 merge-conflict cle
 
 ---
 
+## ADR-014: jumpPower cap (dual-progression jump design)
+
+- **Date:** 2026-07-13
+- **Status:** Accepted
+- **Originated from:** Agent audit — a prompt requesting "double jump as a binary gate + upgradeable height" turned out to already exist almost entirely: `doubleJump`/`dash` are working binary ability gates (world pickups `J`/`A` → `this.upgrades.doubleJump/dash = 1`, consumed by `maxJumps()`), and `jumpPower` ("Coil Boots") was already one of the 12 upgrade types, already applied in `jumpVelocity() = -330 * (1 + jumpPower/100)`. The reachability auditor (`levelLoader.ts`) already models two movement profiles (base vs. double-jump+dash) with physics-derived constants. The one real gap: `jumpPower` was uncapped.
+- **Context:** Uncapped `jumpPower` doesn't break the reachability auditor's safety guarantee (more reach only ever helps, never hurts, and the audit's `BASE_PROFILE` already assumes zero `jumpPower`) — but it does let a heavily-farmed build single-jump past content that was designed to require the double-jump ability specifically, eroding the intended gate identity.
+- **Decision:** Capped at `JUMP_POWER_CAP_PCT = 24` (≈3 tiers of the 8% baseValue roll) in `lib/game/jump-physics.ts`, a new pure module extracted from `game.ts` (mirroring the `save-data.ts` pattern) so the coyote-time/double-jump state machine is unit-testable without a canvas-backed `Game`. Math: base jump apexes at 60.5px (3.78 tiles); capped-max `jumpPower` apexes at 93.0px (5.81 tiles) — comfortably below double-jump's ~112px (7-tile) reach assumption, so a maxed single-jump build still can't reach content gated on the actual ability for most placements (not a hard guarantee for every possible room layout — see Consequences).
+- **Alternatives considered:** Tracking discrete "tier" pickups instead of a continuous capped percentage — rejected; the existing loot system already rolls continuous magnitudes per rarity, and retrofitting discrete tiers would touch the loot-rolling code on both the Python and client-fallback sides for marginal benefit over a simple cap.
+- **Consequences:** `game.ts`'s `jumpVelocity()`/`maxJumps()` now delegate to `jump-physics.ts`; the coyote/jump block in `update()` delegates to `tickGroundedState()`/`resolveJumpPress()`. 14 new vitest cases, including the explicit coyote-consumes-first-jump-not-second edge case. Save round-trip for `doubleJump`/`dash`/`jumpPower` verified by construction, not a new test — they're ordinary `UpgradeId` values already covered by `save-data.test.ts`'s generic upgrade round-trip test (`buildSaveData`/`applySaveData` don't special-case any upgrade ID). Not a hard guarantee: the cap bounds the *margin*, but a room that places double-jump-gated content closer than ~2 tiles above the base-jump threshold could still be single-jump-bypassable by a maxed build — no specific instance found, not audited item-by-item under this ADR's time budget.
+
+---
+
 _Add new ADRs as decisions are made — including ones where you overrode an agent's suggestion. Those are often the most interesting entries for a reviewer._
