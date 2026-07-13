@@ -29,6 +29,7 @@ import { ROOM_H, ROOM_W, START_ROOM, TILE, type ZoneId } from "./world";
 import { fetchLootRoll } from "./loot-client";
 import { getOrCreatePlayerId } from "./player-identity";
 import { loadFromServer, registerPlayer, saveToServer } from "./save-client";
+import { buildSaveData } from "./save-data";
 import {
   describeLoot,
   fallbackRoll,
@@ -702,6 +703,7 @@ export class Game {
   /** SYS-009: award XP for a kill and roll over as many level-ups as it earns. */
   private awardXp(amount: number) {
     this.xp += amount;
+    let leveledUp = false;
     while (this.xp >= this.xpToNext) {
       this.xp -= this.xpToNext;
       this.level += 1;
@@ -709,7 +711,10 @@ export class Game {
       this.hp = this.maxHp();
       this.audio.play("levelup");
       this.showMessage(`LEVEL UP! Now level ${this.level}`);
+      leveledUp = true;
     }
+    // ADR-010: save once even if a single kill rolls over multiple levels.
+    if (leveledUp) this.saveGame();
   }
 
   // ─────────────────────── update ───────────────────────
@@ -1548,6 +1553,7 @@ export class Game {
       this.weapon = loot;
       this.showMessage(`Equipped ${describeLoot(loot)}`);
       this.triggerEquipFx();
+      this.saveGame(); // ADR-010: equipment change is a save checkpoint
     } else if (!this.secondary || dps(loot) > dps(this.secondary)) {
       this.secondary = loot;
       this.showMessage(`Stashed ${describeLoot(loot)} (Y/L to swap)`);
@@ -1625,6 +1631,10 @@ export class Game {
     this.projectiles = [];
     this.roomState(roomId); // materialize
     this.updateMusic();
+    // ADR-010: room transition is the primary auto-save checkpoint - frequent
+    // enough that "continue" resumes close to where the player left off,
+    // without saving mid-death (respawn() below never calls saveGame()).
+    this.saveGame();
   }
 
   private respawn() {
@@ -1688,34 +1698,28 @@ export class Game {
 
   private saveGame() {
     if (typeof localStorage === "undefined") return;
-    const currentRoom = this.world.has(this.roomId) ? this.roomId : START_ROOM;
-    const maxHp = this.maxHp();
-    const clampedHp = Math.round(clampNumber(this.hp, 0, maxHp, maxHp));
-    const clampedCoins = Math.round(clampNumber(this.coins, 0, 999_999, 0));
-    const clampedLevel = Math.round(clampNumber(this.level, 1, 999, 1));
-    const clampedXpToNext = Math.round(clampNumber(this.xpToNext, 1, 1_000_000, 150));
-    const clampedXp = Math.round(clampNumber(this.xp, 0, clampedXpToNext, 0));
-    const data = {
-      version: 1 as const,
-      roomId: currentRoom,
-      px: clampNumber(this.px, 0, VIEW_W - this.pw, 0),
-      py: clampNumber(this.py, 0, VIEW_H - this.ph, 0),
-      hp: clampedHp,
-      coins: clampedCoins,
-      level: clampedLevel,
-      xp: clampedXp,
-      xpToNext: clampedXpToNext,
+    const data = buildSaveData({
+      roomId: this.world.has(this.roomId) ? this.roomId : START_ROOM,
+      px: this.px,
+      py: this.py,
+      viewW: VIEW_W,
+      viewH: VIEW_H,
+      playerW: this.pw,
+      playerH: this.ph,
+      maxHp: this.maxHp(),
+      hp: this.hp,
+      coins: this.coins,
+      level: this.level,
+      xp: this.xp,
+      xpToNext: this.xpToNext,
       weapon: this.weapon,
       secondary: this.secondary,
-      upgrades: Object.fromEntries(
-        Object.entries(this.upgrades)
-          .filter(([id]) => isUpgradeId(id))
-          .map(([id, value]) => [id, Math.round(clampNumber(value, 0, 999, 0))]),
-      ) as Partial<Record<UpgradeId, number>>,
+      upgrades: this.upgrades,
+      isUpgradeId,
       flags: this.flags,
       visitedRooms: Array.from(this.visitedRooms).filter((id) => this.world.has(id)),
-      shopAtkBonus: clampNumber(this.shopAtkBonus, 0, 999, 0),
-    };
+      shopAtkBonus: this.shopAtkBonus,
+    });
     try {
       localStorage.setItem(Game.SAVE_KEY, JSON.stringify(data));
     } catch (error) {

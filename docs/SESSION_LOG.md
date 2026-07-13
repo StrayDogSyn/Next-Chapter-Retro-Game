@@ -39,6 +39,21 @@ An incident entry never doubles as the fix record — the fix gets its own dated
 
 ## Entries
 
+### 2026-07-13 — D1: save-trigger coverage (room transition, level-up, equip) + death/respawn semantics
+
+- **Tool used:** Claude Code
+- **Goal:** `grep -n ".saveGame()"` showed exactly one call site (`activateShrine()`) despite ADR-009's full persistence layer - most real progress was never actually being saved. Also needed to decide and document what death does to the save.
+- **Gate Zero check (start of session):** password rotation still NOT done - tested the `.env` credential directly (`psycopg.connect()`, no value printed) and it still authenticates. D3 (public hosting) stays blocked. Branch divergence from the prior session's Gate Zero item turned out to already be resolved - `git fetch origin` showed `main` and `origin/main` identical at `87782e9`; whatever auto-commits this environment produces apparently also pushes.
+- **What the agent produced:**
+  - Read `goToRoom()`, `respawn()`, `awardXp()`, `applyLoot()` before changing anything. Confirmed `respawn()` already never saves - it heals, clears per-room enemy state, and teleports to `START_ROOM` while keeping level/weapon/upgrades/flags and never touching `runSeed`/`seedPhrase` (set once at construction) - so the death-screen seed-continuity contract was never actually at risk.
+  - Added `saveGame()` calls at: `goToRoom()` (room transition - the primary checkpoint), `awardXp()` (once per XP award even across multi-level rollovers, not once per level), and `applyLoot()`'s weapon-auto-equip branch only (not stash/scrap/upgrade-pickup - too frequent to warrant a save+network round-trip each).
+  - Extracted `buildSaveData()` into `lib/game/save-data.ts` - a pure function of its input, out of `saveGame()`'s previously-inline object construction. 8 new vitest cases (`save-data.test.ts`) covering clamping behavior (hp/coins/level/xp bounds, non-finite fallback, dropped-unknown-upgrade-ids, array-copy-not-alias, position clamping) without needing a running `Game` instance.
+  - **Decision, logged as ADR-010:** death does NOT trigger a save. The most recent save after any of the new triggers is at most a few seconds/one room stale by the time of an in-session death, and `respawn()`'s existing in-memory behavior already fully resolves what death means during a live session - persistence only matters for resuming *between* sessions.
+- **Verification:** `npm test`: 20/20 (12 existing + 8 new). `npm run build`: exit 0. `python -m unittest tests.test_persistence`: 5/5 (unaffected). Live Playwright proof, not just code review: booted the real game, confirmed **zero** `/save` requests before any movement, walked the player from `R01` into `R02` (holding right ~6s to cross the 640px-wide room), confirmed **one** `/save` POST fired, confirmed `localStorage`'s `next_chapter_save_v1.roomId === "R02"`, and confirmed via `mcp__Neon__run_sql` that the server-side row's `save_data->>'roomId'` also read `"R02"` - the full client → server → Neon path for the new trigger, not just the client-side half. Test row deleted after.
+- **Human review/changes:** none yet - reporting this turn.
+- **Outcome:** ✅ merged - save coverage now spans the moments that actually matter for a beta tester's session continuity, verified against the live database.
+- **Anything worth remembering:** deliberately did NOT add a save on manual weapon-swap (V/L, swapping between already-owned primary/secondary) or on non-equip loot (upgrades/scraps) - those don't represent new progression and would multiply network calls for no real continuity benefit. Worth revisiting if a future increment adds save-related UX (e.g., an explicit "saving..." indicator) that would make frequent saves feel intentional rather than chatty.
+
 ### 2026-07-12 — Phase 5 from scratch: Neon persistence (players, run_state, anonymous UUID identity)
 
 - **Tool used:** Claude Code

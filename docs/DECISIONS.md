@@ -147,4 +147,21 @@ _(Renumbered from a duplicate "ADR-003" during the 2026-07-08 merge-conflict cle
 
 ---
 
+## ADR-010: Save-trigger map + death/respawn persistence semantics
+
+- **Date:** 2026-07-12
+- **Status:** Accepted
+- **Originated from:** Agent proposal, following up on ADR-009 - persistence existed but `saveGame()` had exactly one call site (`activateShrine()`), so most progress was never actually persisted.
+- **Context:** Needed to decide both *where* `saveGame()` fires and, specifically, what happens to the save when the player dies. `respawn()` already existed and does NOT touch persistence at all: on death it heals to full, clears per-room enemy state (marking already-cleared rooms as cleared so the minimap survives), and teleports to `START_ROOM` - keeping level/weapon/upgrades/flags in memory. `runSeed`/`seedPhrase` are set once at `Game` construction and never touched by `respawn()`, so the seed-persistence contract the death screen already relies on ("press JUMP to rise again", same seed) was never at risk.
+- **Decision:**
+  - **Save triggers**, in addition to the existing shrine save: **room transition** (`goToRoom()` - the primary checkpoint, frequent enough that "continue" resumes near where the player left off), **level-up** (`awardXp()` - once per XP award even if it rolls over multiple levels, not once per level), and **weapon equip** (`applyLoot()`'s auto-equip branch only - not stash/scrap/upgrade-stat-pickup, which are far more frequent and less worth a save+network round-trip each).
+  - **Death does NOT save.** `respawn()` is unchanged - no `saveGame()` call added there. The player's most recent real save is whatever their last room transition/level-up/equip/shrine produced, which for continuous play is at most a few seconds to one room stale. This avoids ever persisting a `phase: "dead"` mid-respawn state, and keeps `respawn()`'s existing "reset to `START_ROOM`, keep progression" behavior as the single source of truth for what death means in a live session - persistence only matters for *resuming a session*, not for in-session death.
+  - **Extracted `buildSaveData()`** (`lib/game/save-data.ts`) out of `saveGame()`'s inline object-construction so the clamping/shape logic is unit-testable (`save-data.test.ts`, 8 tests) without a running `Game` instance. `applySaveData()` (the load-side, already extracted in ADR-009's work) is unchanged.
+- **Alternatives considered:**
+  - Saving on every loot pickup (not just equip) - rejected as save-spam; upgrades/scraps are frequent and don't warrant a network round-trip each.
+  - Persisting death state and restoring "you were mid-death" on reload - rejected as needless complexity for a case `respawn()` already resolves cleanly in-session.
+- **Consequences:** More frequent `saveGame()` calls means more frequent best-effort `/save` POSTs (ADR-009) - still fire-and-forget with a 3s timeout, never blocking gameplay, but worth watching if it becomes chatty once hosted publicly (ties into D3's rate-limiting work). `visitedRooms`/`upgrades` filtering (dropping anything not in the current `world`/`isUpgradeId`) still happens at the `saveGame()` call site, not inside `buildSaveData()`, which stays a pure function of its input.
+
+---
+
 _Add new ADRs as decisions are made — including ones where you overrode an agent's suggestion. Those are often the most interesting entries for a reviewer._
