@@ -8,9 +8,10 @@ import { GameMenuModal } from "@/components/GameMenuModal";
 type GameCanvasProps = {
   onSnapshot: (snapshot: HudSnapshot) => void;
   continueFromSave?: boolean;
+  seedOverride?: string;
 };
 
-export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasProps) {
+export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const gameRef = useRef<Game | null>(null);
   const shellRef = useRef<HTMLDivElement | null>(null);
@@ -42,7 +43,7 @@ export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasP
     // Ensure deterministic first frame sizing before starting the game loop.
     updateCanvasSize();
 
-    const game = new Game(canvas);
+    const game = new Game(canvas, seedOverride);
     gameRef.current = game;
     game.onSnapshot = (snap) => {
       setSnapshot(snap);
@@ -58,7 +59,7 @@ export function GameCanvas({ onSnapshot, continueFromSave = false }: GameCanvasP
       game.destroy();
       gameRef.current = null;
     };
-  }, [onSnapshot, continueFromSave]);
+  }, [onSnapshot, continueFromSave, seedOverride]);
 
   const handleFocus = () => {
     shellRef.current?.focus();

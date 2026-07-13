@@ -39,6 +39,16 @@ An incident entry never doubles as the fix record — the fix gets its own dated
 
 ## Entries
 
+### 2026-07-13 — F3: run summary screen + daily seed mode (ADR-017)
+
+- **Tool used:** Claude Code
+- **Goal:** the two highest-value pieces of F3 (replayability), scoped down from the full increment per user confirmation given everything already shipped this session.
+- **What the agent produced:** `drawRunSummary()` (seed, time, rooms visited/total, coins, level, weapon, enemies defeated, a new `deathsThisSeed` counter) shown on death and victory, replacing the previous single-line overlay. Moved `Game`'s seed and every RNG stream forked from it out of field initializers into the constructor so a `seedOverride` parameter can be accepted. `StartMenu` gained "Daily Seed" and "Enter Seed" (with a text input) buttons, threaded through a new `GameCanvas` `seedOverride` prop. A `ncrg:dailyAttempted` localStorage flag records today's `dailySeed()` string on click - informational, not a gate.
+- **Verified vs. not verified (being explicit about the gap):** `npm run build` exit 0, `npm test` 37/37. Live Playwright: "Daily Seed" correctly sets the attempted-flag to `dailySeed()`'s exact current output and the game boots/plays normally on that seed (screenshot). **The death-summary screen's actual on-canvas rendering was not verified live** - a 40-second automated combat attempt only brought HP to 60/100, not a real death, and forcing one reliably would have cost more session time than the remaining value justified. Confidence is from code review instead: every displayed field is a pre-existing, already-exercised value plus one trivial new counter, using the identical canvas-panel pattern three other overlays already use successfully - documented as a real, named gap in ADR-017, not claimed as tested.
+- **Also verified (asked to check, turned out already correct):** a fresh run (New Run/Daily/Enter Seed) cannot clobber an existing continue-save before a real save trigger fires - `spawnIntoRoom()` (used for all fresh starts) never calls `saveGame()`, only the ADR-010 triggers do. No code change needed, confirmed via read-through.
+- **Outcome:** ✅ merged, with one explicitly-flagged live-verification gap (summary screen) rather than an overclaimed one.
+- **Explicitly deferred (documented in ADR-017 as future work, not silently dropped):** difficulty scaling, build-variety verification, shop-stock seed-determinism, NG+/ascension, leaderboards, echo-seed variants.
+
 ### 2026-07-13 — F2: audio utilization pass, 0.77% → 3.37% (ADR-016)
 
 - **Tool used:** Claude Code

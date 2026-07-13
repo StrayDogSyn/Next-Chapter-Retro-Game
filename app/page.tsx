@@ -4,10 +4,16 @@ import { useEffect, useState } from "react";
 import { GameCanvas } from "@/components/GameCanvas";
 import { StartMenu } from "@/components/StartMenu";
 import { Game, type HudSnapshot } from "@/lib/game/game";
+import { dailySeed } from "@/lib/game/rng";
+
+// ADR-017: per-day "attempted" flag - informational only (replaying your
+// own daily seed is always allowed, this isn't a gate).
+const DAILY_ATTEMPTED_KEY = "ncrg:dailyAttempted";
 
 export default function Home() {
   const [gameStarted, setGameStarted] = useState(false);
   const [continueFromSave, setContinueFromSave] = useState(false);
+  const [seedOverride, setSeedOverride] = useState<string | undefined>(undefined);
   const [hasSave, setHasSave] = useState(false);
   const [snapshot, setSnapshot] = useState<HudSnapshot | null>(null);
   const [controlsOpen, setControlsOpen] = useState(false);
@@ -34,11 +40,31 @@ export default function Home() {
           <>
             <StartMenu
               onStart={() => {
+                // A fresh run must not clobber the continue-save until the
+                // first save trigger actually fires (ADR-010's triggers) -
+                // starting a new run here only affects in-memory state.
                 setContinueFromSave(false);
+                setSeedOverride(undefined);
                 setGameStarted(true);
               }}
               onContinue={() => {
                 setContinueFromSave(true);
+                setSeedOverride(undefined);
+                setGameStarted(true);
+              }}
+              onDaily={() => {
+                try {
+                  localStorage.setItem(DAILY_ATTEMPTED_KEY, dailySeed());
+                } catch {
+                  // localStorage unavailable - daily still works, just not tracked
+                }
+                setContinueFromSave(false);
+                setSeedOverride(dailySeed());
+                setGameStarted(true);
+              }}
+              onEnterSeed={(seed) => {
+                setContinueFromSave(false);
+                setSeedOverride(seed);
                 setGameStarted(true);
               }}
               hasSave={hasSave}
@@ -58,7 +84,7 @@ export default function Home() {
         {gameStarted ? (
           <section className="game-runtime">
             <div className="game-runtime-canvas">
-              <GameCanvas onSnapshot={setSnapshot} continueFromSave={continueFromSave} />
+              <GameCanvas onSnapshot={setSnapshot} continueFromSave={continueFromSave} seedOverride={seedOverride} />
             </div>
             <div className="controls-drawer">
               <button type="button" className="controls-drawer-toggle" onClick={() => setControlsOpen((open) => !open)}>

@@ -243,19 +243,21 @@ export class Game {
   private sheets = new Map<string, HTMLImageElement>();
   private dropLootCounter = 0;
   private shopLootCounter = 0;
-  // ADR-008: seeded deterministic RNG. One root seed per run; each subsystem
-  // forks its own stream so draws in one system never shift another's sequence
-  // (opening an extra chest must not reshuffle combat crits). seedPhrase is
-  // surfaced in the HUD for shareable runs and reproducible bug reports.
-  readonly seedPhrase = generateSeedPhrase();
-  private rng = new Rng(this.seedPhrase);
-  private combatRng = this.rng.fork("combat");
-  private lootRng = this.rng.fork("loot");
-  private shopRng = this.rng.fork("shop");
-  private vfxRng = this.rng.fork("vfx");
+  // ADR-008/ADR-017: seeded deterministic RNG. One root seed per run, each
+  // subsystem forks its own stream so draws in one system never shift
+  // another's sequence (opening an extra chest must not reshuffle combat
+  // crits). seedPhrase is surfaced in the HUD for shareable runs and
+  // reproducible bug reports. Assigned in the constructor (not a field
+  // initializer) so a caller can override it - daily seed / enter-seed mode.
+  readonly seedPhrase: string;
+  private rng: Rng;
+  private combatRng: Rng;
+  private lootRng: Rng;
+  private shopRng: Rng;
+  private vfxRng: Rng;
   // numeric seed for the /api/loot path + fallbackRoll — derived from the
   // root seed so the whole run remains reproducible from seedPhrase alone
-  private runSeed = this.rng.fork("loot-seed").int(0, 999_999);
+  private runSeed: number;
   // pity: consecutive drops below rare; feeds effective luck in rollLoot()
   private lootPity = 0;
   private lootSource = "unknown";
@@ -317,6 +319,9 @@ export class Game {
   private externalMenuPaused = false;
   private runStartedAt = performance.now();
   private enemiesDefeated = 0;
+  // ADR-017: this-seed death count for the run summary screen - reset only
+  // by a genuinely new seed (Game construction), not by respawn().
+  private deathsThisSeed = 0;
 
   // SYS-011 / SYS-012: shrine checkpoints + NPC shop
   private static readonly SAVE_KEY = "next_chapter_save_v1";
@@ -326,12 +331,21 @@ export class Game {
 
   onSnapshot: ((snap: HudSnapshot) => void) | null = null;
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, seedOverride?: string) {
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("2d context unavailable");
     this.ctx = ctx;
     ctx.imageSmoothingEnabled = false;
     this.input = new InputManager(window);
+
+    // ADR-017: daily seed / enter-seed mode override the random default.
+    this.seedPhrase = seedOverride ?? generateSeedPhrase();
+    this.rng = new Rng(this.seedPhrase);
+    this.combatRng = this.rng.fork("combat");
+    this.lootRng = this.rng.fork("loot");
+    this.shopRng = this.rng.fork("shop");
+    this.vfxRng = this.rng.fork("vfx");
+    this.runSeed = this.rng.fork("loot-seed").int(0, 999_999);
   }
 
   resizeViewport(width: number, height: number) {
@@ -951,6 +965,7 @@ export class Game {
 
     if (this.hp <= 0 && this.phase === "playing") {
       this.phase = "dead";
+      this.deathsThisSeed += 1;
       this.audio.stopAllLoops();
       this.musicMode = "none";
       this.audio.play("gameover");
@@ -2061,9 +2076,9 @@ export class Game {
     this.drawParticles();
     ctx.restore();
     if (this.phase === "paused") this.drawOverlay("PAUSED", "press START / ESC / P to resume");
-    if (this.phase === "dead") this.drawOverlay("YOU DIED", "press JUMP to rise again");
+    if (this.phase === "dead") this.drawRunSummary("YOU DIED", "press JUMP to rise again");
     if (this.phase === "victory")
-      this.drawOverlay("THE BEAST IS SLAIN", "a hero's rest — press JUMP for new game+");
+      this.drawRunSummary("THE BEAST IS SLAIN", "a hero's rest — press JUMP for new game+");
     if (this.fadeT > 0) {
       ctx.fillStyle = `rgba(0,0,0,${this.fadeT})`;
       ctx.fillRect(0, 0, VIEW_W, VIEW_H);
@@ -2492,6 +2507,54 @@ export class Game {
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
       ctx.fill();
     }
+  }
+
+  /**
+   * ADR-017: run summary on death AND victory - seed, time, rooms explored,
+   * coins, level, weapon, and the this-seed death count. Most of this data
+   * already existed for the HUD (elapsedSeconds, enemiesDefeated, coins,
+   * level, weapon, visitedRooms) - this is presentation plus deathsThisSeed,
+   * the one new counter.
+   */
+  private drawRunSummary(title: string, subtitle: string) {
+    const ctx = this.ctx;
+    ctx.fillStyle = "rgba(0,0,0,0.78)";
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    ctx.fillStyle = title.includes("SLAIN") ? "#facc15" : "#ef4444";
+    ctx.font = "bold 26px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(title, VIEW_W / 2, 46);
+
+    const elapsedSeconds = Math.max(0, (performance.now() - this.runStartedAt) / 1000);
+    const mins = Math.floor(elapsedSeconds / 60);
+    const secs = Math.floor(elapsedSeconds % 60);
+    const time = `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+
+    ctx.font = "13px monospace";
+    ctx.fillStyle = "#9fb2c7";
+    ctx.fillText(`seed: ${this.seedPhrase}  (use the "seed" button to copy)`, VIEW_W / 2, 72);
+
+    const lines = [
+      `Time: ${time}`,
+      `Rooms: ${this.visitedRooms.size}/${this.world.size}`,
+      `Coins: ${this.coins}`,
+      `Level: ${this.level}`,
+      `Weapon: ${this.weapon.name} (${this.weapon.rarity})`,
+      `Enemies defeated: ${this.enemiesDefeated}`,
+      `Deaths this seed: ${this.deathsThisSeed}`,
+    ];
+    ctx.fillStyle = "#e5e7eb";
+    ctx.font = "14px monospace";
+    let y = 106;
+    for (const line of lines) {
+      ctx.fillText(line, VIEW_W / 2, y);
+      y += 20;
+    }
+
+    ctx.fillStyle = "#e5e7eb";
+    ctx.font = "14px monospace";
+    ctx.fillText(subtitle, VIEW_W / 2, VIEW_H - 24);
+    ctx.textAlign = "left";
   }
 
   private drawOverlay(title: string, subtitle: string) {
