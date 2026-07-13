@@ -417,12 +417,29 @@ export class Game {
       growl: "/audio/growl.mp3",
       magic: "/audio/magic.mp3",
       step: "/audio/step.mp3",
-      // ADR-015: first extracted-pack stem wired via resolveManifestAsset
-      // (100-cc0-sfx, CC0) rather than a curated public/audio file - no
-      // fallback file exists at this path on purpose, stem-match is the
-      // only path (falls through to no sound if unmatched, same as any
-      // other audio id would if its file were ever missing).
+      // ADR-015/016: extracted-pack stems wired via resolveManifestAsset
+      // (100-cc0-sfx + 8-bit-sound-effect-pack, both CC0) - no fallback
+      // file exists at these paths on purpose, stem-match is the only path
+      // (falls through to no sound if a stem is ever renamed upstream,
+      // same as any other audio id would if its curated file went missing).
       shrineChime: "/audio/bell_01.mp3",
+      enemyHit: "/audio/hit_01.mp3",
+      deathBat: "/audio/hit1.mp3",
+      deathGoblin: "/audio/ouch.mp3",
+      deathImp: "/audio/explodify.mp3",
+      deathFlower: "/audio/splash.mp3",
+      deathWyrmwolf: "/audio/explodify3.mp3",
+      deathMech: "/audio/blast.mp3",
+      deathWerewolf: "/audio/echosplosion.mp3",
+      menuOpenSfx: "/audio/switch_01.mp3",
+      menuCloseSfx: "/audio/switch_02.mp3",
+      purchase: "/audio/bonus.mp3",
+      collectCommon: "/audio/collect1.mp3",
+      collectUncommon: "/audio/collect2.mp3",
+      collectRare: "/audio/collect3.mp3",
+      collectEpic: "/audio/collect4.mp3",
+      doubleJumpGet: "/audio/spring_05.mp3",
+      dashGet: "/audio/whistle.mp3",
     };
 
     const audioEntries = Object.fromEntries(
@@ -470,6 +487,7 @@ export class Game {
     // moment the menu closes (e.g. attack) must not leak into gameplay the
     // instant control returns to it.
     if (wasOpen && !open) this.input.flushPressed();
+    if (open !== wasOpen) this.audio.play(open ? "menuOpenSfx" : "menuCloseSfx", 0.6);
     if (open && this.phase === "playing") {
       this.phase = "paused";
       this.externalMenuPaused = true;
@@ -1005,12 +1023,29 @@ export class Game {
     }
     if (enemy.hp <= 0) {
       this.onEnemyKilled(enemy);
+    } else {
+      // ADR-016: distinct from "kill" (death) and from the player's own
+      // "hit" (damage taken) - a hit that doesn't finish the enemy off.
+      this.audio.play("enemyHit", 0.5);
     }
   }
 
+  // ADR-016: per-enemy-kind death sound, falling back to the original
+  // shared "kill" for any kind not explicitly mapped (keeps this additive,
+  // never a silent regression if a new EnemyKind is added later).
+  private static readonly DEATH_SOUND: Partial<Record<EnemyKind, string>> = {
+    bat: "deathBat",
+    goblin: "deathGoblin",
+    imp: "deathImp",
+    flower: "deathFlower",
+    wyrmwolf: "deathWyrmwolf",
+    mech: "deathMech",
+    werewolf: "deathWerewolf",
+  };
+
   private onEnemyKilled(enemy: Enemy) {
     this.enemiesDefeated += 1;
-    this.audio.play("kill", 0.8);
+    this.audio.play(Game.DEATH_SOUND[enemy.kind] ?? "kill", 0.8);
     this.awardXp(enemy.level * 10);
     const killedInRoom = this.roomId;
     const cx = enemy.x + enemy.w / 2;
@@ -1513,12 +1548,14 @@ export class Game {
           return false;
         case "doubleJump":
           this.upgrades.doubleJump = 1;
-          this.audio.play("levelup");
+          // ADR-016: an ability unlock is a bigger moment than a stat pickup
+          // - it earns its own sound, not the shared "levelup".
+          this.audio.play("doubleJumpGet", 0.9);
           this.showMessage("Aether Wings — press jump in mid-air!");
           return false;
         case "dash":
           this.upgrades.dash = 1;
-          this.audio.play("levelup");
+          this.audio.play("dashGet", 0.9);
           this.showMessage("Phase Dash Module — dodge goes further");
           return false;
         case "chest": {
@@ -1558,18 +1595,27 @@ export class Game {
     });
   }
 
+  // ADR-016: common vs epic loot should SOUND different, not just look it -
+  // reuses the 4-tier Rarity scale already on every LootDrop.
+  private static readonly RARITY_SOUND: Record<Rarity, string> = {
+    common: "collectCommon",
+    uncommon: "collectUncommon",
+    rare: "collectRare",
+    epic: "collectEpic",
+  };
+
   private applyLoot(loot: LootDrop) {
     if (loot.itemType === "upgrade") {
       const current = this.upgrades[loot.upgradeId] ?? 0;
       this.upgrades[loot.upgradeId] = current + loot.value;
       if (loot.upgradeId === "maxHp") this.hp += loot.value;
-      this.audio.play("levelup");
+      this.audio.play(Game.RARITY_SOUND[loot.rarity], 0.8);
       this.showMessage(`${describeLoot(loot)} [${loot.rolledBy}]`);
       return;
     }
     // weapon: auto-equip if better DPS, otherwise stash to secondary
     const dps = (w: WeaponInstance) => w.damage * w.speed;
-    this.audio.play("powerup", 0.8);
+    this.audio.play(Game.RARITY_SOUND[loot.rarity], 0.8);
     if (dps(loot) >= dps(this.weapon)) {
       this.secondary = this.weapon;
       this.weapon = loot;
@@ -1882,7 +1928,7 @@ export class Game {
         void this.buyMysteryBox();
         break;
     }
-    this.audio.play("powerup", 0.8);
+    if (index !== 2) this.audio.play("purchase", 0.8); // mystery box plays its own rarity-tiered sound via applyLoot()
     this.showMessage(`Purchased ${item.name}`);
   }
 

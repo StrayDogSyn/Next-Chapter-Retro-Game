@@ -39,6 +39,15 @@ An incident entry never doubles as the fix record — the fix gets its own dated
 
 ## Entries
 
+### 2026-07-13 — F2: audio utilization pass, 0.77% → 3.37% (ADR-016)
+
+- **Tool used:** Claude Code
+- **Goal:** resume the deferred F2 (asset utilization) from the earlier "Depth Pass" prompt, now that shipping (D/E/G-series) was done and the site is live.
+- **What the agent produced:** 17 new audio IDs wired via `resolveManifestAsset()` stem-matching against the two already-documented CC0 packs (`100-cc0-sfx`, `8-bit-sound-effect-pack` — confirmed as sub-packs of OwlishMedia's "CC0 Sound Effects Collection" on OGA): per-`EnemyKind` death sounds (`Game.DEATH_SOUND`, falls back to the original shared `"kill"` for unmapped kinds), a new `enemyHit` sound for non-lethal hits (previously zero on-hit audio for enemies), rarity-tiered pickup sounds (`Game.RARITY_SOUND`, reusing the existing 4-tier `Rarity` scale) replacing the universal `"powerup"`/`"levelup"`, distinct `doubleJumpGet`/`dashGet` sounds for ability-unlock pickups (previously reused `"levelup"`), and `menuOpenSfx`/`menuCloseSfx`/`purchase` UI sounds (previously silent or reusing gameplay sounds).
+- **Verification:** every new stem's resolution confirmed against `public/assets/manifest.json` (pasted table, all 17 resolve to real files). Live check against the dev server: two sample files curled directly (200, correct `audio/ogg`/`audio/wav` content-types). A Playwright pass booting the real game and toggling the menu open/close twice showed zero audio-related console errors or failed/4xx requests across any `/audio/` or `/assets/extracted/` path - since `Game.start()` preloads the entire `audioFiles` map upfront, this exercises all 22 wired sounds' actual load path, not just the two directly triggered. `npm test` 37/37 (unchanged - no new pure logic to unit-test here, this was wiring/integration), `npm run build` exit 0.
+- **What's still deferred (documented in ADR-016, not silently dropped):** per-zone ambient/music variety - the only unused music-shaped pack turned out to be `.ftm` (FamiTracker module) files, not browser-playable without an offline conversion step out of scope this pass. The sprite/visual half of F2 (unused enemy-sheet variants, per-zone tile/decor). Volume-outlier normalization - no obvious outliers found in this specific batch.
+- **Outcome:** ✅ merged - utilization roughly quadrupled (5→22 of 652 stems), still a small fraction of the library, real audible variety added across combat, pickups, abilities, and UI.
+
 ### 2026-07-13 — First successful public deploy: https://straydogsyn.github.io/Next-Chapter-Retro-Game/ is live
 
 - **Tool used:** Claude Code

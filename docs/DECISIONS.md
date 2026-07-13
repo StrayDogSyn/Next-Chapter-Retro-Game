@@ -228,4 +228,21 @@ _(Renumbered from a duplicate "ADR-003" during the 2026-07-08 merge-conflict cle
 
 ---
 
+## ADR-016: Asset-utilization pass — event-to-stem mapping conventions
+
+- **Date:** 2026-07-13
+- **Status:** Accepted
+- **Originated from:** Agent proposal (F2 of a "Depth Pass" prompt) — utilization was 5/652 extracted-pack stems (0.77%) before this pass, all from the earlier ADR-015 down payment.
+- **Context:** Several game events had no distinct sound at all (enemy hit-without-dying, ability-unlock pickups, menu open/close, shop purchase, loot-rarity pickup feedback) or shared one generic sound regardless of context (all 7 enemy kinds died with the same "kill" clip; all loot pickups played "powerup" regardless of rarity).
+- **Decision:** Wired 17 new audio IDs, all via `resolveManifestAsset()` stem-matching against two already-documented CC0 packs (`100-cc0-sfx`, `8-bit-sound-effect-pack` — both sub-packs of "CC0 Sound Effects Collection" by OwlishMedia, confirmed CC0 on the collection's OGA page):
+  - **Per-enemy-kind death sounds** (`Game.DEATH_SOUND: Partial<Record<EnemyKind, string>>`, `onEnemyKilled()`) — falls back to the original shared `"kill"` for any `EnemyKind` not explicitly mapped, so adding a new enemy kind later can't silently produce no sound.
+  - **A new `enemyHit` sound** (`damageEnemy()`) for a hit that doesn't finish the enemy off — previously enemies had zero on-hit audio feedback, only on-death.
+  - **Rarity-tiered pickup sounds** (`Game.RARITY_SOUND: Record<Rarity, string>`) — reuses the 4-tier `Rarity` scale already on every `LootDrop`, applied to both the weapon-equip and upgrade-pickup branches of `applyLoot()`.
+  - **Ability-unlock sounds** (`doubleJumpGet`, `dashGet`) replacing the shared `"levelup"` for the `doubleJump`/`dash` world pickups — an ability gate is a bigger moment than a stat pickup and now sounds like one.
+  - **UI sounds**: `menuOpenSfx`/`menuCloseSfx` in `setUiModalOpen()`, `purchase` in `purchaseShopItem()` (skipped for the mystery-box branch, which already gets a rarity-tiered sound via `applyLoot()` — avoids double-triggering).
+- **Alternatives considered:** Per-zone ambient/music variety (F2's other major ask) — **not done this pass**. The only unused music-shaped pack (`nes-shooter-music-5-tracks-3-jingles`) turned out to contain only `.ftm` (FamiTracker module) files, not browser-playable audio — would need an offline conversion step out of scope here. Noted as future work: either convert those `.ftm` files or source a new CC0 zone-music pack.
+- **Consequences:** Utilization rose from 5/652 (0.77%) to 22/652 (3.37%) — real progress, still a small fraction of the library. Verified: every new stem resolves in `public/assets/manifest.json` (pasted resolution table), sample files curl-checked live (200, correct `audio/ogg`/`audio/wav` content-types) against the dev server, `npm run build` exit 0. Deferred to a future pass: the sprite/visual half of F2 (unused enemy-sheet variants, per-zone tile/decor variety), zone-specific ambience, and volume-outlier normalization (no obvious outliers found in this batch, so no per-entry gain table was needed yet — the convention from ADR-015 still applies if one's needed later).
+
+---
+
 _Add new ADRs as decisions are made — including ones where you overrode an agent's suggestion. Those are often the most interesting entries for a reviewer._

@@ -46,7 +46,7 @@ Ground truth inputs used for this list:
 | `assets/sounds/beast_growl_generic.mp3` | `growl.mp3` | https://freesound.org/s/366671/ | downloaded |
 | `assets/sounds/bulk/magic_spell_cast_magspel_dark_magic_wand_spell_cast_005_gmcm.mp3` | `magic.mp3` | https://freesound.org/s/855440/ | skipped-exists |
 | `assets/sounds/bulk/footstep_stone_fx_006_footstep_stone_r_wav.mp3` | `step.mp3` | https://freesound.org/s/390763/ | skipped-exists |
-| `public/assets/extracted/100-cc0-sfx/bell_01.ogg` | `shrineChime` (via `resolveManifestAsset()` stem match, ADR-015) | https://opengameart.org/content/100-cc0-sfx | CC0 |
+| `public/assets/extracted/100-cc0-sfx/*` and `public/assets/extracted/8-bit-sound-effect-pack/*` (stem-matched via `resolveManifestAsset()`, ADR-015/016: `shrineChime`, `enemyHit`, `deathBat/Goblin/Imp/Flower/Wyrmwolf/Mech/Werewolf`, `menuOpenSfx`, `menuCloseSfx`, `purchase`, `collectCommon/Uncommon/Rare/Epic`, `doubleJumpGet`, `dashGet`) | https://opengameart.org/content/100-cc0-sfx and https://opengameart.org/content/8-bit-sound-effect-pack, both sub-packs of "CC0 Sound Effects Collection" by OwlishMedia — https://opengameart.org/content/cc0-sound-effects | **CC0** ("attribution not required," confirmed on the collection page) |
 
 ## Notes
 
