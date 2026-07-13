@@ -25,17 +25,30 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "npm"
           cache-dependency-path: package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
       - name: Build (static export)
         run: npm run build
         env:
           NODE_ENV: production
+          # ADR-011: next.config.mjs's basePath/assetPrefix cover Next's own
+          # routing; runtime fetch()/Image() calls to literal "/sprites/..."
+          # etc. need this too (see lib/game/asset-url.ts).
+          NEXT_PUBLIC_BASE_PATH: /Next-Chapter-Retro-Game
+          # ADR-012: the hosted python-service (Render). Public URL, not a
+          # secret - the browser calls this directly (ADR-008).
+          NEXT_PUBLIC_PYTHON_SERVICE_URL: https://ncrg-python-service.onrender.com
+          # Version stamp shown in the footer next to the seed - bug reports
+          # without a version are noise.
+          NEXT_PUBLIC_BUILD_SHA: ${{ github.sha }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

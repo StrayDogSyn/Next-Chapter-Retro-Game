@@ -7,12 +7,31 @@ Owns the procedural / random-generation game logic per ADR-001:
                       TypeScript client only renders what this returns (its
                       local fallback is for offline resilience, see ADR-003).
   - /loot/table     : full loot table dump, handy for balancing/debugging.
+
+Persistence (ADR-009):
+  - /players/register : idempotent anonymous identity (client-generated UUID)
+  - /save, /load       : run_state keyed on that identity, mirroring the
+                          client's existing localStorage save shape 1:1
 """
 
+import os
+import uuid
 from random import Random
+from typing import Any
 
-from fastapi import FastAPI
+import psycopg
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+
+from db import get_connection
 from loot_tables import (
     BASE_WEAPONS,
     PREFIXES,
@@ -22,6 +41,49 @@ from loot_tables import (
 )
 
 app = FastAPI(title="Retro Game Python Service")
+
+# ADR-008: the browser calls this service directly (no Next.js proxy route,
+# since the frontend is a static export with no server at runtime), so CORS
+# must allow the deployed origins explicitly. Overridable via ALLOWED_ORIGINS
+# (comma-separated) for hosts where the deploy origin isn't known ahead of
+# time; falls back to the known dev + GitHub Pages origins.
+_default_origins = (
+    "http://localhost:3000,http://127.0.0.1:3000,"
+    "http://localhost:3001,http://127.0.0.1:3001,"  # Next.js falls back here if 3000 is busy
+    "https://straydogsyn.github.io"
+)
+ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get("ALLOWED_ORIGINS", _default_origins).split(",")
+    if origin.strip()
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
+
+# ADR-012: public-exposure hardening ahead of hosting. Per-IP limits on the
+# write endpoints only - reads (/loot/*, /generate-level) are cheap, stateless,
+# and not worth gating. Deferred: per-player quotas, auth - out of scope for
+# a beta with no accounts.
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+MAX_SAVE_BODY_BYTES = 64 * 1024  # generous for the current save shape (ADR-009)
+
+
+@app.middleware("http")
+async def cap_request_body_size(request: Request, call_next):
+    if request.method == "POST" and request.url.path == "/save":
+        content_length = request.headers.get("content-length")
+        if content_length is not None and content_length.isdigit():
+            if int(content_length) > MAX_SAVE_BODY_BYTES:
+                return JSONResponse(status_code=413, content={"detail": "save payload too large"})
+    return await call_next(request)
 
 
 @app.get("/health")
@@ -121,3 +183,71 @@ def loot_table() -> dict[str, object]:
         "distinctWeaponCombos": combos,
         "upgradeDropChance": UPGRADE_DROP_CHANCE,
     }
+
+
+class RegisterRequest(BaseModel):
+    client_uuid: uuid.UUID
+
+
+class SaveRequest(BaseModel):
+    client_uuid: uuid.UUID
+    save_data: dict[str, Any]
+
+
+def _find_player_id(conn: psycopg.Connection, client_uuid: uuid.UUID) -> int | None:
+    row = conn.execute(
+        "SELECT id FROM players WHERE client_uuid = %s", (client_uuid,)
+    ).fetchone()
+    return row["id"] if row else None
+
+
+@app.post("/players/register")
+@limiter.limit("20/minute")
+def register_player(request: Request, body: RegisterRequest) -> dict[str, object]:
+    """Idempotent: same client_uuid always resolves to the same player row."""
+    with get_connection() as conn:
+        conn.execute(
+            """
+            INSERT INTO players (client_uuid) VALUES (%s)
+            ON CONFLICT (client_uuid) DO NOTHING
+            """,
+            (body.client_uuid,),
+        )
+        player_id = _find_player_id(conn, body.client_uuid)
+    return {"playerId": player_id, "clientUuid": str(body.client_uuid)}
+
+
+@app.post("/save")
+@limiter.limit("30/minute")
+def save_run(request: Request, body: SaveRequest) -> dict[str, object]:
+    """Upserts the one active run for this player (mirrors the client's
+    single-slot localStorage save - see Game.saveGame() in game.ts)."""
+    with get_connection() as conn:
+        player_id = _find_player_id(conn, body.client_uuid)
+        if player_id is None:
+            raise HTTPException(status_code=404, detail="player not registered")
+        conn.execute(
+            """
+            INSERT INTO run_state (player_id, save_data, updated_at)
+            VALUES (%s, %s, now())
+            ON CONFLICT (player_id)
+            DO UPDATE SET save_data = EXCLUDED.save_data, updated_at = now()
+            """,
+            (player_id, psycopg.types.json.Jsonb(body.save_data)),
+        )
+    return {"ok": True}
+
+
+@app.get("/load")
+def load_run(client_uuid: uuid.UUID) -> dict[str, object]:
+    with get_connection() as conn:
+        player_id = _find_player_id(conn, client_uuid)
+        if player_id is None:
+            raise HTTPException(status_code=404, detail="player not registered")
+        row = conn.execute(
+            "SELECT save_data, updated_at FROM run_state WHERE player_id = %s",
+            (player_id,),
+        ).fetchone()
+    if row is None:
+        return {"ok": False, "saveData": None}
+    return {"ok": True, "saveData": row["save_data"], "updatedAt": row["updated_at"].isoformat()}

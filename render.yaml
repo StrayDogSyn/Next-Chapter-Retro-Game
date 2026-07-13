@@ -1,0 +1,25 @@
+# Render Blueprint for python-service (ADR-012). Env var VALUES are set in
+# Render's dashboard, never committed here - DATABASE_URL_POOLED and
+# DATABASE_URL_DIRECT come from the Neon project's connection strings (see
+# ADR-009), ALLOWED_ORIGINS should be exactly the deployed origins in
+# production (no wildcard - see main.py's CORS setup, ADR-008).
+#
+# D3 is blocked until the leaked Neon credential (docs/SESSION_LOG.md,
+# 2026-07-11 security-cleanup entry) is rotated - do not deploy this
+# Blueprint with the old credential.
+services:
+  - type: web
+    name: ncrg-python-service
+    env: python
+    region: oregon
+    plan: free
+    rootDir: python-service
+    buildCommand: pip install -r requirements.txt && alembic upgrade head
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL_POOLED
+        sync: false
+      - key: DATABASE_URL_DIRECT
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false

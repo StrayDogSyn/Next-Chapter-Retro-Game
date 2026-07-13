@@ -1,0 +1,59 @@
+name: Beta bug report
+description: Report a bug found while playtesting the public beta
+title: "[beta] "
+labels: ["beta", "bug"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Short commit SHA from the footer, or approximate date/time if not visible yet
+      placeholder: e.g. fdfe693, or "2026-07-13 evening"
+    validations:
+      required: true
+  - type: input
+    id: seed
+    attributes:
+      label: Seed
+      description: From the death screen or the HUD's "seed" button
+      placeholder: e.g. WOLF-4207
+    validations:
+      required: false
+  - type: input
+    id: room
+    attributes:
+      label: Room
+      description: Room name/ID you were in when it happened
+    validations:
+      required: false
+  - type: input
+    id: browser
+    attributes:
+      label: Browser + OS
+      placeholder: e.g. Chrome 128 / Windows 11
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Online/offline mode
+      description: What did the HUD status chip (top-right, next to seed/menu) show?
+      options:
+        - "Online"
+        - "Offline mode"
+        - "Connecting…"
+        - "Didn't check / not visible"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+    validations:
+      required: true
+  - type: textarea
+    id: what-expected
+    attributes:
+      label: What you expected instead
+    validations:
+      required: true

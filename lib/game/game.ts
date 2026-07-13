@@ -26,6 +26,17 @@ import {
   T_SPIKE,
 } from "./levelLoader";
 import { ROOM_H, ROOM_W, START_ROOM, TILE, type ZoneId } from "./world";
+import { assetUrl } from "./asset-url";
+import {
+  jumpVelocity as jumpPhysicsJumpVelocity,
+  maxJumps as jumpPhysicsMaxJumps,
+  resolveJumpPress,
+  tickGroundedState,
+} from "./jump-physics";
+import { fetchLootRoll } from "./loot-client";
+import { getOrCreatePlayerId } from "./player-identity";
+import { loadFromServer, registerPlayer, saveToServer } from "./save-client";
+import { buildSaveData } from "./save-data";
 import {
   describeLoot,
   fallbackRoll,
@@ -152,6 +163,7 @@ export type HudSnapshot = {
   upgrades: Partial<Record<UpgradeId, number>>;
   phase: "playing" | "paused" | "dead" | "victory";
   lootSource: string;
+  saveSource: string;
   /** Shareable run seed — show on death screen for bug reports / challenges */
   seed: string;
   respawnHoldPct: number;
@@ -247,6 +259,7 @@ export class Game {
   // pity: consecutive drops below rare; feeds effective luck in rollLoot()
   private lootPity = 0;
   private lootSource = "unknown";
+  private saveSource = "unknown";
   private message = "";
   private messageT = 0;
   private phase: "playing" | "paused" | "dead" | "victory" = "playing";
@@ -337,7 +350,7 @@ export class Game {
   async start(continueFromSave = false) {
     this.assetManifest = await loadAssetManifest();
 
-    const metaResp = await fetch("/sprites/spritemeta.json");
+    const metaResp = await fetch(assetUrl("/sprites/spritemeta.json"));
     this.meta = (await metaResp.json()) as SpriteMeta;
 
     const sheetNames = [
@@ -373,11 +386,14 @@ export class Game {
             };
             img.src =
               resolveManifestAsset(this.assetManifest, name, [".png", ".webp", ".jpg", ".jpeg"]) ??
-              `/sprites/${name}.png`;
+              assetUrl(`/sprites/${name}.png`);
           }),
       ),
     );
 
+    // Deliberately unprefixed here (ADR-011) - these are raw fallback paths,
+    // prefixed via assetUrl() below where audioEntries is built. Never fetch
+    // one of these literals directly.
     const audioFiles: Record<string, string> = {
       jump: "/audio/jump.wav",
       hit: "/audio/hit.wav",
@@ -401,19 +417,28 @@ export class Game {
       growl: "/audio/growl.mp3",
       magic: "/audio/magic.mp3",
       step: "/audio/step.mp3",
+      // ADR-015: first extracted-pack stem wired via resolveManifestAsset
+      // (100-cc0-sfx, CC0) rather than a curated public/audio file - no
+      // fallback file exists at this path on purpose, stem-match is the
+      // only path (falls through to no sound if unmatched, same as any
+      // other audio id would if its file were ever missing).
+      shrineChime: "/audio/bell_01.mp3",
     };
 
     const audioEntries = Object.fromEntries(
       Object.entries(audioFiles).map(([id, fallbackPath]) => {
         const stem = fallbackPath.split("/").pop()?.split(".")[0] ?? id;
         const resolved = resolveManifestAsset(this.assetManifest, stem, [".wav", ".ogg", ".mp3", ".flac"]);
-        return [id, resolved ?? fallbackPath];
+        return [id, resolved ?? assetUrl(fallbackPath)];
       }),
     );
 
     await this.audio.loadAll(audioEntries);
 
-    const loaded = continueFromSave && this.loadSavedGame();
+    const playerId = getOrCreatePlayerId();
+    if (playerId) void registerPlayer(playerId);
+
+    const loaded = continueFromSave && (await this.loadSavedGame());
     if (!loaded) this.spawnIntoRoom(START_ROOM, "spawnPoint");
     void this.probeLootService();
     this.loop.start(
@@ -434,12 +459,17 @@ export class Game {
   }
 
   setUiModalOpen(open: boolean) {
+    const wasOpen = this.externalMenuOpen;
     this.externalMenuOpen = open;
     if (open) {
       this.inventoryOpen = false;
       this.helpOpen = false;
       this.shopOpen = false;
     }
+    // Bug fix (Windsurf review): whatever key was "just pressed" at the
+    // moment the menu closes (e.g. attack) must not leak into gameplay the
+    // instant control returns to it.
+    if (wasOpen && !open) this.input.flushPressed();
     if (open && this.phase === "playing") {
       this.phase = "paused";
       this.externalMenuPaused = true;
@@ -452,18 +482,8 @@ export class Game {
   }
 
   private async probeLootService() {
-    try {
-      const resp = await fetch(`/api/loot?seed=${this.runSeed}&luck=0&enemyLevel=1`);
-      if (!resp.ok) {
-        console.warn(`[loot-probe] HTTP ${resp.status} — falling back to client roller`);
-        this.lootSource = "client-fallback";
-        return;
-      }
-      const payload = await resp.json();
-      this.lootSource = payload.ok ? "python-service" : "client-fallback";
-    } catch {
-      this.lootSource = "client-fallback";
-    }
+    const result = await fetchLootRoll(this.runSeed, 0, 1);
+    this.lootSource = result.ok ? "python-service" : "client-fallback";
   }
 
   // ─────────────────────── room handling ───────────────────────
@@ -683,11 +703,11 @@ export class Game {
   }
 
   private jumpVelocity(): number {
-    return -330 * (1 + this.stat("jumpPower") / 100);
+    return -jumpPhysicsJumpVelocity(this.stat("jumpPower"));
   }
 
   private maxJumps(): number {
-    return 1 + (this.stat("doubleJump") > 0 ? 1 : 0);
+    return jumpPhysicsMaxJumps(this.stat("doubleJump") > 0);
   }
 
   private attackSpeed(): number {
@@ -704,6 +724,7 @@ export class Game {
   /** SYS-009: award XP for a kill and roll over as many level-ups as it earns. */
   private awardXp(amount: number) {
     this.xp += amount;
+    let leveledUp = false;
     while (this.xp >= this.xpToNext) {
       this.xp -= this.xpToNext;
       this.level += 1;
@@ -711,7 +732,10 @@ export class Game {
       this.hp = this.maxHp();
       this.audio.play("levelup");
       this.showMessage(`LEVEL UP! Now level ${this.level}`);
+      leveledUp = true;
     }
+    // ADR-010: save once even if a single kill rolls over multiple levels.
+    if (leveledUp) this.saveGame();
   }
 
   // ─────────────────────── update ───────────────────────
@@ -808,23 +832,24 @@ export class Game {
       if (ax > 0) this.facing = 1;
     }
 
-    // jumping (coyote time + optional double jump)
-    if (this.onGround) {
-      this.coyoteT = 0.1;
-      this.jumpsUsed = 0;
-    } else if (this.coyoteT > 0) {
-      this.coyoteT -= dt;
-    }
+    // jumping (coyote time + optional double jump) — state machine lives in
+    // jump-physics.ts (ADR-014) so the coyote/double-jump edge cases are
+    // unit-testable without a canvas-backed Game.
+    const grounded = tickGroundedState(
+      { onGround: this.onGround, coyoteT: this.coyoteT, jumpsUsed: this.jumpsUsed },
+      dt,
+    );
+    this.coyoteT = grounded.coyoteT;
+    this.jumpsUsed = grounded.jumpsUsed;
     if (input.pressed.jump) {
-      const canGroundJump = this.onGround || this.coyoteT > 0;
-      // Air-jump requires: not a ground jump, double-jump upgrade, and at least
-      // one prior jump already consumed (prevents a free air-jump when knocked
-      // airborne with jumpsUsed still at 0).
-      const canAirJump = !canGroundJump && this.jumpsUsed >= 1 && this.jumpsUsed < this.maxJumps();
-      if (canGroundJump || canAirJump) {
+      const resolution = resolveJumpPress(
+        { onGround: this.onGround, coyoteT: this.coyoteT, jumpsUsed: this.jumpsUsed },
+        this.maxJumps(),
+      );
+      this.coyoteT = resolution.coyoteT;
+      this.jumpsUsed = resolution.jumpsUsed;
+      if (resolution.jumped) {
         this.pvy = this.jumpVelocity();
-        this.jumpsUsed = canGroundJump ? 1 : this.jumpsUsed + 1;
-        this.coyoteT = 0;
         this.audio.play("jump", 0.7);
       }
     }
@@ -1550,6 +1575,7 @@ export class Game {
       this.weapon = loot;
       this.showMessage(`Equipped ${describeLoot(loot)}`);
       this.triggerEquipFx();
+      this.saveGame(); // ADR-010: equipment change is a save checkpoint
     } else if (!this.secondary || dps(loot) > dps(this.secondary)) {
       this.secondary = loot;
       this.showMessage(`Stashed ${describeLoot(loot)} (Y/L to swap)`);
@@ -1583,27 +1609,18 @@ export class Game {
 
   private async fetchOrFallbackRoll(seed: number, luck: number, enemyLevel: number): Promise<LootDrop> {
     const abort = new AbortController();
+    // Timeout so a hung request degrades to the fallback instead of a drop
+    // that never lands (fetch has no default timeout).
     const timer = setTimeout(() => abort.abort(), 3000);
     try {
-      // Timeout so a hung request degrades to the fallback instead of a drop
-      // that never lands (fetch has no default timeout).
-      const resp = await fetch(
-        `/api/loot?seed=${seed}&luck=${luck}&enemyLevel=${enemyLevel}`,
-        { signal: abort.signal },
-      );
-      if (!resp.ok) {
-        console.warn(`[loot] HTTP ${resp.status} from /api/loot — using client fallback`);
-        throw new Error(`HTTP ${resp.status}`);
+      const result = await fetchLootRoll(seed, luck, enemyLevel, abort.signal);
+      if (!result.ok) {
+        console.warn(`[loot] ${result.error} from python-service — using client fallback`);
+        this.lootSource = "client-fallback";
+        return fallbackRoll(seed, luck, enemyLevel);
       }
-      const payload = await resp.json();
-      if (payload.ok && payload.drop) {
-        this.lootSource = "python-service";
-        return payload.drop as LootDrop;
-      }
-      throw new Error(payload.error ?? "loot service unavailable");
-    } catch {
-      this.lootSource = "client-fallback";
-      return fallbackRoll(seed, luck, enemyLevel);
+      this.lootSource = "python-service";
+      return result.drop;
     } finally {
       clearTimeout(timer);
     }
@@ -1636,6 +1653,10 @@ export class Game {
     this.projectiles = [];
     this.roomState(roomId); // materialize
     this.updateMusic();
+    // ADR-010: room transition is the primary auto-save checkpoint - frequent
+    // enough that "continue" resumes close to where the player left off,
+    // without saving mid-death (respawn() below never calls saveGame()).
+    this.saveGame();
   }
 
   private respawn() {
@@ -1693,44 +1714,46 @@ export class Game {
   private activateShrine() {
     this.hp = this.maxHp();
     this.saveGame();
-    this.audio.play("chest", 0.9);
+    this.audio.play("shrineChime", 0.8);
     this.showMessage("GAME SAVED");
   }
 
   private saveGame() {
     if (typeof localStorage === "undefined") return;
-    const currentRoom = this.world.has(this.roomId) ? this.roomId : START_ROOM;
-    const maxHp = this.maxHp();
-    const clampedHp = Math.round(clampNumber(this.hp, 0, maxHp, maxHp));
-    const clampedCoins = Math.round(clampNumber(this.coins, 0, 999_999, 0));
-    const clampedLevel = Math.round(clampNumber(this.level, 1, 999, 1));
-    const clampedXpToNext = Math.round(clampNumber(this.xpToNext, 1, 1_000_000, 150));
-    const clampedXp = Math.round(clampNumber(this.xp, 0, clampedXpToNext, 0));
-    const data = {
-      version: 1 as const,
-      roomId: currentRoom,
-      px: clampNumber(this.px, 0, VIEW_W - this.pw, 0),
-      py: clampNumber(this.py, 0, VIEW_H - this.ph, 0),
-      hp: clampedHp,
-      coins: clampedCoins,
-      level: clampedLevel,
-      xp: clampedXp,
-      xpToNext: clampedXpToNext,
+    const data = buildSaveData({
+      roomId: this.world.has(this.roomId) ? this.roomId : START_ROOM,
+      px: this.px,
+      py: this.py,
+      viewW: VIEW_W,
+      viewH: VIEW_H,
+      playerW: this.pw,
+      playerH: this.ph,
+      maxHp: this.maxHp(),
+      hp: this.hp,
+      coins: this.coins,
+      level: this.level,
+      xp: this.xp,
+      xpToNext: this.xpToNext,
       weapon: this.weapon,
       secondary: this.secondary,
-      upgrades: Object.fromEntries(
-        Object.entries(this.upgrades)
-          .filter(([id]) => isUpgradeId(id))
-          .map(([id, value]) => [id, Math.round(clampNumber(value, 0, 999, 0))]),
-      ) as Partial<Record<UpgradeId, number>>,
+      upgrades: this.upgrades,
+      isUpgradeId,
       flags: this.flags,
       visitedRooms: Array.from(this.visitedRooms).filter((id) => this.world.has(id)),
-      shopAtkBonus: clampNumber(this.shopAtkBonus, 0, 999, 0),
-    };
+      shopAtkBonus: this.shopAtkBonus,
+    });
     try {
       localStorage.setItem(Game.SAVE_KEY, JSON.stringify(data));
     } catch (error) {
       console.warn("[save] failed to write localStorage", error);
+    }
+    // Best-effort server mirror (ADR-009) - localStorage above is always the
+    // source of truth; this never blocks or throws into the caller.
+    const playerId = getOrCreatePlayerId();
+    if (playerId) {
+      void saveToServer(playerId, data).then((ok) => {
+        this.saveSource = ok ? "python-service" : "client-fallback";
+      });
     }
   }
 
@@ -1742,49 +1765,75 @@ export class Game {
     }
   }
 
-  /** Restores a shrine save, if one exists and parses cleanly. Returns whether it was applied. */
-  private loadSavedGame(): boolean {
+  /**
+   * Restores a shrine save, if one exists and parses cleanly. Tries the
+   * server save first (ADR-009 - keyed on the anonymous player id), falling
+   * back to the localStorage save if the server is unreachable or has
+   * nothing for this player. Returns whether a save was applied.
+   */
+  private async loadSavedGame(): Promise<boolean> {
+    const playerId = getOrCreatePlayerId();
+    if (playerId) {
+      const remote = await loadFromServer(playerId);
+      if (remote && this.applySaveData(remote)) {
+        this.saveSource = "python-service";
+        return true;
+      }
+    }
     if (typeof localStorage === "undefined") return false;
     try {
       const raw = localStorage.getItem(Game.SAVE_KEY);
       if (!raw) return false;
       const data = JSON.parse(raw);
-      if (!data || data.version !== 1 || typeof data.roomId !== "string") return false;
+      const applied = this.applySaveData(data);
+      if (applied) this.saveSource = "client-fallback";
+      return applied;
+    } catch (error) {
+      console.warn("[save] failed to load localStorage save", error);
+      return false;
+    }
+  }
 
-      const roomId = this.world.has(data.roomId) ? data.roomId : START_ROOM;
-      const level = Math.round(clampNumber(data.level, 1, 999, 1));
-      const xpToNext = Math.round(clampNumber(data.xpToNext, 1, 1_000_000, Math.round(level * 100 * 1.5)));
-      const xp = Math.round(clampNumber(data.xp, 0, xpToNext, 0));
+  private applySaveData(data: unknown): boolean {
+    try {
+      if (!data || typeof data !== "object") return false;
+      const d = data as Record<string, unknown>;
+      if (d.version !== 1 || typeof d.roomId !== "string") return false;
+
+      const roomId = this.world.has(d.roomId) ? d.roomId : START_ROOM;
+      const level = Math.round(clampNumber(d.level, 1, 999, 1));
+      const xpToNext = Math.round(clampNumber(d.xpToNext, 1, 1_000_000, Math.round(level * 100 * 1.5)));
+      const xp = Math.round(clampNumber(d.xp, 0, xpToNext, 0));
       const maxHpAtLevel = 100 + (level - 1) * 3;
 
       this.level = level;
       this.xpToNext = xpToNext;
       this.xp = xp;
-      this.hp = Math.round(clampNumber(data.hp, 0, maxHpAtLevel, maxHpAtLevel));
-      this.coins = Math.round(clampNumber(data.coins, 0, 999_999, 0));
-      this.weapon = data.weapon;
-      this.secondary = data.secondary;
-      const upgradesInput = data.upgrades && typeof data.upgrades === "object" ? data.upgrades : {};
+      this.hp = Math.round(clampNumber(d.hp, 0, maxHpAtLevel, maxHpAtLevel));
+      this.coins = Math.round(clampNumber(d.coins, 0, 999_999, 0));
+      this.weapon = d.weapon as WeaponInstance;
+      this.secondary = d.secondary as WeaponInstance | null;
+      const upgradesInput = d.upgrades && typeof d.upgrades === "object" ? d.upgrades : {};
       const normalizedUpgrades: Partial<Record<UpgradeId, number>> = {};
       for (const [id, value] of Object.entries(upgradesInput as Record<string, unknown>)) {
         if (!isUpgradeId(id)) continue;
         normalizedUpgrades[id] = Math.round(clampNumber(value, 0, 999, 0));
       }
       this.upgrades = normalizedUpgrades;
-      this.flags = data.flags;
-      const visited = Array.isArray(data.visitedRooms)
-        ? data.visitedRooms.filter((id: unknown): id is string => typeof id === "string" && this.world.has(id))
+      this.flags = d.flags as typeof this.flags;
+      const visited = Array.isArray(d.visitedRooms)
+        ? d.visitedRooms.filter((id: unknown): id is string => typeof id === "string" && this.world.has(id))
         : [];
       this.visitedRooms = new Set<string>(visited);
       this.visitedRooms.add(roomId);
-      this.shopAtkBonus = clampNumber(data.shopAtkBonus, 0, 999, 0);
-      const x = clampNumber(data.px, 0, VIEW_W - this.pw, 0);
-      const y = clampNumber(data.py, 0, VIEW_H - this.ph, 0);
+      this.shopAtkBonus = clampNumber(d.shopAtkBonus, 0, 999, 0);
+      const x = clampNumber(d.px, 0, VIEW_W - this.pw, 0);
+      const y = clampNumber(d.py, 0, VIEW_H - this.ph, 0);
       this.spawnIntoRoom(roomId, { x, y });
       this.hp = Math.min(this.hp, this.maxHp());
       return true;
     } catch (error) {
-      console.warn("[save] failed to load localStorage save", error);
+      console.warn("[save] failed to apply save data", error);
       return false;
     }
   }
@@ -1897,6 +1946,7 @@ export class Game {
       upgrades: { ...this.upgrades },
       phase: this.phase,
       lootSource: this.lootSource,
+      saveSource: this.saveSource,
       seed: this.seedPhrase,
       respawnHoldPct: Math.min(1, this.respawnHoldT / Game.RESPAWN_HOLD_SECONDS),
       level: this.level,

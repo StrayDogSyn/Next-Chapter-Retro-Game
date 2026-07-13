@@ -6,6 +6,10 @@ type GameFooterProps = {
   snapshot: HudSnapshot | null;
 };
 
+// Version stamp for bug reports (docs/BETA_TESTING.md asks testers for it).
+// Unset in local dev - "dev" is a clearer footer than a blank chip.
+const BUILD_SHA = (process.env.NEXT_PUBLIC_BUILD_SHA ?? "dev").slice(0, 7);
+
 export function GameFooter({ snapshot }: GameFooterProps) {
   const gamepad = snapshot?.gamepad;
   const source = snapshot?.lootSource ?? "unknown";
@@ -28,6 +32,9 @@ export function GameFooter({ snapshot }: GameFooterProps) {
           Loot source: {source}
         </span>
         <span className="hud-chip">State: {snapshot?.phase ?? "loading"}</span>
+        <span className="hud-chip" title="Build version - include this in bug reports">
+          v{BUILD_SHA}
+        </span>
       </div>
       {snapshot && snapshot.respawnHoldPct > 0 ? (
         <div className="hud-line">

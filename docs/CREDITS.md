@@ -26,6 +26,7 @@ Ground truth inputs used for this list:
 | `assets/img/bulk/sky_background.png` | `public/sprites/bg_sky.png` | https://opengameart.org/content/sky-background | skipped-exists |
 | `assets/img/bulk/mangrove.png` | `public/sprites/bg_mangrove.png` | https://opengameart.org/content/mangrove | skipped-exists |
 | `assets/img/bulk/living_tissue_background.zip` | `public/sprites/bg_tissue.png` | https://opengameart.org/content/living-tissue-background | skipped-exists |
+| `assets/sprites/oga-swm-*.png` (17 files: mainchar, tiles, fx, objects/enemies, brainguy boss, backgrounds, shop UI) | not yet wired — pending a future animation-mapping session | "Space War Man: Platform Shmup Set" by Emcee Flesher — https://opengameart.org/content/space-war-man-platform-shmup-set | **OGA-BY 3.0** (attribution required: "Space War Man by Emcee Flesher on opengameart.org"), confirmed both from the license text embedded directly in the asset image and the OGA submission page |
 
 ## Audio sources used in game
 
@@ -45,6 +46,7 @@ Ground truth inputs used for this list:
 | `assets/sounds/beast_growl_generic.mp3` | `growl.mp3` | https://freesound.org/s/366671/ | downloaded |
 | `assets/sounds/bulk/magic_spell_cast_magspel_dark_magic_wand_spell_cast_005_gmcm.mp3` | `magic.mp3` | https://freesound.org/s/855440/ | skipped-exists |
 | `assets/sounds/bulk/footstep_stone_fx_006_footstep_stone_r_wav.mp3` | `step.mp3` | https://freesound.org/s/390763/ | skipped-exists |
+| `public/assets/extracted/100-cc0-sfx/bell_01.ogg` | `shrineChime` (via `resolveManifestAsset()` stem match, ADR-015) | https://opengameart.org/content/100-cc0-sfx | CC0 |
 
 ## Notes
 

@@ -39,6 +39,26 @@ function MiniMap({ rooms }: { rooms: HudSnapshot["minimap"] }) {
   );
 }
 
+/**
+ * ADR-013: surfaces Game's existing lootSource/saveSource so testers can
+ * tell, and report, whether they were online or on client-fallback
+ * (ADR-003/ADR-009) — a dimmed brass lamp when either has fallen back.
+ */
+function ConnectionStatus({ lootSource, saveSource }: { lootSource: string; saveSource: string }) {
+  const offline = lootSource === "client-fallback" || saveSource === "client-fallback";
+  const pending = lootSource === "unknown" && saveSource === "unknown";
+  const label = pending ? "connecting…" : offline ? "offline mode" : "online";
+  return (
+    <div
+      className={`hud-status-chip${offline ? " offline" : ""}${pending ? " pending" : ""}`}
+      title={`loot: ${lootSource} · save: ${saveSource}`}
+    >
+      <span className="hud-status-dot" />
+      {label}
+    </div>
+  );
+}
+
 export function GameHudOverlay({ snapshot, onToggleMenu, onCopySeed }: Props) {
   if (!snapshot) return null;
 
@@ -90,9 +110,12 @@ export function GameHudOverlay({ snapshot, onToggleMenu, onCopySeed }: Props) {
       <section className="hud-panel hud-panel--intel">
         <MiniMap rooms={snapshot.minimap} />
         <div className="hud-feed">{snapshot.message || "..."}</div>
-        <div className="hud-actions">
-          <button type="button" onClick={onToggleMenu}>menu</button>
-          <button type="button" onClick={onCopySeed}>seed</button>
+        <div className="hud-row hud-row--between">
+          <ConnectionStatus lootSource={snapshot.lootSource} saveSource={snapshot.saveSource} />
+          <div className="hud-actions">
+            <button type="button" onClick={onToggleMenu}>menu</button>
+            <button type="button" onClick={onCopySeed}>seed</button>
+          </div>
         </div>
       </section>
     </div>
