@@ -252,20 +252,15 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
       </div>
       <div
         id="game-stage-viewport"
-        className="relative w-full aspect-video bg-slate-950 overflow-hidden"
+        className="relative w-full bg-slate-950 overflow-hidden"
         ref={viewportRef}
       >
         <div className="game-canvas-stage" ref={stageRef}>
           <canvas
+            className="game-stage-canvas"
             ref={canvasRef}
             width={VIEW_W}
             height={VIEW_H}
-            style={{
-              imageRendering: "pixelated",
-              display: "block",
-              width: "100%",
-              height: "100%",
-            }}
           />
         </div>
         <TouchControlsOverlay state={touchState} visible={touchCapable && touchState.visible} />
