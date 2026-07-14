@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -107,12 +107,12 @@ export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }
   const seedInputRef = useRef<HTMLInputElement | null>(null);
 
   // Menu items depend on hasSave
-  const menuItems: MenuItem[] = [
+  const menuItems: MenuItem[] = useMemo(() => [
     ...(hasSave ? [{ id: "continue" as const, label: "CONTINUE",   color: "#93c5fd", glowColor: "#3b82f6" }] : []),
     { id: "newRun",    label: "NEW RUN",     color: "#ffcc66", glowColor: "#d97706" },
     { id: "daily",     label: "DAILY SEED",  color: "#86efac", glowColor: "#16a34a" },
     { id: "enterSeed", label: "ENTER SEED",  color: "#d8b4fe", glowColor: "#7c3aed" },
-  ];
+  ], [hasSave]);
 
   const [selectedIdx, setSelectedIdx] = useState(0);
   const selectedIdxRef = useRef(0);
@@ -127,8 +127,8 @@ export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }
   }, [seedFormVisible]);
 
   // ── Activation ───────────────────────────────────────────────────────────────
-  const activateSelected = useCallback(() => {
-    const item = menuItems[selectedIdxRef.current];
+  const activateMenuIndex = useCallback((index: number) => {
+    const item = menuItems[index];
     if (!item) return;
     switch (item.id) {
       case "continue":   onContinue(); break;
@@ -138,8 +138,11 @@ export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }
         setSeedFormVisible(true);
         break;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasSave, onContinue, onStart, onDaily]);
+  }, [menuItems, onContinue, onStart, onDaily]);
+
+  const activateSelected = useCallback(() => {
+    activateMenuIndex(selectedIdxRef.current);
+  }, [activateMenuIndex]);
 
   // ── Keyboard / Gamepad navigation ────────────────────────────────────────────
   useEffect(() => {
@@ -663,11 +666,10 @@ export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }
       if (lx >= menuX - 24 && lx <= menuX + 236 && ly >= iy - 14 && ly <= iy + 8) {
         setSelectedIdx(i);
         selectedIdxRef.current = i;
-        activateSelected();
+        activateMenuIndex(i);
       }
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activateSelected, hasSave]);
+  }, [activateMenuIndex, menuItems]);
 
   return (
     <div className="start-screen-wrap">

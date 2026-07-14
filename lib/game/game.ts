@@ -1166,11 +1166,17 @@ export class Game {
         enemy.burnTickT -= dt;
         if (enemy.burnTickT <= 0) {
           enemy.burnTickT = 0.45;
+          const phaseBeforeBurnTick = this.phase;
           this.damageEnemy(enemy, 3 + enemy.level * 0.7, {
             bypassStatusMult: true,
             applyOnHitEffects: false,
           });
-          if (enemy.hp <= 0) continue;
+          if (enemy.hp <= 0) {
+            // CR-015: if burn DoT kills a boss and flips to victory,
+            // stop processing enemy/projectile side-effects in this frame.
+            if (phaseBeforeBurnTick === "playing" && this.phase === "victory") return;
+            continue;
+          }
         }
       } else {
         enemy.burnTickT = 0;
@@ -1284,6 +1290,7 @@ export class Game {
           enemy.anim = "idle";
           enemy.y = enemy.homeY - enemy.h - 30 + Math.sin(this.animT * 1.4) * 22;
           enemy.x += Math.sign(distX) * 22 * speedScale * dt;
+          enemy.x = Math.max(0, Math.min(enemy.x, VIEW_W - enemy.w));
           enemy.facing = distX < 0 ? -1 : 1;
           const volleyEvery = enemy.hp < enemy.maxHp / 2 ? 1.6 : 2.4;
           if (!stunned && dist < 320 && enemy.stateTime > volleyEvery) {
@@ -1786,6 +1793,7 @@ export class Game {
   private respawn() {
     this.hp = this.maxHp();
     this.phase = "playing";
+    this.respawnHoldT = 0;
     // Snapshot cleared state before wiping room states so the minimap survives respawn.
     for (const [id, state] of this.roomStates) {
       if (state.enemies.every((e) => e.hp <= 0)) this.clearedRooms.add(id);
