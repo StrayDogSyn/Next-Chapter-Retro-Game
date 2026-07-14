@@ -39,6 +39,24 @@ An incident entry never doubles as the fix record — the fix gets its own dated
 
 ## Entries
 
+### 2026-07-14 — [incident] ADR-018 claimed in a commit message but never written to DECISIONS.md
+
+- **What happened:** Reconciling git state at the start of the hero-integration mission found `fa911c7 feat(touch): mobile controls - virtual gamepad + tactical tap modes (ADR-018)` on `main` — an auto-checkpointed commit (author `StrayDogSyndications`, not this session) whose message claims ADR-018, but `docs/DECISIONS.md` has no ADR-018 entry; the file's last real entry is still ADR-017.
+- **Root cause of the failure:** The commit that introduced touch controls referenced an ADR number in its message without actually writing the corresponding entry to `DECISIONS.md` — a "claimed done, not actually done" gap of the same shape this project has caught from other tools before.
+- **Resolution:** Did not claim ADR-018 for this mission's hero-integration decision to avoid a collision if the touch-controls ADR is retroactively written later. This mission's hero-integration ADR uses **ADR-019** instead. ADR-018 stays reserved/pending for whoever documents the touch-controls decision.
+- **Status of the underlying bug:** OPEN — `docs/DECISIONS.md` still needs an ADR-018 entry for the touch-controls commit (`fa911c7`); out of scope for this mission, not fixed here.
+
+### 2026-07-14 — M1: swm kit provenance recovery — hero kit + enemies-sheet verified, 15 files still unverified
+
+- **Tool used:** Claude Code
+- **Goal:** M1 of the hero-integration mission — confirm the exact OpenGameArt source of the "swm" sprite kit and upgrade `docs/CREDITS.md` only where exact evidence is found.
+- **What happened:** Rendered the bottom third of `assets/sprites/enemies-sheet-alpha.png` via PIL and read the baked-in attribution directly off the image: `"SUPER DEAD GUNNER" / BY EMCEE FLESHER / ON OPENGAMEART.ORG / 2021`. Web-searched and fetched candidate OGA pages, checking each one's file list against the actual files on disk rather than trusting title/author similarity alone:
+  - **Hero kit — verified.** https://opengameart.org/content/super-dead-space-gunner-merc-redux-platform-shmup-hero ("Super Dead Space Gunner Merc Redux: Platform Shmup Hero", Emcee Flesher, CC-BY 4.0, 2021-10-23) lists `char-sheet-alpha.png`, all 8 `char-sheet-alt-colours-*-alpha.png`, all 4 `char-sheet-layer-*` files, `char-parts.png`, `powerups-sheet-alpha.png`, `projectiles-sheet-alpha.png`, `projectiles-rotations.png`, all 5 `impacts-sheet-colour-*-alpha.png`, all 5 `weaponflash-sheet-colour-*-alpha.png`, `palette.png`, and `diewhirl-sheet-alpha.png` — an exact match against every file on disk in that family. Credits Surt's "Space Merc" (CC-BY 3.0) and JRob774's explosion sheet (CC-BY 3.0) as upstream sources.
+  - **`enemies-sheet-alpha.png` — verified.** https://opengameart.org/content/super-dead-gunner-platform-shmup-enemies ("Super Dead Gunner: Platform Shmup Enemies", Emcee Flesher, CC-BY 4.0, 2021-06-23) is a single-file page whose one attachment (`enemies-sheet-alpha.png`) matches, and whose credited derivation (Surt's "Dead Gunner", Surt's "Space Merc", Redshrike's "Scifi Creature Tileset") matches the baked-in image text's implication of a composite lineage.
+  - **Remaining ~15 `oga-swm-*` files (mainchar, tiles, fx, objects/enemies, brainguy, backgrounds, shop UI) — still unverified.** Checked the "Super Dead Gunner" collection index page and its other 11 linked submissions (Batch 2, Batch 3, Space Junkyard Environment, and 8 single-enemy pages); none of their file lists matched these filenames. Did not force a match.
+- **Docs updated:** `docs/CREDITS.md` (replaced the single blanket `oga-swm-*` row with three rows: the two verified subsets with exact page/license/date, and the remaining unverified subset with a dated negative-search note), `docs/ASSET_SOURCES.md` (provenance section revised to reflect the split), `docs/SPRITE_ART_INVENTORY.md` (licensing note updated to match).
+- **Outcome:** ✅ M1 complete. Two real upgrades landed with page-level evidence, one subset honestly left unverified rather than guessed. Both verified subsets are CC-BY 4.0 (attribution required) with their own upstream attribution chains (Surt, JRob774, Redshrike) — no in-game credits screen exists yet, so `CREDITS.md` is the attribution record of note until one ships; logged as a to-do, not fixed here (out of this mission's scope wall).
+
 ### 2026-07-14 — Sprite inventory correction: `space_merc.png` is the mockup, `char-sheet-alpha.png` is the real hero source
 
 - **Tool used:** GitHub Copilot

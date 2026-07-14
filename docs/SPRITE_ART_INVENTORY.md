@@ -130,9 +130,9 @@ That changes the integration plan in a useful way:
 
 ## Licensing note
 
-CC0-first remains the project policy, but the entire `assets/sprites/` folder — including the swm kit — should currently stay documented as **platform confirmed, exact page unknown** unless and until exact item pages are recovered and committed into the repo docs.
+**Update 2026-07-14:** the hero kit (`char-sheet-*`, palettes, layers, powerups, projectiles, impacts, weaponflash) and `enemies-sheet-alpha.png` are now page-verified — **CC-BY 4.0**, Emcee Flesher, both requiring attribution to Flesher and to the upstream authors (Surt, JRob774, Redshrike) they derive from. See `docs/CREDITS.md` for the exact rows and `docs/ASSET_SOURCES.md` for the search record.
 
-The `oga-swm-` prefix is a strong clue, not a finished citation. One manual source-recovery pass could upgrade a large chunk of this folder at once, but until that work is actually done, the docs should keep the honest soft-attribution posture rather than promoting likely sources into definitive ones.
+The remaining ~15 `oga-swm-*` files (tiles, fx, objects/enemies, brainguy, backgrounds, shop UI) stay documented as **platform confirmed, exact page unknown** — a same-day search across the "Super Dead Gunner" collection index and its other submissions did not turn up a match. The `oga-swm-` prefix remains a strong clue (same likely author/lineage as the two verified subsets), not a finished citation for these specific files.
 
 ---
 
