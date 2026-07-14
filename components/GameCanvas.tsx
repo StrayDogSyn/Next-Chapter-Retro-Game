@@ -33,6 +33,14 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
   });
   const [touchCapable, setTouchCapable] = useState(false);
 
+  const setMenuOpenSynced = (next: boolean | ((prev: boolean) => boolean)) => {
+    setMenuOpen((prev) => {
+      const resolved = typeof next === "function" ? (next as (value: boolean) => boolean)(prev) : next;
+      gameRef.current?.setUiModalOpen(resolved);
+      return resolved;
+    });
+  };
+
   useEffect(() => {
     setTouchCapable(typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0));
   }, []);
@@ -86,7 +94,7 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
       touchInputRef.current = null;
       gameRef.current = null;
     };
-  }, [onSnapshot, continueFromSave, seedOverride, touchScheme]);
+  }, [onSnapshot, continueFromSave, seedOverride]);
 
   const handleFocus = () => {
     shellRef.current?.focus();
@@ -105,12 +113,16 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
   const toggleFullscreen = async () => {
     const viewport = viewportRef.current;
     if (!viewport) return;
-    if (document.fullscreenElement === viewport) {
-      await document.exitFullscreen();
-      return;
+    try {
+      if (document.fullscreenElement === viewport) {
+        await document.exitFullscreen();
+        return;
+      }
+      await viewport.requestFullscreen();
+      handleFocus();
+    } catch {
+      // Fullscreen can be denied by browser policy or embedding context.
     }
-    await viewport.requestFullscreen();
-    handleFocus();
   };
 
   useEffect(() => {
@@ -125,11 +137,11 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.code === "Tab" || event.code === "KeyI") {
         event.preventDefault();
-        setMenuOpen((open) => !open);
+        setMenuOpenSynced((open) => !open);
       }
       if (event.code === "Escape" && menuOpen) {
         event.preventDefault();
-        setMenuOpen(false);
+        setMenuOpenSynced(false);
       }
     };
 
@@ -151,7 +163,7 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
       );
 
       if (pressed && !gamepadMenuPressedRef.current) {
-        setMenuOpen((open) => !open);
+        setMenuOpenSynced((open) => !open);
       }
       gamepadMenuPressedRef.current = pressed;
       frame = requestAnimationFrame(poll);
@@ -214,8 +226,8 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
           />
         </div>
         <TouchControlsOverlay state={touchState} visible={touchCapable} />
-        <GameHudOverlay snapshot={snapshot} onToggleMenu={() => setMenuOpen((open) => !open)} onCopySeed={copySeed} />
-        <GameMenuModal open={menuOpen} snapshot={snapshot} onClose={() => setMenuOpen(false)} />
+        <GameHudOverlay snapshot={snapshot} onToggleMenu={() => setMenuOpenSynced((open) => !open)} onCopySeed={copySeed} />
+        <GameMenuModal open={menuOpen} snapshot={snapshot} onClose={() => setMenuOpenSynced(false)} />
       </div>
     </div>
   );

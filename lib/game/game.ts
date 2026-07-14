@@ -40,6 +40,7 @@ import { buildSaveData } from "./save-data";
 import {
   describeLoot,
   fallbackRoll,
+  isWeaponInstance,
   RARITIES,
   STARTING_WEAPON,
   UPGRADE_DEFS,
@@ -491,7 +492,7 @@ export class Game {
   destroy() {
     this.loop.stop();
     this.input.destroy();
-    this.audio.stopAllLoops();
+    void this.audio.close();
   }
 
   /** UI-008: called from the React "?" button in GameCanvas.tsx. */
@@ -1871,6 +1872,9 @@ export class Game {
       if (!data || typeof data !== "object") return false;
       const d = data as Record<string, unknown>;
       if (d.version !== 1 || typeof d.roomId !== "string") return false;
+      if (!isWeaponInstance(d.weapon)) return false;
+      if (d.secondary !== null && d.secondary !== undefined && !isWeaponInstance(d.secondary)) return false;
+      if (!isGameFlags(d.flags)) return false;
 
       const roomId = this.world.has(d.roomId) ? d.roomId : START_ROOM;
       const level = Math.round(clampNumber(d.level, 1, 999, 1));
@@ -1883,8 +1887,8 @@ export class Game {
       this.xp = xp;
       this.hp = Math.round(clampNumber(d.hp, 0, maxHpAtLevel, maxHpAtLevel));
       this.coins = Math.round(clampNumber(d.coins, 0, 999_999, 0));
-      this.weapon = d.weapon as WeaponInstance;
-      this.secondary = d.secondary as WeaponInstance | null;
+      this.weapon = { ...d.weapon };
+      this.secondary = d.secondary ? { ...d.secondary } : null;
       const upgradesInput = d.upgrades && typeof d.upgrades === "object" ? d.upgrades : {};
       const normalizedUpgrades: Partial<Record<UpgradeId, number>> = {};
       for (const [id, value] of Object.entries(upgradesInput as Record<string, unknown>)) {
@@ -1892,7 +1896,7 @@ export class Game {
         normalizedUpgrades[id] = Math.round(clampNumber(value, 0, 999, 0));
       }
       this.upgrades = normalizedUpgrades;
-      this.flags = d.flags as typeof this.flags;
+      this.flags = { ...d.flags };
       const visited = Array.isArray(d.visitedRooms)
         ? d.visitedRooms.filter((id: unknown): id is string => typeof id === "string" && this.world.has(id))
         : [];
@@ -2136,7 +2140,7 @@ export class Game {
     const enemy = this.roomState(this.roomId).enemies.find((candidate) => pointInRect(worldX, worldY, candidate));
     if (enemy) {
       this.facing = enemy.x >= this.px ? 1 : -1;
-      this.input.state.pressed.attack = true;
+      this.input.queuePressed("attack");
       return;
     }
 
@@ -2144,7 +2148,7 @@ export class Game {
       pointInRect(worldX, worldY, { x: candidate.x - 8, y: candidate.y - 8, w: candidate.w + 16, h: candidate.h + 16 }),
     );
     if (interactable) {
-      this.input.state.pressed.interact = true;
+      this.input.queuePressed("interact");
       return;
     }
 
@@ -2589,6 +2593,7 @@ export class Game {
    */
   private drawRunSummary(title: string, subtitle: string) {
     const ctx = this.ctx;
+    ctx.save();
     ctx.fillStyle = "rgba(0,0,0,0.78)";
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
     ctx.fillStyle = title.includes("SLAIN") ? "#facc15" : "#ef4444";
@@ -2625,11 +2630,12 @@ export class Game {
     ctx.fillStyle = "#e5e7eb";
     ctx.font = "14px monospace";
     ctx.fillText(subtitle, VIEW_W / 2, VIEW_H - 24);
-    ctx.textAlign = "left";
+    ctx.restore();
   }
 
   private drawOverlay(title: string, subtitle: string) {
     const ctx = this.ctx;
+    ctx.save();
     ctx.fillStyle = "rgba(0,0,0,0.65)";
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
     ctx.fillStyle = title.includes("SLAIN") ? "#facc15" : "#ef4444";
@@ -2639,7 +2645,7 @@ export class Game {
     ctx.fillStyle = "#e5e7eb";
     ctx.font = "14px monospace";
     ctx.fillText(subtitle, VIEW_W / 2, VIEW_H / 2 + 20);
-    ctx.textAlign = "left";
+    ctx.restore();
   }
 }
 
@@ -2667,6 +2673,22 @@ function clampNumber(value: unknown, min: number, max: number, fallback: number)
 
 function isUpgradeId(value: string): value is UpgradeId {
   return value in UPGRADE_DEFS;
+}
+
+function isGameFlags(value: unknown): value is {
+  hasKey: boolean;
+  wyrmSlain: boolean;
+  mechSlain: boolean;
+  beastSlain: boolean;
+} {
+  if (typeof value !== "object" || value === null) return false;
+  const flags = value as Record<string, unknown>;
+  return (
+    typeof flags.hasKey === "boolean" &&
+    typeof flags.wyrmSlain === "boolean" &&
+    typeof flags.mechSlain === "boolean" &&
+    typeof flags.beastSlain === "boolean"
+  );
 }
 
 const RARITY_ORDER: Rarity[] = ["common", "uncommon", "rare", "epic"];

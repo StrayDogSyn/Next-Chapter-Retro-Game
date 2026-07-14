@@ -36,6 +36,10 @@ function clampNumber(value: unknown, min: number, max: number, fallback: number)
   return Math.min(max, Math.max(min, value));
 }
 
+function cloneWeapon(weapon: WeaponInstance): WeaponInstance {
+  return { ...weapon };
+}
+
 export type BuildSaveDataInput = {
   roomId: string;
   px: number;
@@ -76,14 +80,14 @@ export function buildSaveData(input: BuildSaveDataInput): SaveDataV1 {
     level: clampedLevel,
     xp: clampedXp,
     xpToNext: clampedXpToNext,
-    weapon: input.weapon,
-    secondary: input.secondary,
+    weapon: cloneWeapon(input.weapon),
+    secondary: input.secondary ? cloneWeapon(input.secondary) : null,
     upgrades: Object.fromEntries(
       Object.entries(input.upgrades)
         .filter(([id]) => input.isUpgradeId(id))
         .map(([id, value]) => [id, Math.round(clampNumber(value, 0, 999, 0))]),
     ) as Partial<Record<UpgradeId, number>>,
-    flags: input.flags,
+    flags: { ...input.flags },
     visitedRooms: [...input.visitedRooms],
     shopAtkBonus: clampNumber(input.shopAtkBonus, 0, 999, 0),
   };

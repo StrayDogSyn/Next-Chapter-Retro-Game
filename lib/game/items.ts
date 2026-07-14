@@ -139,6 +139,60 @@ export const UPGRADE_DEFS: Record<
 
 export type LootDrop = WeaponInstance | UpgradeInstance;
 
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isRolledBy(value: unknown): value is WeaponInstance["rolledBy"] {
+  return value === "python-service" || value === "client-fallback";
+}
+
+export function isRarity(value: unknown): value is Rarity {
+  return value === "common" || value === "uncommon" || value === "rare" || value === "epic";
+}
+
+function isWeaponKind(value: unknown): value is WeaponKind {
+  return value === "melee" || value === "ranged" || value === "magic";
+}
+
+function isWeaponSound(value: unknown): value is BaseWeapon["sound"] {
+  return value === "sword" || value === "laser" || value === "magic";
+}
+
+export function isWeaponInstance(value: unknown): value is WeaponInstance {
+  if (!isObjectRecord(value)) return false;
+  if (value.itemType !== "weapon") return false;
+  if (typeof value.baseId !== "string" || typeof value.prefixId !== "string") return false;
+  if (!isRarity(value.rarity)) return false;
+  if (typeof value.name !== "string") return false;
+  if (typeof value.damage !== "number" || !Number.isFinite(value.damage)) return false;
+  if (typeof value.speed !== "number" || !Number.isFinite(value.speed)) return false;
+  if (typeof value.range !== "number" || !Number.isFinite(value.range)) return false;
+  if (!isWeaponKind(value.kind)) return false;
+  if (!isWeaponSound(value.sound)) return false;
+  if (!isRolledBy(value.rolledBy)) return false;
+  if (value.projectileSpeed !== undefined && (typeof value.projectileSpeed !== "number" || !Number.isFinite(value.projectileSpeed))) {
+    return false;
+  }
+  if (value.effect !== undefined && typeof value.effect !== "string") return false;
+  return true;
+}
+
+function isUpgradeInstance(value: unknown): value is UpgradeInstance {
+  if (!isObjectRecord(value)) return false;
+  if (value.itemType !== "upgrade") return false;
+  if (typeof value.upgradeId !== "string" || !(value.upgradeId in UPGRADE_DEFS)) return false;
+  if (!isRarity(value.rarity)) return false;
+  if (typeof value.name !== "string") return false;
+  if (typeof value.value !== "number" || !Number.isFinite(value.value)) return false;
+  if (!isRolledBy(value.rolledBy)) return false;
+  return true;
+}
+
+export function isLootDrop(value: unknown): value is LootDrop {
+  return isWeaponInstance(value) || isUpgradeInstance(value);
+}
+
 export function describeLoot(drop: LootDrop): string {
   if (drop.itemType === "weapon") {
     return `${drop.name} (${drop.rarity}) — ${Math.round(drop.damage)} dmg @ ${drop.speed.toFixed(1)}/s`;

@@ -301,6 +301,10 @@ export class InputManager {
     }
   }
 
+  queuePressed(action: InputAction) {
+    this.state.pressed[action] = true;
+  }
+
   /** Poll-based read — required because gamepads have no per-button events. */
   private pollGamepad(): Gamepad | null {
     if (typeof navigator === "undefined" || !navigator.getGamepads) return null;

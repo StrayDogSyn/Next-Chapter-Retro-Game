@@ -15,6 +15,10 @@ function withTimeout(ms: number): { signal: AbortSignal; clear: () => void } {
   return { signal: abort.signal, clear: () => clearTimeout(timer) };
 }
 
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
 export async function registerPlayer(clientUuid: string): Promise<boolean> {
   const { signal, clear } = withTimeout(3000);
   try {
@@ -55,8 +59,10 @@ export async function loadFromServer(clientUuid: string): Promise<unknown | null
     const params = new URLSearchParams({ client_uuid: clientUuid });
     const resp = await fetch(`${pythonServiceBase()}/load?${params.toString()}`, { signal });
     if (!resp.ok) return null;
-    const payload = (await resp.json()) as { ok: boolean; saveData: unknown | null };
-    return payload.ok ? payload.saveData : null;
+    const payload = await resp.json();
+    if (!isObjectRecord(payload) || typeof payload.ok !== "boolean") return null;
+    if (!payload.ok) return null;
+    return "saveData" in payload ? payload.saveData : null;
   } catch {
     return null;
   } finally {

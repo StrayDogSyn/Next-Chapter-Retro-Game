@@ -12,11 +12,32 @@
  * python-service/main.py) since this is now a cross-origin request in
  * production.
  */
-import type { LootDrop } from "./items";
+import { isLootDrop, type LootDrop } from "./items";
 
 export type LootRollResult =
   | { ok: true; drop: LootDrop }
   | { ok: false; drop: null; error: string };
+
+function withTimeout(ms: number): { signal: AbortSignal; clear: () => void } {
+  const abort = new AbortController();
+  const timer = setTimeout(() => abort.abort(), ms);
+  return { signal: abort.signal, clear: () => clearTimeout(timer) };
+}
+
+function mergeSignals(signals: AbortSignal[]): AbortSignal {
+  const active = signals.filter(Boolean);
+  if (active.length === 0) return new AbortController().signal;
+  if (active.length === 1) return active[0];
+  const controller = new AbortController();
+  for (const signal of active) {
+    if (signal.aborted) {
+      controller.abort();
+      break;
+    }
+    signal.addEventListener("abort", () => controller.abort(), { once: true });
+  }
+  return controller.signal;
+}
 
 function pythonServiceBase(): string {
   return process.env.NEXT_PUBLIC_PYTHON_SERVICE_URL ?? "http://127.0.0.1:8000";
@@ -34,15 +55,20 @@ export async function fetchLootRoll(
     enemy_level: String(enemyLevel),
   });
 
+  const timeout = withTimeout(3000);
   try {
     const resp = await fetch(`${pythonServiceBase()}/loot/roll?${params.toString()}`, {
       cache: "no-store",
-      signal,
+      signal: signal ? mergeSignals([signal, timeout.signal]) : timeout.signal,
     });
     if (!resp.ok) {
       return { ok: false, drop: null, error: `HTTP ${resp.status}` };
     }
-    const drop = (await resp.json()) as LootDrop;
+    const payload = await resp.json();
+    if (!isLootDrop(payload)) {
+      return { ok: false, drop: null, error: "Invalid loot payload" };
+    }
+    const drop = payload;
     return { ok: true, drop };
   } catch (error) {
     return {
@@ -50,5 +76,7 @@ export async function fetchLootRoll(
       drop: null,
       error: error instanceof Error ? error.message : "Unknown error",
     };
+  } finally {
+    timeout.clear();
   }
 }

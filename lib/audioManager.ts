@@ -95,4 +95,16 @@ export class AudioManager {
   stopAllLoops() {
     for (const loopId of Array.from(this.loops.keys())) this.stopLoop(loopId);
   }
+
+  async close() {
+    this.stopAllLoops();
+    if (!this.context) return;
+    const context = this.context;
+    this.context = null;
+    try {
+      await context.close();
+    } catch {
+      // Ignore close failures in constrained/unsupported environments.
+    }
+  }
 }

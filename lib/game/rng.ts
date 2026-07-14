@@ -91,7 +91,11 @@ export class Rng {
 
   /** Weighted pick: entries of [item, weight]. */
   weighted<T>(entries: ReadonlyArray<readonly [T, number]>): T {
+    if (entries.length === 0) throw new Error("Rng.weighted: empty entries");
     const total = entries.reduce((s, [, w]) => s + w, 0);
+    if (!Number.isFinite(total) || total <= 0) {
+      throw new Error("Rng.weighted: total weight must be > 0");
+    }
     let roll = this.next01() * total;
     for (const [item, w] of entries) {
       roll -= w;
