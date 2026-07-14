@@ -46,7 +46,7 @@
 
 | 800 px window | 2560 px window |
 | --- | --- |
-| ![800px](../assets/img/screenshots/task1-resize-800.png) | ![2560px](../assets/img/screenshots/task1-resize-2560.png) |
+| ![800px](../../../../assets/img/screenshots/task1-resize-800.png) | ![2560px](../../../../assets/img/screenshots/task1-resize-2560.png) |
 
 ## Task 2 — Header/Footer chrome outside the canvas (persistent player feedback)
 
@@ -74,7 +74,7 @@ screen (`app/page.tsx`) and vanish once you press Start.
 **Verify:** screenshot showing header+footer persistent while the player moves,
   picks up loot (message appears in footer), and fights a boss (boss bar in header).
 
-![HUD chrome prototype](../assets/img/screenshots/working-prototype00.png)
+![HUD chrome prototype](../../../../assets/img/screenshots/working-prototype00.png)
 
 ## Task 3 — Arrow-key reliability ("controls sometimes shift to WASD-only")
 

@@ -81,8 +81,8 @@ The Next.js app owns rendering, input, and UI. The Python service owns logic tha
 
 - `requestAnimationFrame`-based game loop with delta-time movement
 - 24 single-screen rooms across 5 zones, validated at load by `lib/game/levelLoader.ts`
-- Sprite animation state machine (idle / walk / jump / attack)
-- Unified keyboard + Xbox gamepad + touch input handler; virtual gamepad and tactical tap modes
+- Sprite animation state machine (idle / walk / jump / attack); hero swapped to swm `char-sheet-alpha.png` + 8 palette variants (ADR-020), aliased clip map (run+aim-sweep sheet with no distinct idle/jump/crouch/hurt/death authored poses — logged as asset debt)
+- Unified keyboard + Xbox gamepad + touch input handler; virtual gamepad and tactical tap modes (ADR-021)
 - React HUD header and footer layered outside the canvas (HP, XP, coins, weapon, minimap, loot/save source, control hints)
 - 4 regular enemy types + 3 bosses with distinct AI patterns
 - Deterministic seeded RNG with forked loot/combat/shop streams; Daily Seed and Enter Seed modes
@@ -160,7 +160,7 @@ This project was built through paired programming with AI coding agents. Every s
 
 **Start here:** [docs/AGENTIC_WORKFLOW.md](docs/AGENTIC_WORKFLOW.md)
 
-**Latest review backlog:** [docs/BUGS_IMPROVEMENT_GUIDE.md](docs/BUGS_IMPROVEMENT_GUIDE.md#cr-001cr-013-code-review-findings-2026-07-14)
+**Latest review backlog:** [docs/BUGS_IMPROVEMENT_GUIDE.md](docs/BUGS_IMPROVEMENT_GUIDE.md#cr-findings-2026-07-14)
 
 ## Assets & Credits
 
@@ -182,15 +182,16 @@ All third-party assets are CC0 or explicitly licensed for reuse. The runtime ass
 - [x] Real sprite/audio assets swapped in via the asset pipeline
 - [x] Living documentation structure and ADRs
 - [x] Responsive canvas + header/footer HUD refactor
-- [x] Level progression save state and inventory persistence (shrines + server + localStorage fallback)
-- [x] Daily/Enter Seed modes and run-summary screen
-- [x] Touch controls (virtual gamepad + tactical tap)
+- [x] Level progression save state and inventory persistence (shrines + server + localStorage fallback, ADR-010)
+- [x] Daily/Enter Seed modes and run-summary screen (ADR-017)
+- [x] Touch controls — Pointer Events, auto/on/off policy (ADR-021)
 - [x] Public deploy on GitHub Pages + Render + Neon
+- [x] Hero sprite swapped to verified swm `char-sheet-alpha.png` + 8 palette variants (ADR-020)
+- [x] Senior-engineer code review of main branch; CR-001..CR-013 findings logged
 
 ### In progress / next
 - [ ] Code-review fix backlog (see [docs/BUGS_IMPROVEMENT_GUIDE.md](docs/BUGS_IMPROVEMENT_GUIDE.md#cr-findings-2026-07-14))
-- [ ] Sprite asset utilization pass (per-zone tile/decor variety, enemy-sheet variants)
-- [ ] Hero sprite swap to a verified `char-sheet-alpha.png` kit
+- [ ] Sprite asset utilization pass (AST-014..AST-020: powerups, impacts/weaponflash rarity FX, swm biome, tile-variation pools, zone backdrops, darksaber+wyrmwolf bosses, purge-list execution)
 - [ ] Zone-specific ambient/music
 - [ ] Bootcamp submission polish pass
 

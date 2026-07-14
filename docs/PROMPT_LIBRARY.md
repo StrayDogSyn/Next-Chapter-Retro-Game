@@ -24,6 +24,7 @@ Reusable, effective prompts from this project's agentic workflow, with notes on 
 ## Entries
 
 ### Scaffold prompt
+<a name="scaffold-prompt"></a>
 **Used for:** Initial repo scaffold (Next.js + FastAPI structure, canvas render loop, sprite state machine)
 **Tool:** GitHub Copilot cloud agent
 **Effectiveness:** ⭐⭐⭐⭐☆ _(update after reviewing the actual PR)_

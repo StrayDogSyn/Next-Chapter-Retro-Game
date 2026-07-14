@@ -16,7 +16,7 @@
 | [UI-002](#ui-002-equipment-dashboard-highlight--swap-effects) | UI / FX | Equipment needs stronger HUD highlighting and noticeable swap feedback | Medium | 🔴 Untracked |
 | [BUG-003](#bug-003-unreachable-platform-generation--dead-ends) | Level Gen | Initial floors have unreachable platform heights causing navigation dead-ends | High | ✅ Fixed (verified 2026-07-13) |
 | [UX-004](#ux-004-player-respawn--self-destruct-mechanism) | Controls / UX | No self-destruct/reset mechanism when trapped in soft-locks or dead-ends | High | ✅ Fixed (verified 2026-07-13) |
-| [AST-005](#ast-005-underutilized-sprite--audio-assets) | Asset Pipeline | Game engine only utilizes a small fraction of available sprites and SFX | Medium | 🟡 Partial — audio pass done 2026-07-13 (ADR-016); sprite/visual half deferred |
+| [AST-005](#ast-005-underutilized-sprite--audio-assets) | Asset Pipeline | Game engine only utilizes a small fraction of available sprites and SFX | Medium | 🟡 Partial — audio pass done 2026-07-13 (ADR-016); hero sprite swap done 2026-07-14 (ADR-020); remaining sprite/visual items broken out into AST-014..AST-020 |
 | [UX-006](#ux-006-treasure--coin-micro-interactions) | Visuals / Polish | Coins and treasure lack premium micro-interactions and sprite variety | Medium | 🔴 Untracked |
 | [UI-007](#ui-007-dashboard-mini-map-integration) | UI / Navigation | Lack of spatial orientation; mini-map needed in the dashboard | High | ✅ Fixed — minimap rendered in `GameHeader`/`GameHudOverlay` |
 | [UI-008](#ui-008-fullscreen-unobtrusive-help-modal) | UI / Accessibility | Fullscreen hides instructions; persistent unobtrusive `?` modal needed | Medium | ✅ Fixed — in-canvas help overlay + controls footer; persistent `?` icon not wired |
