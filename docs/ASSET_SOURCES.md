@@ -12,7 +12,7 @@ Use **CC0 1.0 / public-domain** assets wherever possible. Keep attribution notes
 
 ---
 
-## `assets/sprites/` provenance (2026-07-13, user-attested)
+## `assets/sprites/` provenance (2026-07-13, revised 2026-07-14)
 
 The ~70 files directly under `assets/sprites/` (`space_merc.png`, `char-sheet-*.png`, `oga-swm-*.png`, `mainchar-*`, etc.) predate this project's tracked download pipeline (`scripts/asset-fetch.py`/`asset-extract.py`) and had no per-file entry in `CREDITS.md`, `manifest.csv`, or `manifest_bulk.csv`. The user confirmed these were sourced from three free/open platforms:
 
@@ -20,7 +20,12 @@ The ~70 files directly under `assets/sprites/` (`space_merc.png`, `char-sheet-*.
 - https://itch.io/game-assets/free/tag-sprites (the "free" tag specifically; per-creator license stated on each item page)
 - Freesound.org, for the audio equivalent (a Google share link resolved here)
 
-**This is site-level attestation, not per-file page URLs** — the exact item page for any individual file in this set was not preserved at download time. The `oga-swm-` filename prefix is consistent with genuine OpenGameArt provenance (a common naming convention for that platform's submissions). Treat CREDITS.md entries sourced from this note as "platform confirmed, exact page unknown" rather than a fully verified citation — if a specific file's exact source page is ever found, upgrade its CREDITS.md row accordingly.
+Most of this folder still has only **site-level attestation, not per-file page URLs** — the exact item page for any individual file in this set was not preserved at download time. Two clarifications now matter for integration planning:
+
+- `space_merc.png` is **not** the actual hero source sheet. It is a `1024x1024` palette-mode composite/mockup image representing a larger matched kit. The integration-relevant hero sources are the already-transparent `char-sheet-alpha.png`, the eight `char-sheet-alt-colours-*-alpha.png` variants, and the `char-sheet-layer-*.png` equipment layers. Any future hero-swap or equipment-visibility work should start from those files, not from `space_merc.png`.
+- The `oga-swm-*` filename prefix is still best treated as **strong provenance evidence, not a final citation**. It very likely corresponds to a findable OpenGameArt submission, but until the exact page is recovered and re-documented in this repo, keep the whole `assets/sprites/` folder — including the swm kit — under the honest label **"platform confirmed, exact page unknown."**
+
+That means `CREDITS.md` should not silently upgrade these files to exact-page attribution yet. See `docs/SPRITE_ART_INVENTORY.md` for measured dimensions, palette/mode notes, compatibility ratings, and the current integration priority order.
 
 ---
 

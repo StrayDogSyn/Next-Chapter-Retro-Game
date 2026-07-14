@@ -39,6 +39,15 @@ An incident entry never doubles as the fix record — the fix gets its own dated
 
 ## Entries
 
+### 2026-07-14 — Sprite inventory correction: `space_merc.png` is the mockup, `char-sheet-alpha.png` is the real hero source
+
+- **Tool used:** GitHub Copilot
+- **Goal:** turn a visual/manual asset audit into repo-grounded documentation instead of leaving it as chat-only context.
+- **What the agent produced:** added `docs/SPRITE_ART_INVENTORY.md`, a measured inventory of the highest-value sprite families in `assets/sprites/` with exact dimensions, image modes, compatibility ratings, palette/style fit, and procgen suitability. Also updated `docs/ASSET_SOURCES.md` to keep the licensing posture honest: the whole `assets/sprites/` folder, including `oga-swm-*`, stays documented as platform-confirmed / exact-page-unknown until a real source-recovery pass is completed. The `space_merc` family is documented correctly as a matched art kit where `space_merc.png` is a `1024x1024` composite/mockup while the real hero source is the already-transparent `char-sheet-alpha.png` plus its 8 alt palettes and layer-separated equipment sheets.
+- **Key measured findings:** the main hero/layer sheets are all `384x2240 RGBA` and visually read as a regular `6x35` grid of `64px` cells; `space_merc.png` is `1024x1024 P`; the strongest immediate runtime candidates for rarity/readability are the 5-tier `weaponflash-*` / `impacts-*` sheets; `forest.png`, `mesa.png`, and `depths_of_terra.png` are the cleanest backdrop family for the current game's dusk-purple SNES-adjacent look.
+- **Outcome:** ✅ documentation corrected. Future hero-swap work should start from `char-sheet-alpha.png`, not from `space_merc.png`, and the chroma-key pipeline remains important for genuinely opaque sheets like demon-flower-class assets rather than as a blocker for the hero swap. Provenance language was also pulled back to match the project's actual evidence level rather than a likely-but-unrecovered exact page.
+- **Anything worth remembering:** this is exactly the kind of asset-level false assumption that can survive multiple sessions if nobody measures the files directly. The fix was simple: inspect dimensions/mode and look at the actual sheet before planning integration work.
+
 ### 2026-07-13 — Steam-Indie Program, Tier 1 precondition check: BUG-001/BUG-003/UX-004 already fixed, table was stale
 
 - **Tool used:** Claude Code
