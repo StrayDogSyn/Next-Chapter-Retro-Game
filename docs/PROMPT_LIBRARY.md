@@ -794,6 +794,9 @@ React component lifecycle safety issues.
 - Explicitly separating "log/update" tasks from "ADR only if needed" avoids unnecessary decision-noise.
 - Calling out stale-beta cleanup as a first-class task prevents old review notes from contradicting fixed code.
 
+**Latest use (2026-07-14):**
+- Applied to a documentation-visual governance pass: root `README.md` updated to semantically named screenshots and `docs/VISUAL_PROGRESSION.md` added to preserve legacy screenshots as an iteration timeline.
+
 ---
 
 ### Hero Integration Mission prompt (M1-M3 self-contained)

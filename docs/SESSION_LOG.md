@@ -39,6 +39,17 @@ An incident entry never doubles as the fix record — the fix gets its own dated
 
 ## Entries
 
+### 2026-07-14 — Documentation governance sync follow-up: semantic screenshot refresh + visual progression archive
+
+- **Tool used:** GitHub Copilot (GPT-5.3-Codex)
+- **Goal:** Apply the governance checklist to documentation visuals by upgrading root README screenshots to semantically named assets and preserving older screenshots as an iteration timeline.
+- **Prompt summary:** Re-run the docs-governance process with truth-sync focus: session/workflow/prompt updates, ensure BUGS/BETA/WORKFLOW alignment remains correct, and validate markdown links.
+- **What the agent produced:** `README.md` screenshot gallery now prioritizes semantically named captures; new `docs/VISUAL_PROGRESSION.md` documents staged visual evolution using legacy and current screenshots; governance logs updated.
+- **Human review/changes:** Confirmed this remained documentation-only and aligned with archive-first policy (older artifacts preserved, not removed).
+- **Outcome:** ✅ merged
+- **Time saved vs. hand-writing (rough estimate):** ~30-45 minutes
+- **Anything worth remembering:** Visual docs should follow the same governance standards as technical docs: current-state assets in README, historical assets in a dedicated progression record.
+
 ### 2026-07-14 — Documentation governance sync: living docs refresh + stale-beta cleanup
 
 - **Tool used:** GitHub Copilot (GPT-5.3-Codex)
