@@ -26,8 +26,7 @@ export type InputAction =
   | "interact"
   | "pause"
   | "respawn"
-  | "help"
-  | "inventory";
+  | "help";
 
 import type { TouchInputManager } from "./touchInput";
 
@@ -56,7 +55,6 @@ const ACTIONS: InputAction[] = [
   "pause",
   "respawn",
   "help",
-  "inventory",
 ];
 
 const KEY_BINDINGS: Record<string, InputAction> = {
@@ -83,8 +81,6 @@ const KEY_BINDINGS: Record<string, InputAction> = {
   KeyR: "respawn",
   F1: "help",
   Slash: "help",
-  Tab: "inventory",
-  KeyI: "inventory",
 };
 
 /**
@@ -284,20 +280,23 @@ export class InputManager {
   }
 
   /**
-   * Clears the "just pressed" edge for every action without touching `held`.
-   * update() computes `pressed` every frame regardless of whether a UI
-   * overlay is open (it has to, so the close/cancel key itself still
-   * registers) — so whatever was just pressed at the moment an overlay
-   * closes (e.g. the attack key, if the player happened to press it right
-   * as a menu closed) would otherwise fire in gameplay the instant control
-   * returns to it. Callers close a modal/menu THEN call this so that stale
-   * edge never leaks through. Does not touch `previousHeld`, so a still-held
-   * key correctly reports pressed=false next frame (no re-trigger) while a
-   * genuinely new press after the flush still registers normally.
+   * Clears the "just pressed" edge for every action and snapshots the
+   * current held state into `previousHeld`. update() computes `pressed`
+   * every frame regardless of whether a UI overlay is open (it has to, so
+   * the close/cancel key itself still registers) — so whatever was just
+   * pressed at the moment an overlay closes would otherwise fire into
+   * gameplay the instant control returns to it. Callers close a modal/menu
+   * THEN call this so the stale edge never leaks through.
+   *
+   * We update `previousHeld` to the current known held state (keyboard +
+   * last computed held) so a still-held key does not re-trigger as a
+   * fresh press on the next update, while a genuinely new press after the
+   * flush still registers normally.
    */
   flushPressed() {
     for (const action of ACTIONS) {
       this.state.pressed[action] = false;
+      this.previousHeld[action] = this.keyboardHeld[action] || this.state.held[action];
     }
   }
 

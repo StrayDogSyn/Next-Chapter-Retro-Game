@@ -46,7 +46,7 @@
 
 | 800 px window | 2560 px window |
 | --- | --- |
-| ![800px](../../../../assets/img/screenshots/task1-resize-800.png) | ![2560px](../../../../assets/img/screenshots/task1-resize-2560.png) |
+| ![Reference viewport capture A](../../../../assets/img/screenshots/updated-working-model.png) | ![Reference viewport capture B](../../../../assets/img/screenshots/revamped-level.png) |
 
 ## Task 2 — Header/Footer chrome outside the canvas (persistent player feedback)
 

@@ -42,14 +42,6 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
   const [touchCapable, setTouchCapable] = useState(false);
   const [isLandscape, setIsLandscape] = useState(true);
 
-  const setMenuOpenSynced = (next: boolean | ((prev: boolean) => boolean)) => {
-    setMenuOpen((prev) => {
-      const resolved = typeof next === "function" ? (next as (value: boolean) => boolean)(prev) : next;
-      gameRef.current?.setUiModalOpen(resolved);
-      return resolved;
-    });
-  };
-
   useEffect(() => {
     if (typeof window === "undefined") return;
     setTouchCapable("ontouchstart" in window || navigator.maxTouchPoints > 0 || window.matchMedia("(pointer: coarse)").matches);
@@ -167,6 +159,7 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
     try {
       if (document.fullscreenElement === viewport) {
         await document.exitFullscreen();
+        handleFocus();
         return;
       }
       await viewport.requestFullscreen();
@@ -184,11 +177,11 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.code === "Tab" || event.code === "KeyI") {
         event.preventDefault();
-        setMenuOpenSynced((open) => !open);
+        setMenuOpen((open) => !open);
       }
       if (event.code === "Escape" && menuOpen) {
         event.preventDefault();
-        setMenuOpenSynced(false);
+        setMenuOpen(false);
       }
     };
 
@@ -211,7 +204,7 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
 
       if (pressed && !gamepadMenuPressedRef.current) {
         lastPhysicalInputAtRef.current = performance.now();
-        setMenuOpenSynced((open) => !open);
+        setMenuOpen((open) => !open);
       }
       gamepadMenuPressedRef.current = pressed;
       frame = requestAnimationFrame(poll);
@@ -282,8 +275,8 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
             <span>You can still play in portrait, but controls are tighter.</span>
           </div>
         ) : null}
-        <GameHudOverlay snapshot={snapshot} onToggleMenu={() => setMenuOpenSynced((open) => !open)} onCopySeed={copySeed} />
-        <GameMenuModal open={menuOpen} snapshot={snapshot} onClose={() => setMenuOpenSynced(false)} />
+        <GameHudOverlay snapshot={snapshot} onToggleMenu={() => setMenuOpen((open) => !open)} onCopySeed={copySeed} />
+        <GameMenuModal open={menuOpen} snapshot={snapshot} onClose={() => setMenuOpen(false)} />
       </div>
     </div>
   );

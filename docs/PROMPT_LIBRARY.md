@@ -768,6 +768,37 @@ React component lifecycle safety issues.
 
 ---
 
+### Documentation governance sync prompt
+
+**Used for:** Follow-up docs-only maintenance after multiple rapid implementation sessions where stale claims can linger.
+
+**Tool:** GitHub Copilot (GPT-5.3-Codex)
+
+**Effectiveness:** ⭐⭐⭐⭐⭐
+
+**Prompt:**
+> Continue the 10-point documentation-governance checklist, but prioritize truth-sync over prose changes:
+> 1) add a dated SESSION_LOG entry,
+> 2) update AGENTIC_WORKFLOW quick table,
+> 3) add reusable prompt notes,
+> 4) reconcile BUGS_IMPROVEMENT_GUIDE status with actual code/test reality,
+> 5) remove stale BETA_TESTING backlog bullets that are already fixed,
+> 6) confirm WORKFLOW guidance still matches living docs,
+> 7) add ADR only if a new architecture decision happened,
+> 8) ensure README status/roadmap still matches,
+> 9) preserve archive-first policy (move/redirect, don't delete),
+> 10) validate internal markdown links.
+
+**Why it worked / design notes:**
+- "Truth-sync over prose" keeps the pass focused on correctness instead of cosmetic rewrites.
+- Explicitly separating "log/update" tasks from "ADR only if needed" avoids unnecessary decision-noise.
+- Calling out stale-beta cleanup as a first-class task prevents old review notes from contradicting fixed code.
+
+**Latest use (2026-07-14):**
+- Applied to a documentation-visual governance pass: root `README.md` updated to semantically named screenshots and `docs/VISUAL_PROGRESSION.md` added to preserve legacy screenshots as an iteration timeline.
+
+---
+
 ### Hero Integration Mission prompt (M1-M3 self-contained)
 
 **Used for:** Executing a multi-mission asset integration with gate/increment/commit protocol — provenance recovery (M1), hero sprite swap with grid verification (M2), and Tier-2 backlog documentation (M3).

@@ -1,4 +1,4 @@
-# Next-Chapter-Retro-Game — Master Build Specification
+# Bytefall: Segfault Summit — Master Build Specification
 ### An Agent-Executable Overhaul Spec with Ground-Truth Verification Discipline
 
 ---

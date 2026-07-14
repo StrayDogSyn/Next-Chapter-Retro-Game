@@ -408,42 +408,45 @@ export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }
       ctx.textAlign = "left";
 
       // ── 5. Stylized title block ───────────────────────────────────────────
-      const titleX = W / 2 - 120;
+      const titleX = W / 2 - 220;
       const titleCX = W / 2;
       // Float animation
-      const titleY = 44 + Math.sin(t * 0.9) * 3.5;
+      const titleY = 40 + Math.sin(t * 0.9) * 3.5;
 
       // Drop shadow
       ctx.globalAlpha = 0.55;
       ctx.fillStyle = "#000";
-      ctx.font = pixelFont(36);
+      ctx.font = pixelFont(32);
       ctx.textAlign = "center";
-      ctx.fillText("NEXT", titleCX + 3, titleY + 3);
-      ctx.fillText("CHAPTER", titleCX + 3, titleY + 41);
+      ctx.fillText("BYTEFALL", titleCX + 3, titleY + 3);
+      ctx.font = pixelFont(18);
+      ctx.fillText("SEGFAULT SUMMIT", titleCX + 3, titleY + 39);
       ctx.globalAlpha = 1;
 
       // Main title gradient — gold → amber → white shimmer
       const shine = shinePct(t, 3.2);
-      const titleGrad = ctx.createLinearGradient(titleX, titleY - 36, titleX + 240, titleY + 5);
+      const titleGrad = ctx.createLinearGradient(titleX, titleY - 32, titleX + 440, titleY + 5);
       titleGrad.addColorStop(0,                       "#d97706");
       titleGrad.addColorStop(Math.max(0, shine - 0.1),"#ffcc66");
       titleGrad.addColorStop(shine,                   "#fffbe6");
       titleGrad.addColorStop(Math.min(1, shine + 0.1),"#ffcc66");
       titleGrad.addColorStop(1,                       "#d97706");
 
-      ctx.font = pixelFont(36);
+      ctx.font = pixelFont(32);
       ctx.textAlign = "center";
       ctx.fillStyle = titleGrad;
-      ctx.fillText("NEXT", titleCX, titleY);
-      ctx.fillText("CHAPTER", titleCX, titleY + 38);
+      ctx.fillText("BYTEFALL", titleCX, titleY);
+
+      ctx.font = pixelFont(18);
+      ctx.fillText("SEGFAULT SUMMIT", titleCX, titleY + 36);
 
       // Subtitle
-      ctx.font = pixelFont(12);
+      ctx.font = pixelFont(14);
       ctx.fillStyle = "#60a5fa";
-      ctx.fillText("RETRO GAME", titleCX, titleY + 62);
+      ctx.fillText("RETRO PLATFORMER", titleCX, titleY + 62);
 
       // Thin underline accent
-      const ulW = 240;
+      const ulW = 300;
       const ulGrad = ctx.createLinearGradient(titleCX - ulW / 2, 0, titleCX + ulW / 2, 0);
       ulGrad.addColorStop(0,   "transparent");
       ulGrad.addColorStop(0.5, "#60a5fa");
@@ -451,8 +454,8 @@ export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }
       ctx.strokeStyle = ulGrad;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(titleCX - ulW / 2, titleY + 70);
-      ctx.lineTo(titleCX + ulW / 2, titleY + 70);
+      ctx.moveTo(titleCX - ulW / 2, titleY + 73);
+      ctx.lineTo(titleCX + ulW / 2, titleY + 73);
       ctx.stroke();
 
       // ── 6. Menu items with animated cursor sword ──────────────────────────

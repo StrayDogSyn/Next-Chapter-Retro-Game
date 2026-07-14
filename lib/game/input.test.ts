@@ -42,19 +42,15 @@ describe("InputManager.flushPressed (menu-close input-leak fix)", () => {
   });
 
   it("a key still held after flush does not re-trigger pressed next frame (no double-consume)", () => {
-    // Simulates: player pressed X while a menu was open, menu closes and
-    // flushes, player is STILL holding X - update() must not treat the
-    // still-held key as a brand new press.
+    // Simulates: player pressed a key after the last update tick, the menu
+    // closes and flushes, and the player is STILL holding the key.
     const input = new InputManager(createFakeWindow());
-    // First frame: press registers normally via the real update() path is
-    // hard to drive without real DOM events, so assert the invariant
-    // flushPressed() relies on directly: previousHeld is left untouched.
-    input.state.pressed.attack = true;
-    input.state.held.attack = true;
+    // Drive via the internal keyboard-held state because we cannot easily
+    // dispatch real DOM events in this minimal fake.
+    input["keyboardHeld"].attack = true;
+    input["previousHeld"].attack = false;
     input.flushPressed();
-    // A second flush (idempotent) must also be safe and not throw / not
-    // resurrect a stale pressed flag.
-    input.flushPressed();
+    input.update();
     expect(input.state.pressed.attack).toBe(false);
     expect(input.state.held.attack).toBe(true);
   });

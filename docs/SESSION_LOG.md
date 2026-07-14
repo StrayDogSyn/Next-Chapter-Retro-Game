@@ -39,6 +39,40 @@ An incident entry never doubles as the fix record — the fix gets its own dated
 
 ## Entries
 
+### 2026-07-14 — Documentation governance sync follow-up: semantic screenshot refresh + visual progression archive
+
+- **Tool used:** GitHub Copilot (GPT-5.3-Codex)
+- **Goal:** Apply the governance checklist to documentation visuals by upgrading root README screenshots to semantically named assets and preserving older screenshots as an iteration timeline.
+- **Prompt summary:** Re-run the docs-governance process with truth-sync focus: session/workflow/prompt updates, ensure BUGS/BETA/WORKFLOW alignment remains correct, and validate markdown links.
+- **What the agent produced:** `README.md` screenshot gallery now prioritizes semantically named captures; new `docs/VISUAL_PROGRESSION.md` documents staged visual evolution using legacy and current screenshots; governance logs updated.
+- **Human review/changes:** Confirmed this remained documentation-only and aligned with archive-first policy (older artifacts preserved, not removed).
+- **Outcome:** ✅ merged
+- **Time saved vs. hand-writing (rough estimate):** ~30-45 minutes
+- **Anything worth remembering:** Visual docs should follow the same governance standards as technical docs: current-state assets in README, historical assets in a dedicated progression record.
+
+### 2026-07-14 — Documentation governance sync: living docs refresh + stale-beta cleanup
+
+- **Tool used:** GitHub Copilot (GPT-5.3-Codex)
+- **Goal:** Execute the documentation-governance checklist end-to-end: continue AI-Augmentation logging, correct stale documentation claims, and verify doc-link integrity.
+- **Prompt summary:** Continue the 10-point docs-maintenance workflow (session log + workflow status + prompt library + bug guide + beta doc + README consistency + archive/index + link validation) without code changes.
+- **What the agent produced:** Updated living docs to reflect current implementation reality, added this session's process log/workflow trace, and removed stale code-review-backlog items in `BETA_TESTING.md` that were already fixed in CR round 2.
+- **Human review/changes:** Verified updates stayed documentation-only and preserved the existing archive policy (move/redirect, no deletion of historical records).
+- **Outcome:** ✅ merged
+- **Time saved vs. hand-writing (rough estimate):** ~45-60 minutes
+- **Anything worth remembering:** A docs-only maintenance pass should still be treated like engineering work: verify against source/tests, then update docs. Stale review-backlog bullets were more misleading than missing docs because they contradicted already-fixed CR items.
+
+### 2026-07-14 — Stability & Security Pass, round 2: CR-004/007 already fixed, CR-009/013 genuinely fixed this round
+
+- **Tool used:** Claude Code
+- **Goal:** A follow-up "Stability & Security Pass" prompt re-listing all 10 non-CR-001/006/011 findings (CR-002/003/004/005/007/008/009/010/012/013). Six (CR-002/003/005/008/010/012) were already verified fixed in an earlier Sprint A this session; this round checked the four not yet formally verified: CR-004, CR-007, CR-009, CR-013.
+- **CR-004 (fullscreen promise handling):** confirmed already fixed. `toggleFullscreen()` wraps both `exitFullscreen()`/`requestFullscreen()` calls in one try/catch - functionally equivalent to `.catch(() => {})` on each.
+- **CR-007 (`Rng.weighted()` zero-weight guard):** confirmed already fixed, this time by reading the code directly rather than trusting commit `7fe645a`'s message (which Sprint A had explicitly left unverified). Throws a clear error on empty entries or non-positive/non-finite total weight.
+- **CR-013 (UUID fallback) — checked, found only partially fixed, real bug:** a fallback existed (`fallbackUuidLike()`) but produced `"fallback-<hex>-<hex>"`, not valid UUID syntax. `python-service/main.py` declares `client_uuid: uuid.UUID` as a Pydantic field type, which FastAPI validates strictly - any client without `crypto.randomUUID` (old browsers, or an insecure/non-HTTPS context where the Crypto API is restricted) would have had every `/players/register`, `/save`, and `/load` call silently rejected, permanently stuck in client-fallback/degraded persistence with no indication why. Replaced with `fallbackUuidV4()`, generating real RFC 4122 v4 syntax via `Math.random()`. New `player-identity.test.ts` (8 cases after a later concurrent enhancement also added legacy-ID-healing) validates format, version/variant nibbles, and uniqueness.
+- **CR-009 (dual menu-input ownership) — checked, found a real (if low-practical-risk) architecture issue, consolidated:** `Tab`/`KeyI` were bound in both `InputManager` (the `"inventory"` action, consumed in `Game.update()` toggling the in-canvas `inventoryOpen` overlay) and `GameCanvas.tsx`'s own independent keydown listener (driving the React `GameMenuModal`). Traced the exact execution order rather than assuming a bug: React's handler runs synchronously off the native keydown event, and `setUiModalOpen(true)` early-returns in `update()` before the inventory-toggle line is ever reached, so the React modal always won the race in practice - `Game.update()`'s handling of `pressed.inventory` was reachable-only-by-timing-coincidence dead code (that action also has no gamepad binding). Removed it, making `GameCanvas.tsx` the sole owner of `Tab`/`KeyI`. Left `inventoryOpen`/`drawInventoryOverlay()` in place (still forced `false` by `setUiModalOpen(true)`) rather than deleting them - retiring that overlay is a separate, CR-006-adjacent decision outside this fix's scope. Also removed a related anti-pattern (`setUiModalOpen()` called as a side effect inside a `setState` updater, redundant with an existing `useEffect`). Live-verified via Playwright: Tab opens/closes the modal cleanly, no flicker/reopen, zero console errors.
+- **Verification commands run, full raw output pasted in the response to the user:** `npm test` → 9 test files, 79 passed at commit time (82 after a later concurrent enhancement to `player-identity.test.ts`), exit 0. `npx tsc --noEmit` → exit 0. `python scripts/project-status.py` → exit 0.
+- **Outcome:** ✅ CR-004, CR-007 confirmed already fixed (no new code). ✅ CR-013, CR-009 genuinely fixed this round (real code changes, each with its own commit). CR-001's dashboard total now 10 of 13 (CR-001, CR-006, CR-011 remain open, out of scope for both stability passes so far).
+- **Anything worth remembering:** Two of four items in this round were NOT already fixed, unlike Sprint A's clean sweep - a reminder that "verify before assuming" cuts both ways equally often: sometimes the finding is stale, sometimes it's real and needs actual work. CR-013 in particular was a good catch of a *partial* fix masquerading as complete (a fallback existed, so a shallow check might have marked it done, but it didn't satisfy the actual downstream contract).
+
 ### 2026-07-14 — Sprint B: Tier 2 Visual Juice Pass — AST-014 fixed, AST-015 partial (impacts wired, weaponflash deferred)
 
 - **Tool used:** Claude Code

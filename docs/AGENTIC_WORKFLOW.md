@@ -46,7 +46,7 @@
 | Level/world system | 🟢 24 single-screen rooms, 5 zones, validated exit graph |
 | Enemy AI | 🟢 4 regular kinds + 3 bosses with distinct patterns |
 | Weapon/loot system | 🟢 data-driven, Python-authoritative (280 combos; 6/6 prefix effects wired) |
-| Documentation | 🟢 living docs updated 2026-07-14; archive established at docs/archive/historical |
+| Documentation | 🟢 living docs updated 2026-07-14; archive established at docs/archive/historical; visual timeline in docs/VISUAL_PROGRESSION.md |
 
 ## Session Log
 
@@ -55,6 +55,8 @@
 
 | Date | Tool | Task | Human Role | Agent Role | Outcome | Notes |
 |---|---|---|---|---|---|---|
+| 2026-07-14 | GitHub Copilot | Documentation governance follow-up (semantic screenshots + visual progression timeline) | Requested professional README visuals and preserved iteration history | Replaced README primary screenshots with semantically named captures; created docs/VISUAL_PROGRESSION.md to preserve legacy-to-current evolution | ✅ docs synchronized | See [SESSION_LOG.md](SESSION_LOG.md) |
+| 2026-07-14 | GitHub Copilot | Documentation governance sync (living docs + stale-claim cleanup + link validation) | Directed docs-only maintenance pass | Updated SESSION_LOG/AGENTIC_WORKFLOW/PROMPT_LIBRARY/BETA_TESTING; confirmed BUGS/README consistency with current CR status | ✅ docs synchronized | See [SESSION_LOG.md](SESSION_LOG.md) |
 | 2026-07-14 | Claude Code | Documentation refresh: archive superseded docs, refresh living docs, verify links | Directed documentation updates | Archived PHASE2_OVERHAUL.md; refreshed SESSION_LOG, AGENTIC_WORKFLOW, PROMPT_LIBRARY, BETA_TESTING, BUGS_IMPROVEMENT_GUIDE; verified all internal links | ✅ all docs current, archive updated | See [SESSION_LOG.md](SESSION_LOG.md) |
 | 2026-07-14 | Windsurf Cascade | Code-review findings logged + AI-Augmentation documentation refresh | Scoped review + docs update; verified test pass | Reviewed main branch for logic/resource/API issues; updated all docs + README; archived duplicate brief | 🟡 docs complete, fixes pending | See [SESSION_LOG.md](SESSION_LOG.md) |
 | 2026-07-14 | Claude Code | M1: swm kit provenance recovery | Directed hero-asset investigation | Recovered exact OGA pages for swm hero/enemy subsets; updated CREDITS.md + ASSET_SOURCES.md | ✅ M1 complete, 15 files still unverified | See [SESSION_LOG.md](SESSION_LOG.md) |
