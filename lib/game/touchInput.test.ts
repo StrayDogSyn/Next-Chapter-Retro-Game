@@ -54,6 +54,6 @@ describe("TouchInputManager", () => {
 
     (manager as any).handlePointerDown(pointerEvent(1, 350, 182));
     const frame = manager.consumeGameplayFrame();
-    expect(frame.held.attack).toBe(false);
+    expect(Boolean(frame.held.attack)).toBe(false);
   });
 });

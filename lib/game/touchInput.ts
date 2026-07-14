@@ -1,6 +1,6 @@
 import type { InputAction } from "./input";
 
-export type TouchControlScheme = "virtualGamepad";
+export type TouchControlScheme = "virtualGamepad" | "tacticalTap";
 
 export type TouchActionButtonId = "jump" | "attack" | "dodge" | "interact" | "useItem" | "pause";
 
