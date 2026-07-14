@@ -50,14 +50,15 @@ describe("ADR-014: capped single-jump apex stays below double-jump's reach", () 
     expect(maxedApex).toBeLessThan(doubleJumpReachPx);
   });
 
-  it("base (unupgraded) jump apexes at ~3.78 tiles, matching levelLoader.ts's JUMP_RISE_TILES assumption", () => {
+  it("base (unupgraded) jump apexes at ~4.13 tiles (Space Marine Overhaul buff), still above levelLoader.ts's JUMP_RISE_TILES floor", () => {
     const baseApex = jumpApexPx(jumpVelocity(0));
-    expect(baseApex / 16).toBeCloseTo(3.78, 1);
+    expect(baseApex / 16).toBeCloseTo(4.13, 1);
+    expect(baseApex / 16).toBeGreaterThan(JUMP_RISE_TILES);
   });
 
   it("gravity/base-velocity constants match the physics levelLoader.ts's reachability math assumes", () => {
     expect(GRAVITY).toBe(900);
-    expect(JUMP_BASE_VELOCITY).toBe(330);
+    expect(JUMP_BASE_VELOCITY).toBe(345);
   });
 });
 

@@ -6,13 +6,28 @@
  */
 
 export const GRAVITY = 900; // px/s^2
-export const JUMP_BASE_VELOCITY = 330; // px/s, upward (negated by callers)
+// Space Marine Overhaul: buffed from 330 to 345 px/s (+4.5%) for a more
+// comfortable base jump to match the character's new heavier physical
+// presence (see game.ts's pw/ph comment). Chosen empirically via
+// simulateJumpFlight(), not guessed: base apex rises from 3.61 to 3.95
+// simulated tiles (+9.4%), while the capped-jumpPower apex only rises to
+// 6.13 simulated tiles - still a full 0.87-tile margin below double-jump's
+// ~7-tile reach (levelLoader.ts's UPGRADED_JUMP_RISE_TILES), preserving the
+// ADR-014 invariant this constant exists to protect. Deliberately did NOT
+// raise levelLoader.ts's JUMP_RISE_TILES/JUMP_GAP_TILES reachability-audit
+// floor constants to match: those are the classification threshold the
+// world's ability-gating (double-jump-locked bonus content, ADR-004/
+// ADR-023) is built on, and raising them would silently reclassify some of
+// that gated content as base-reachable. This buff only widens the comfort
+// margin over platforms already classified as base-reachable; it does not
+// let the un-upgraded player reach anything new.
+export const JUMP_BASE_VELOCITY = 345; // px/s, upward (negated by callers)
 export const COYOTE_SECONDS = 0.1;
 
-// See ADR-014 for the full derivation: capped so a maxed single jump (5.8
-// tiles) stays well below double-jump's ~7-tile reach (levelLoader.ts's
-// UPGRADED_JUMP_RISE_TILES) - jumpPower is comfort/expression, never a
-// progression key.
+// See ADR-014 for the full derivation: capped so a maxed single jump (6.35
+// analytic / 6.13 simulated tiles) stays well below double-jump's ~7-tile
+// reach (levelLoader.ts's UPGRADED_JUMP_RISE_TILES) - jumpPower is
+// comfort/expression, never a progression key.
 export const JUMP_POWER_CAP_PCT = 24;
 
 /** Upward jump speed (positive px/s; callers negate for their own sign convention). */

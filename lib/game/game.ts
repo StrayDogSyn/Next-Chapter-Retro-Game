@@ -291,8 +291,18 @@ export class Game {
   private py = 0;
   private pvx = 0;
   private pvy = 0;
-  private readonly pw = 14;
-  private readonly ph = 26;
+  // Space Marine Overhaul: hitbox enlarged from 14x26 to 18x32 (+29%/+23%) for
+  // a heavier physical presence, rounding ph to exactly 2 tiles (32px @
+  // TILE=16) - a clean, standard platformer convention. This deliberately
+  // reverses the "Fix Pack: Hero Scale + Reachable Platforms" mission's
+  // Increment 1 decision to leave the hitbox untouched; that mission flagged
+  // hitbox resizing as "a gameplay-feel decision for the user" rather than
+  // making it unilaterally, and the user has now made that call explicitly.
+  // See the draw-scale block below for how drawW/drawH/anchors were
+  // recomputed to match, and levelLoader.ts's door-carve height for the
+  // corresponding aperture widening this required.
+  private readonly pw = 18;
+  private readonly ph = 32;
   private facing: 1 | -1 = 1;
   private onGround = false;
   private jumpsUsed = 0;
@@ -2429,12 +2439,13 @@ export class Game {
     const ctx = this.ctx;
     if (this.iframes > 0 && Math.floor(this.animT * 12) % 2 === 0) return; // flicker
 
-    // Anchor math (ADR-020, scale corrected under the hero-scale fix pack):
-    // hitbox (this.pw/this.ph) is unchanged. The sprite anchors at
-    // feet-center of the physics box — horizontal offset centers the wider
-    // render box on the narrower hitbox, vertical offset aligns the render
-    // box's bottom edge with the hitbox's bottom edge. Visual overhang
-    // beyond the hitbox is expected.
+    // Anchor math (ADR-020, scale corrected under the hero-scale fix pack,
+    // draw box re-scaled again under the Space Marine Overhaul): the sprite
+    // anchors at feet-center of the physics box — horizontal offset centers
+    // the render box on the hitbox, vertical offset aligns the render box's
+    // bottom edge with the hitbox's bottom edge. Visual overhang beyond the
+    // hitbox is expected and intentional (the hitbox stays tighter than the
+    // sprite silhouette on purpose - see pw/ph's own comment).
     //
     // Scale derivation (measured, not assumed - see SESSION_LOG for the
     // full pixel measurements): drawW/drawH were never actually the bug.
@@ -2452,9 +2463,19 @@ export class Game {
     // existing per-entity draw-scale mechanism (drawW/drawH are already a
     // per-call parameter to drawSheetAnim(), the same one every enemy uses
     // via ENEMY_DEFS[...].drawW/drawH) rather than reprocessing the sheet.
+    //
+    // Space Marine Overhaul on top of that: the hitbox grew non-uniformly
+    // (pw 14->18 = x1.2857, ph 26->32 = x1.2308) to a 2-tile-tall physical
+    // presence. The draw box is scaled by those SAME per-axis factors (not
+    // re-derived from scratch) so the sprite's proportions relative to the
+    // hitbox - and thus the overhang look established above - stay
+    // consistent: drawW = round(32 * 1.108 * 1.2857) = 46,
+    // drawH = round(34 * 1.108 * 1.2308) = 46.
     const HERO_SCALE = 1.108;
-    const drawW = Math.round(32 * HERO_SCALE); // 35
-    const drawH = Math.round(34 * HERO_SCALE); // 38
+    const HITBOX_SCALE_W = 18 / 14; // this.pw growth factor
+    const HITBOX_SCALE_H = 32 / 26; // this.ph growth factor
+    const drawW = Math.round(32 * HERO_SCALE * HITBOX_SCALE_W); // 46
+    const drawH = Math.round(34 * HERO_SCALE * HITBOX_SCALE_H); // 46
     const dx = this.px + this.pw / 2 - drawW / 2;
     const dy = this.py + this.ph - drawH;
     // ADR-020: char-sheet-alpha.png is single-facing (always faces right in

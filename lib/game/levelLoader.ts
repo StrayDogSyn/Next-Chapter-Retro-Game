@@ -124,7 +124,12 @@ function isPassableEdgeTile(tile: number): boolean {
 /**
  * Some authored rooms had single-cell edge openings; after transition the
  * player could be wedged against nearby solids and feel trapped. Normalize
- * every declared exit to a minimum 2-cell portal and clear one tile inward.
+ * every declared exit to a minimum 3-cell portal and clear one tile inward.
+ *
+ * Space Marine Overhaul: widened from 2 cells (32px) to 3 cells (48px) so a
+ * 3-tile-wide, 2-tile-tall hitbox (game.ts's pw=18/ph=32, up from 14/26) has
+ * a full tile of clearance passing through, instead of exactly filling a
+ * 2-tile-tall portal with zero margin.
  */
 function ensureExitClearance(room: LoadedRoom) {
   const midRow = Math.floor(ROOM_H / 2);
@@ -150,8 +155,8 @@ function ensureExitClearance(room: LoadedRoom) {
 
   const carveVerticalPortal = (edgeCol: number, innerCol: number) => {
     const anchor = chooseRow(edgeCol);
-    const top = Math.max(1, Math.min(ROOM_H - 3, anchor - 1));
-    for (let row = top; row <= top + 1; row++) {
+    const top = Math.max(1, Math.min(ROOM_H - 4, anchor - 1));
+    for (let row = top; row <= top + 2; row++) {
       setTile(room, edgeCol, row, T_EMPTY);
       setTile(room, innerCol, row, T_EMPTY);
     }
@@ -159,8 +164,8 @@ function ensureExitClearance(room: LoadedRoom) {
 
   const carveHorizontalPortal = (edgeRow: number, innerRow: number) => {
     const anchor = chooseCol(edgeRow);
-    const left = Math.max(1, Math.min(ROOM_W - 3, anchor - 1));
-    for (let col = left; col <= left + 1; col++) {
+    const left = Math.max(1, Math.min(ROOM_W - 4, anchor - 1));
+    for (let col = left; col <= left + 2; col++) {
       setTile(room, col, edgeRow, T_EMPTY);
       setTile(room, col, innerRow, T_EMPTY);
     }
@@ -190,18 +195,27 @@ function hasOpening(room: LoadedRoom, edge: "left" | "right" | "up" | "down"): b
 // ─────────────────────── reachability validation (BUG-003) ───────────────────────
 //
 // Jump metrics, derived from the real player physics in game.ts (not guessed):
-//   jumpVelocity() = -330 px/s (base, no upgrades), gravity = 900 px/s^2.
-//   Rise to apex = v^2 / (2*g) = 330^2 / 1800 = 60.5px = 3.78 tiles (16px tiles).
-// JUMP_RISE_TILES is rounded DOWN to 3 tiles: validation must hold for a player
-// who has not yet found the double-jump upgrade, and 3 leaves a safety margin
-// for the horizontal-motion-eats-into-vertical-reach tradeoff a real parabola has.
+//   jumpVelocity() = -345 px/s (base, no upgrades; buffed from 330 under the
+//   Space Marine Overhaul - see jump-physics.ts's JUMP_BASE_VELOCITY
+//   comment), gravity = 900 px/s^2.
+//   Rise to apex = v^2 / (2*g) = 345^2 / 1800 = 66.1px = 4.13 tiles (16px tiles).
+// JUMP_RISE_TILES is rounded DOWN to 3 tiles (unchanged since the velocity
+// buff, on purpose): validation must hold for a player who has not yet found
+// the double-jump upgrade, and this floor is also the classification
+// threshold the world's ability-gating relies on (ADR-004/ADR-023) - raising
+// it to track the real 4.13-tile capability would silently reclassify some
+// double-jump-gated bonus content as base-reachable. The velocity buff only
+// spends its extra height as comfort margin over this floor, not as new
+// reach. 3 also still leaves a safety margin for the horizontal-motion-eats-
+// into-vertical-reach tradeoff a real parabola has.
 // Exported so jump-physics.test.ts can cross-check these hand-derived
 // constants against a real frame-stepped simulation (Fix Pack mission,
 // Increment 2.1) without duplicating the numbers.
 export const JUMP_RISE_TILES = 3;
-// Full up-and-down airtime at base jump velocity = 2 * (330/900) = 0.733s.
-// At base move speed (150px/s) that's 110px = ~6.9 tiles of horizontal travel
-// across a dead-air gap; rounded down to 6 tiles for the same safety-margin reason.
+// Full up-and-down airtime at base jump velocity = 2 * (345/900) = 0.767s.
+// At base move speed (150px/s) that's 115px = ~7.2 tiles of horizontal travel
+// across a dead-air gap; rounded down to 6 tiles, unchanged, for the same
+// floor-is-a-gating-threshold reason as JUMP_RISE_TILES above.
 export const JUMP_GAP_TILES = 6;
 // Falling (no ascent needed) gets extra horizontal drift credit per tile of
 // drop, since airtime -- and therefore horizontal travel while falling -- keeps
