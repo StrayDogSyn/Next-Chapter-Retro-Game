@@ -344,10 +344,7 @@ export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }
 
       // Relic glow pulse
       ctx.save();
-      const glowA = 0.12 + 0.08 * Math.sin(t * 1.5);
-      const glowRad = ctx.createRadialGradient(iconX, iconY, 2, iconX, iconY, 28);
-      glowRad.addColorStop(0, relicColor.replace(")", `, ${glowA})`).replace("rgb", "rgba").replace("#", "rgba(0,0,0,"));
-      ctx.globalAlpha = glowA * 3;
+      ctx.globalAlpha = 0.28 + 0.14 * Math.sin(t * 1.5);
       ctx.fillStyle = relicColor;
       ctx.beginPath();
       ctx.arc(iconX, iconY, 22, 0, Math.PI * 2);
