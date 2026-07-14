@@ -109,9 +109,72 @@ function parseRoom(def: RoomDef): LoadedRoom {
   };
 }
 
+function getTile(room: LoadedRoom, col: number, row: number): number {
+  return room.tiles[row * ROOM_W + col];
+}
+
+function setTile(room: LoadedRoom, col: number, row: number, tile: number) {
+  room.tiles[row * ROOM_W + col] = tile;
+}
+
+function isPassableEdgeTile(tile: number): boolean {
+  return tile !== T_SOLID;
+}
+
+/**
+ * Some authored rooms had single-cell edge openings; after transition the
+ * player could be wedged against nearby solids and feel trapped. Normalize
+ * every declared exit to a minimum 2-cell portal and clear one tile inward.
+ */
+function ensureExitClearance(room: LoadedRoom) {
+  const midRow = Math.floor(ROOM_H / 2);
+  const midCol = Math.floor(ROOM_W / 2);
+
+  const chooseRow = (edgeCol: number): number => {
+    let best: number | null = null;
+    for (let row = 1; row < ROOM_H - 1; row++) {
+      if (!isPassableEdgeTile(getTile(room, edgeCol, row))) continue;
+      if (best === null || Math.abs(row - midRow) < Math.abs(best - midRow)) best = row;
+    }
+    return best ?? midRow;
+  };
+
+  const chooseCol = (edgeRow: number): number => {
+    let best: number | null = null;
+    for (let col = 1; col < ROOM_W - 1; col++) {
+      if (!isPassableEdgeTile(getTile(room, col, edgeRow))) continue;
+      if (best === null || Math.abs(col - midCol) < Math.abs(best - midCol)) best = col;
+    }
+    return best ?? midCol;
+  };
+
+  const carveVerticalPortal = (edgeCol: number, innerCol: number) => {
+    const anchor = chooseRow(edgeCol);
+    const top = Math.max(1, Math.min(ROOM_H - 3, anchor - 1));
+    for (let row = top; row <= top + 1; row++) {
+      setTile(room, edgeCol, row, T_EMPTY);
+      setTile(room, innerCol, row, T_EMPTY);
+    }
+  };
+
+  const carveHorizontalPortal = (edgeRow: number, innerRow: number) => {
+    const anchor = chooseCol(edgeRow);
+    const left = Math.max(1, Math.min(ROOM_W - 3, anchor - 1));
+    for (let col = left; col <= left + 1; col++) {
+      setTile(room, col, edgeRow, T_EMPTY);
+      setTile(room, col, innerRow, T_EMPTY);
+    }
+  };
+
+  if (room.exits.left) carveVerticalPortal(0, 1);
+  if (room.exits.right) carveVerticalPortal(ROOM_W - 1, ROOM_W - 2);
+  if (room.exits.up) carveHorizontalPortal(0, 1);
+  if (room.exits.down) carveHorizontalPortal(ROOM_H - 1, ROOM_H - 2);
+}
+
 function hasOpening(room: LoadedRoom, edge: "left" | "right" | "up" | "down"): boolean {
   const at = (col: number, row: number) =>
-    room.tiles[row * ROOM_W + col] !== T_SOLID;
+    isPassableEdgeTile(getTile(room, col, row));
   if (edge === "left") {
     for (let row = 1; row < ROOM_H - 1; row++) if (at(0, row)) return true;
   } else if (edge === "right") {
@@ -371,7 +434,9 @@ export function loadWorld(): Map<string, LoadedRoom> {
   const world = new Map<string, LoadedRoom>();
   for (const def of ROOMS) {
     if (world.has(def.id)) throw new Error(`[world] Duplicate room id ${def.id}`);
-    world.set(def.id, parseRoom(def));
+    const room = parseRoom(def);
+    ensureExitClearance(room);
+    world.set(def.id, room);
   }
 
   for (const room of Array.from(world.values())) {
