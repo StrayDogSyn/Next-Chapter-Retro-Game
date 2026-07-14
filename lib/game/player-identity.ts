@@ -4,6 +4,7 @@
  * Known limitation: clearing browser storage orphans the server-side save.
  */
 const STORAGE_KEY = "ncrg:playerId";
+const UUID_V4_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 let cached: string | null | undefined;
 
@@ -30,6 +31,10 @@ export function fallbackUuidV4(): string {
   });
 }
 
+function isUuidV4(value: string): boolean {
+  return UUID_V4_RE.test(value);
+}
+
 export function getOrCreatePlayerId(): string | null {
   if (cached !== undefined) return cached;
   if (typeof localStorage === "undefined") {
@@ -38,7 +43,7 @@ export function getOrCreatePlayerId(): string | null {
   }
   try {
     let id = localStorage.getItem(STORAGE_KEY);
-    if (!id) {
+    if (!id || !isUuidV4(id)) {
       if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
         id = crypto.randomUUID();
       } else {
