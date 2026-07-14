@@ -2,7 +2,7 @@
 
 Bytefall: Segfault Summit is a retro-inspired full-stack showcase blending SNES-style 2D sprite art, open-source chiptune SFX, and Python-powered game logic inside a TypeScript/Next.js app — built in collaboration with AI coding agents to demonstrate agentic development workflows alongside core software engineering fundamentals.
 
-![Game menu](assets/img/screenshots/game-menu.png)
+![Start screen](assets/img/screenshots/starting-screen.png)
 
 ![Status](https://img.shields.io/badge/status-in--progress-yellow)
 ![Stack](https://img.shields.io/badge/stack-Next.js%2014%20%2B%20React%2018%20%2B%20TypeScript%205.9%20%2B%20FastAPI-blue)
@@ -40,7 +40,7 @@ This project is two things at once, on purpose:
 
 The Python backend isn't decorative — it owns procedural loot and level generation, while the Next.js frontend owns rendering, input, and UI. See [Architecture](#architecture) for the full rationale.
 
-![Working prototype](assets/img/screenshots/working-prototype00.png)
+![Updated gameplay model](assets/img/screenshots/updated-working-model.png)
 
 ## Tech Stack
 
@@ -142,9 +142,21 @@ The browser fetches the Python service directly at `NEXT_PUBLIC_PYTHON_SERVICE_U
 
 ## Screenshots
 
-| Game menu | Prototype gameplay |
+| Start Screen | Loading Sequence |
 | --- | --- |
-| ![Main menu](assets/img/screenshots/game-menu.png) | ![Working prototype](assets/img/screenshots/working-prototype00.png) |
+| ![Start screen](assets/img/screenshots/starting-screen.png) | ![Updated loading screen](assets/img/screenshots/updated-loading-screen.png) |
+
+| Gameplay Loop | Controls Menu |
+| --- | --- |
+| ![Updated gameplay model](assets/img/screenshots/updated-working-model.png) | ![Control menu](assets/img/screenshots/control-menu.png) |
+
+| High Scores | Revamped Level |
+| --- | --- |
+| ![High scores](assets/img/screenshots/high-scores.png) | ![Revamped level](assets/img/screenshots/revamped-level.png) |
+
+| AI-Augmentation Workflow Capture |
+| --- |
+| ![Active workflow demonstration](assets/img/screenshots/active-workflow-demonstration.png) |
 
 ### Responsive canvas scaling
 
@@ -153,6 +165,8 @@ The canvas keeps its internal 640×352 resolution but scales to fit the viewport
 ### Playtest
 
 ![Playtest](assets/img/screenshots/playtest01.png)
+
+For a historical timeline of the game's visual evolution (including legacy captures), see [docs/VISUAL_PROGRESSION.md](docs/VISUAL_PROGRESSION.md).
 
 ## AI Collaboration
 
