@@ -330,11 +330,10 @@ export class Game {
   // UI-008: fullscreen-safe help overlay (pauses gameplay updates while open)
   private helpOpen = false;
 
-  // SYS-009: XP/leveling + inventory overlay
+  // SYS-009: XP/leveling
   private level = 1;
   private xp = 0;
   private xpToNext = 150;
-  private inventoryOpen = false;
   private externalMenuOpen = false;
   private externalMenuPaused = false;
   private runStartedAt = performance.now();
@@ -517,7 +516,6 @@ export class Game {
     const wasOpen = this.externalMenuOpen;
     this.externalMenuOpen = open;
     if (open) {
-      this.inventoryOpen = false;
       this.helpOpen = false;
       this.shopOpen = false;
     }
@@ -806,25 +804,12 @@ export class Game {
     if (this.input.state.pressed.help || (this.helpOpen && this.input.state.pressed.pause)) {
       this.helpOpen = !this.helpOpen;
     }
-    // CR-009: Tab/KeyI ("inventory" in input.ts) used to also toggle
-    // this.inventoryOpen here, racing against GameCanvas.tsx's own Tab/KeyI
-    // listener (which drives the React GameMenuModal and always wins in
-    // practice - it runs synchronously off the native keydown event, before
-    // the next update() tick, and setUiModalOpen(true) early-returns above
-    // before this line is ever reached). That made this dead code reachable
-    // only by a timing coincidence, with input.ts's "inventory" action
-    // bound to no other input source (no gamepad button). Removed so
-    // GameCanvas.tsx is the single, unambiguous owner of Tab/KeyI;
-    // this.inventoryOpen and drawInventoryOverlay() are left in place
-    // (still forced false by setUiModalOpen(true) below) rather than torn
-    // out, since retiring that overlay entirely is a separate decision
-    // (see AST/CR-006's dead-UI-path note) outside this fix's scope.
     if (this.shopOpen) {
       this.updateShop();
       this.pushSnapshot(dt);
       return;
     }
-    if (this.helpOpen || this.inventoryOpen) {
+    if (this.helpOpen) {
       this.pushSnapshot(dt);
       return;
     }
@@ -2169,7 +2154,6 @@ export class Game {
       ctx.fillRect(0, 0, VIEW_W, VIEW_H);
     }
     if (this.helpOpen) this.drawHelpOverlay();
-    if (this.inventoryOpen) this.drawInventoryOverlay();
     if (this.shopOpen) this.drawShopOverlay();
   }
 
@@ -2256,52 +2240,6 @@ export class Game {
     ctx.textAlign = "left";
   }
 
-  private drawInventoryOverlay() {
-    const ctx = this.ctx;
-    ctx.fillStyle = "rgba(6,10,16,0.88)";
-    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
-    ctx.fillStyle = "#ffcc66";
-    ctx.font = "bold 18px monospace";
-    ctx.textAlign = "center";
-    ctx.fillText("INVENTORY & STATS", VIEW_W / 2, 30);
-    ctx.font = "12px monospace";
-    ctx.textAlign = "left";
-
-    let y = 58;
-    const line = (text: string, color = "#e5e7eb") => {
-      ctx.fillStyle = color;
-      ctx.fillText(text, 40, y);
-      y += 18;
-    };
-
-    line(`Level ${this.level}  —  XP ${Math.round(this.xp)}/${this.xpToNext}`, "#facc15");
-    line(`HP ${Math.round(this.hp)}/${this.maxHp()}   Coins ${this.coins}`);
-    line("");
-    line(`Weapon: ${this.weapon.name} (${this.weapon.rarity})`, RARITIES[this.weapon.rarity].color);
-    line(`  ${Math.round(this.weapon.damage)} dmg @ ${this.weapon.speed.toFixed(1)}/s, range ${this.weapon.range}${this.weapon.effect ? `, effect: ${this.weapon.effect}` : ""}`);
-    line(
-      this.secondary
-        ? `Secondary: ${this.secondary.name} (${this.secondary.rarity})`
-        : "Secondary: empty",
-      this.secondary ? RARITIES[this.secondary.rarity].color : "#6b7280",
-    );
-    line("");
-    line("Upgrades:", "#9fb2c7");
-    const upgradeIds = Object.keys(this.upgrades) as UpgradeId[];
-    if (upgradeIds.length === 0) {
-      line("  none yet");
-    } else {
-      for (const id of upgradeIds) {
-        const def = UPGRADE_DEFS[id];
-        const value = this.upgrades[id] ?? 0;
-        line(`  ${def.name}: +${value}${def.unit}`);
-      }
-    }
-    ctx.fillStyle = "#9fb2c7";
-    ctx.textAlign = "center";
-    ctx.fillText("TAB / I — close inventory", VIEW_W / 2, VIEW_H - 14);
-    ctx.textAlign = "left";
-  }
 
   private drawHelpOverlay() {
     const ctx = this.ctx;

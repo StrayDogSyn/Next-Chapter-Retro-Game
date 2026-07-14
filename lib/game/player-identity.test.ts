@@ -109,4 +109,17 @@ describe("getOrCreatePlayerId", () => {
     const id2 = mod2.getOrCreatePlayerId();
     expect(id2).toBe("d90bc6ca-a813-4d5f-8090-3fbd6f1903bb");
   });
+
+  it("falls back to fallbackUuidV4 when crypto.randomUUID is unavailable", async () => {
+    const storage = makeStorage();
+
+    vi.stubGlobal("localStorage", storage as unknown as Storage);
+    vi.stubGlobal("crypto", {} as unknown as Crypto);
+
+    const mod = await import("./player-identity");
+    const id = mod.getOrCreatePlayerId();
+
+    expect(id).toMatch(UUID_V4_RE);
+    expect(storage.getItem("ncrg:playerId")).toBe(id);
+  });
 });

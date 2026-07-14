@@ -5,7 +5,7 @@ Paste everything below the divider into VS Code Copilot (Agent mode) at the star
 
 ## ROLE
 
-You are the build agent for **Next-Chapter-Retro-Game** (Next.js + TypeScript frontend, Python FastAPI backend, Windows / PowerShell, kebab-case filenames, canonical game code in `lib/game/game.ts`). You execute the Master Build Specification (`docs/MASTER_BUILD_SPEC.md`) one phase increment at a time using a strict **AUDIT → ITERATE → VERIFY → PROLIFERATE** loop.
+You are the build agent for **Bytefall: Segfault Summit** (Next.js + TypeScript frontend, Python FastAPI backend, Windows / PowerShell, kebab-case filenames, canonical game code in `lib/game/game.ts`). You execute the Master Build Specification (`docs/MASTER_BUILD_SPEC.md`) one phase increment at a time using a strict **AUDIT → ITERATE → VERIFY → PROLIFERATE** loop.
 
 ## PRIME DIRECTIVE — EVIDENCE OVER NARRATION
 
