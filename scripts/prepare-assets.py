@@ -239,6 +239,81 @@ def main() -> None:
         shutil.rmtree(TMP, ignore_errors=True)
     TMP.mkdir(exist_ok=True)
 
+    # ---------- Player: swm hero (char-sheet-alpha.png, CC-BY 4.0 Emcee Flesher) ----------
+    # Placed first in main() so it survives the pre-existing, unrelated failure
+    # further down (assets/img/beast_boss_darksaber.zip is missing from disk -
+    # see SESSION_LOG 2026-07-14). Already a clean 46x46-cell RGBA grid sheet
+    # (confirmed via alpha-band analysis + the sheet's own baked-in "46x46"
+    # label - do NOT re-derive this as 64px; that was an earlier agent's
+    # unverified guess). No pack_rows() needed: the source is already alpha'd
+    # and grid-regular, so this is a direct copy, matching the "backgrounds"
+    # convention below rather than the boss/goblin recompositing path.
+    # Columns 0-5 (x: 0-276) are the 6-frame run+aim-sweep cycle; x >= 276 is
+    # a baked-in legend/palette strip, never sampled by row*cellW addressing.
+    HERO_CELL = 46
+    hero_src = ASSETS / "sprites" / "char-sheet-alpha.png"
+    hero_im = Image.open(hero_src)
+    if hero_im.size != (384, 2240) or hero_im.mode != "RGBA":
+        raise RuntimeError(
+            f"char-sheet-alpha.png geometry drifted from the verified 384x2240 RGBA "
+            f"(got {hero_im.size} {hero_im.mode}) - re-run Step 4.1's grid derivation "
+            f"before trusting the hardcoded row map below."
+        )
+    shutil.copy(hero_src, SPRITES_OUT / "hero.png")
+    WIRED.append("assets/sprites/char-sheet-alpha.png")
+    # None of these poses exist as distinct authored animations - every row is
+    # the same run+aim-sweep cycle at a different arm angle (verified by
+    # rendering a labeled grid overlay across all 48 rows, see SESSION_LOG).
+    # idle/jump/fall/attack/hurt/death are therefore deliberate aliases onto
+    # existing rows, logged here and in SESSION_LOG/DECISIONS.md as asset debt
+    # rather than invented frame rects (ADR-005).
+    HERO_ANIMS = {
+        "run": {"row": 0, "frames": 6},
+        "idle": {"row": 0, "frames": 1},
+        "attack": {"row": 12, "frames": 6},
+        "jump": {"row": 20, "frames": 1},
+        "fall": {"row": 36, "frames": 1},
+        "hurt": {"row": 6, "frames": 1},
+        "death": {"row": 47, "frames": 2},
+    }
+    META["hero"] = {"cellW": HERO_CELL, "cellH": HERO_CELL, "anims": HERO_ANIMS}
+    log(f"wrote {(SPRITES_OUT / 'hero.png').relative_to(ROOT)} (46x46 cells, direct copy)")
+
+    # 8 palette-variant skins - registered in spritemeta with the identical
+    # clip map (dimensions verified to match the base sheet exactly), but
+    # deliberately NOT added to game.ts's sheet-preload list: no unlock UI or
+    # selection logic exists yet, so preloading 8 unused images would only
+    # cost bandwidth. Data-only registration per this mission's scope wall.
+    for i in range(1, 9):
+        skin_src = ASSETS / "sprites" / f"char-sheet-alt-colours-{i}-alpha.png"
+        skin_im = Image.open(skin_src)
+        if skin_im.size != hero_im.size or skin_im.mode != "RGBA":
+            raise RuntimeError(
+                f"char-sheet-alt-colours-{i}-alpha.png geometry ({skin_im.size} "
+                f"{skin_im.mode}) no longer matches the base hero sheet "
+                f"({hero_im.size} {hero_im.mode}) - re-verify before registering."
+            )
+        skin_name = f"hero_skin_{i}"
+        shutil.copy(skin_src, SPRITES_OUT / f"{skin_name}.png")
+        WIRED.append(f"assets/sprites/char-sheet-alt-colours-{i}-alpha.png")
+        META[skin_name] = {"cellW": HERO_CELL, "cellH": HERO_CELL, "anims": HERO_ANIMS}
+    log("registered 8 hero palette-variant skins (data-only, not preloaded)")
+
+    # Persist immediately rather than waiting for main()'s final spritemeta.json
+    # write: a separate, pre-existing, unrelated bug (assets/img/beast_boss_
+    # darksaber.zip missing from disk, logged in SESSION_LOG 2026-07-14) crashes
+    # main() a few steps below before it reaches that write, which would
+    # otherwise silently drop these hero/skin entries on every pipeline run
+    # until that unrelated bug is fixed. Merge into whatever spritemeta.json
+    # already exists on disk (from the last successful full run) so tiles/bat/
+    # goblin/etc. entries survive, then let main()'s own write at the end
+    # overwrite this with the complete METa dict on any run that does succeed.
+    _meta_path = SPRITES_OUT / "spritemeta.json"
+    _existing_meta = json.loads(_meta_path.read_text()) if _meta_path.exists() else {}
+    _existing_meta.update({k: META[k] for k in ["hero"] + [f"hero_skin_{i}" for i in range(1, 9)]})
+    _meta_path.write_text(json.dumps(_existing_meta, indent=2))
+    log(f"merged hero entries into {_meta_path.relative_to(ROOT)} (main() may not reach its own write this run)")
+
     # ---------- Boss: Dark Saber Werewolf (CC-BY 3.0 MindChamber) ----------
     ds = extract("img/beast_boss_darksaber.zip", TMP / "ds", ("DarkSaber/",)) / "DarkSaber"
 
