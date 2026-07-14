@@ -2,7 +2,7 @@
 
 > **Purpose:** This document tracks usability issues, gameplay bugs, and feature enhancements identified during human playtesting and QA audits. Each item provides root-cause analysis, actionable step-by-step remediation aligned with the project architecture, and a strict verification checklist.
 >
-> **Last updated:** 2026-07-13 (re-verification pass — BUG-001/BUG-003/UX-004 confirmed already fixed, table was stale; see `docs/SESSION_LOG.md`)  
+> **Last updated:** 2026-07-14 (Tier 2 swm asset-utilization backlog added: AST-014 through AST-020; see `docs/SESSION_LOG.md`)  
 > **Maintainer:** StrayDogSyn / QA & Engineering Team  
 > **Rule of Thumb:** All changes must respect existing architectural boundaries (no parallel canvas systems, unified `Game` class logic in `lib/game/game.ts`, asset ingestion strictly via `scripts/prepare-assets.py`).
 
@@ -25,6 +25,13 @@
 | [SYS-011](#sys-011-persistent-checkpoints--save-states) | Persistence | No checkpoint system or persistent save data across sessions | High | 🔴 Untracked |
 | [SYS-012](#sys-012-npc-item-shop--coin-economy-sink) | Gameplay / Economy | Coins lack an economy sink; NPC shop needed for replay value | Medium | 🔴 Untracked |
 | [AST-013](#ast-013-suspect-thumbnail-triage--scraper-hardening) | Asset Pipeline | `project-status.py`'s size-only heuristic flagged 24 assets as suspect; most were false positives | Medium | 🟢 Triage + scraper fix done, re-fetch pending |
+| [AST-014](#ast-014-powerups-sheet--rarity-tiered-pickup-art) | Asset Pipeline | swm `powerups-sheet-alpha.png` isn't bound to loot tables; pickups still render as flat colored rects | Medium | 🔴 Untracked |
+| [AST-015](#ast-015-impactsweaponflash-5-color-tiers--rarity-fx) | Asset Pipeline | swm `impacts-*`/`weaponflash-*` 5-color-tier FX sheets are unused; hit/pickup feedback has no rarity-tinted juice | Medium | 🔴 Untracked |
+| [AST-016](#ast-016-one-coherent-swm-biome-tiles--backgrounds--enemies) | Level Gen / Asset Pipeline | swm tiles, backgrounds, and `enemies-sheet-alpha.png` are unused; no single biome uses the coherent swm art language yet | High | 🔴 Untracked |
+| [AST-017](#ast-017-tile-variation-pools-for-seeded-rooms) | Level Gen / Asset Pipeline | Tile-variation sets, `truchet.png`, and `minimalist_pixel_tileset.png` aren't registered as seed-driven variant pools | Medium | 🔴 Untracked |
+| [AST-018](#ast-018-forestmesadepths-backdrops-for-zone-variety) | Asset Pipeline | `forest.png`/`mesa.png`/`depths_of_terra.png` backdrops are unused; every zone currently shares one background family | Medium | 🔴 Untracked |
+| [AST-019](#ast-019-darksaber--wyrmwolf-boss-integration) | Bosses / Asset Pipeline | Darksaber werewolf pack and `wyrmwolf.png` aren't wired as distinct boss encounters beyond the existing single mid-boss crop | Medium | 🔴 Untracked |
+| [AST-020](#ast-020-purge-list-execution-thumbnails--wrong-projectionera-assets) | Asset Pipeline | 5 known thumbnail/wrong-projection/wrong-era assets (incl. the currently-wired `bat_sprite.png`) should be moved out of pipeline reach, not left where procgen could roll them | Low | 🔴 Untracked |
 
 ---
 
@@ -115,6 +122,8 @@
 - [ ] Wired new sound events into `audioManager.ts` and confirmed in-game playback.
 - [ ] Assigned new sprite sheets to game entities without breaking animation state machines.
 - [ ] Ran `python scripts/project-status.py` to verify asset hash consistency.
+
+**Note (2026-07-14):** The player-character sprite specifically was swapped from `hero_0.png` to the swm kit's `char-sheet-alpha.png` (+ 8 palette variants) under ADR-020 — a real utilization win, but scoped separately from this item and not a substitute for it. The sprite/visual half of AST-005's original scope (unused enemy-sheet variants, per-zone tile/decor) is now further broken out into the concrete Tier-2 items below (AST-014 through AST-020).
 
 ---
 
@@ -270,6 +279,87 @@
 - [ ] Manually verify the 4 LIKELY files in a browser and re-fetch if they are indeed thumbnails.
 - [ ] Re-run `python scripts/prepare-assets.py` after any replacement, then `npx tsc --noEmit` and `npm run dev`.
 - [ ] Re-run `python scripts/project-status.py` and confirm the CONFIRMED/LIKELY counts drop to 0.
+
+---
+
+## Tier 2 — swm Asset-Utilization Backlog
+
+Sourced from the 2026-07-14 "Steam-Indie Program" asset audit and `docs/SPRITE_ART_INVENTORY.md`'s integration-priority list, turned into concrete checklists per the "Hero Integration Mission" prompt's M3. **None of these 7 items were consumed by the 2026-07-14 hero-integration session (ADR-020)** — that session integrated only `char-sheet-alpha.png` (the player character) and its 8 palette variants; the powerups/impacts/tiles/backgrounds/bosses/purge-list items below remain fully open. Each item lists its goal, the files involved, an effort note, and what verification evidence closing it requires — matching this doc's existing checklist convention.
+
+### AST-014: Powerups Sheet → Rarity-Tiered Pickup Art
+**Goal:** Bind `assets/sprites/powerups-sheet-alpha.png` (640×544, `RGBA`, page-verified CC-BY 4.0 per `docs/CREDITS.md`) to the loot system so pickups render as real sprite art instead of flat colored rects.
+
+**Files involved:** `scripts/prepare-assets.py` (new pipeline block, grid-derive the sheet the same way ADR-020 did for the hero — do not assume a cell size, measure it), `public/sprites/spritemeta.json`, `lib/game/game.ts` (wherever loot/pickup entities currently render), `lib/game/items.ts`.
+
+**Effort note:** `Prep` — sheet is `Ready` per the inventory doc, but its grid still needs independent verification (ADR-020's whole finding was that "looks like a regular grid" claims from this same audit round were wrong twice already for other sheets).
+
+**Verification evidence required to close:** grid derivation method + labeled overlay (same discipline as ADR-020's Step 4.1), `npm test` clean, live screenshot showing at least 2 distinct pickup icons rendering in-game, `docs/CREDITS.md` row confirming this file's usage is now "wired" not "not yet wired".
+
+---
+
+### AST-015: Impacts/Weaponflash 5-Color Tiers → Rarity FX
+**Goal:** Map the 5-color-tier `impacts-sheet-colour-{1..5}-alpha.png` and `weaponflash-sheet-colour-{1..5}-alpha.png` families onto the game's existing 4-tier `Rarity` scale (`common/uncommon/rare/epic` — see `Game.RARITY_SOUND` in `game.ts` for the existing rarity-tier pattern to mirror) for hit and pickup visual feedback.
+
+**Files involved:** `scripts/prepare-assets.py`, `public/sprites/spritemeta.json`, `lib/game/game.ts` (`applyLoot()`, `damageEnemy()` — the same call sites ADR-016 wired rarity-tiered *audio* into; this is the visual half of that same idea).
+
+**Effort note:** `Ready` per the inventory doc — 5 color tiers map cleanly onto the 4-tier rarity scale (one tier can double up, e.g. tier-5 reused for both epic and a future "legendary").
+
+**Verification evidence required to close:** spritemeta clip validity test (mirror `hero-spritemeta.test.ts`'s pattern), live screenshot comparing a common-rarity hit/pickup against an epic-rarity one showing visibly different FX color.
+
+---
+
+### AST-016: One Coherent swm Biome (Tiles + Backgrounds + Enemies)
+**Goal:** Build one full room/zone using only swm-family art (`oga-swm-tiles-alpha.png`, a swm background, `enemies-sheet-alpha.png`) so the kit's visual coherence (noted in `docs/SPRITE_ART_INVENTORY.md`'s headline finding) actually pays off in-game instead of staying scattered across unused files.
+
+**Files involved:** `lib/game/world.ts` (new room definitions), `scripts/prepare-assets.py`, `public/sprites/spritemeta.json`, `lib/game/levelLoader.ts` (new rooms must pass the existing BUG-003 reachability audit — see that item's completion checklist above for the live-probe method).
+
+**Effort note:** `High` — this is the largest Tier-2 item; it's a full room-authoring pass, not just a pipeline wire-up. `enemies-sheet-alpha.png`'s own grid needs independent derivation (15+ enemies per the inventory doc; do not assume uniform cell size across all of them without checking).
+
+**Verification evidence required to close:** BUG-003's reachability probe passing for every new room (0 dead-ends), live screenshot of the new biome, `npm test`/`npm run build` clean.
+
+---
+
+### AST-017: Tile-Variation Pools for Seeded Rooms
+**Goal:** Register `oga-swm-earth-tile-variations-alpha.png`, `truchet.png`, and `minimalist_pixel_tileset.png` as seed-driven variant pools so procedural/seeded room decoration (ADR-017's daily-seed mode) has real visual variety to draw from instead of a single fixed tileset.
+
+**Files involved:** `scripts/prepare-assets.py`, `lib/game/rng.ts` (an existing forked stream, e.g. `vfxRng`, is the natural place to draw tile-variant picks from — deterministic per seed, matching ADR-017's design), `lib/game/world.ts` or wherever room decoration currently happens.
+
+**Effort note:** `Ready`/`High` procgen value per the inventory doc — these were specifically called out as "literal procgen decor source" material.
+
+**Verification evidence required to close:** two different seeds producing visibly different tile variants in the same room shape, `npm test` covering the pool-selection logic as a pure function (mirror `rng.test.ts`'s determinism-testing pattern).
+
+---
+
+### AST-018: forest/mesa/depths Backdrops for Zone Variety
+**Goal:** Wire `forest.png`, `mesa.png`, and `depths_of_terra.png` (all `1024x768`, measured in `docs/SPRITE_ART_INVENTORY.md`) as additional zone backgrounds so different zones read as visually distinct instead of sharing one background family.
+
+**Files involved:** `scripts/prepare-assets.py` (`forest.png`/`mesa.png` are palette-mode `P` — check whether they need the same chroma-key treatment the demon-flower sheet needed, per `gif_frames()`'s `apply_chroma_key()` in `prepare-assets.py`, or whether they're already fully opaque backgrounds that don't need keying at all), `lib/game/world.ts` (per-zone background assignment).
+
+**Effort note:** `Prep` — needs a quick opacity/mode check per file before wiring (same discipline as ADR-020's `RuntimeError` guards on unexpected sheet geometry).
+
+**Verification evidence required to close:** live screenshot showing at least 2 zones with visually distinct backdrops, `npm run build` clean.
+
+---
+
+### AST-019: Darksaber + Wyrmwolf Boss Integration
+**Goal:** Give the Dark Saber Werewolf pack and `wyrmwolf.png` real, distinct boss encounters (beyond the existing single cropped `wyrmwolf` mid-boss pose) matching `docs/SPRITE_ART_INVENTORY.md`'s "showpiece boss" recommendation.
+
+**Files involved:** `scripts/prepare-assets.py`, `lib/bossManager.ts` (already supports multi-phase boss AI per the project's original scaffold — reuse, don't rebuild), `lib/game/world.ts`.
+
+**Effort note:** `Prep` pending extract — **blocked** by the pre-existing, logged bug: `assets/img/beast_boss_darksaber.zip` is missing from both the live `assets/` tree and the untracked `assets.zip` backup (see SESSION_LOG 2026-07-14, T1.1 precondition check entry). This item cannot proceed until that source file is recovered from somewhere (original download, a teammate's machine, or re-sourced from OpenGameArt) — do not attempt to fabricate a substitute.
+
+**Verification evidence required to close:** confirm the source zip is present on disk before starting (`ls assets/img/beast_boss_darksaber.zip`), then the usual gate + live boss-encounter screenshot.
+
+---
+
+### AST-020: Purge List Execution (Thumbnails / Wrong-Projection / Wrong-Era Assets)
+**Goal:** Move known-bad assets out of pipeline reach so procgen or a future asset-utilization pass never rolls them: the currently-**wired** `bat_sprite.png` (probable thumbnail per `docs/SPRITE_ART_INVENTORY.md` and AST-013's triage), `rpg_village_isometric.png` (wrong projection for a side-scroller), `vintagebuggy.png`/`vintagehippievan.png`/`motorcycle.png` (wrong era/universe), and `2d_sprite_skins_walking_animation.jpg` (JPEG, no alpha, unsuitable as a runtime sprite source).
+
+**Files involved:** `assets/` (move, don't delete — mirrors ADR-019's documentation-archival policy: move flagged files to an `assets/_excluded/` or similar holding area with a note, rather than deleting), `scripts/prepare-assets.py` (the `bat_sprite.png` wiring specifically needs a *replacement* source, not just removal, since the bat enemy is live and currently uses this file).
+
+**Effort note:** `Low` effort to move the never-wired files; the `bat_sprite.png` replacement is the one item here with real gameplay risk (removing it without a replacement breaks the bat enemy).
+
+**Verification evidence required to close:** **do not delete anything without explicit user approval** (per this project's standing git-safety discipline — these are irreversible-if-wrong operations on asset files, not code). Confirm via `git status`/`ls` that flagged files were moved (not deleted) and that `bat_sprite.png`'s replacement (if done in the same pass) still renders the bat enemy correctly in a live screenshot.
 
 ---
 
