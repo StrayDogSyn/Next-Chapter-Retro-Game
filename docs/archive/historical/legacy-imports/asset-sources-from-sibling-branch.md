@@ -1,6 +1,6 @@
 # Asset Sources & Sourcing Plan
 
-This document is the living guide for sourcing, categorizing, and integrating third-party assets for the Next-Chapter-Retro-Game. It focuses on **CC0 / public-domain** libraries so the project can randomize visuals and audio without licensing friction.
+This document is the living guide for sourcing, categorizing, and integrating third-party assets for Bytefall: Segfault Summit. It focuses on **CC0 / public-domain** libraries so the project can randomize visuals and audio without licensing friction.
 
 > For the currently wired assets, see [CREDITS.md](../../../CREDITS.md). For the pipeline that turns downloaded archives into game-ready files, see [scripts/prepare-assets.py](../../../../scripts/prepare-assets.py).
 

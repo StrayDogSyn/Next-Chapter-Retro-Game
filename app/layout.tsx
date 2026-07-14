@@ -6,8 +6,9 @@ import { Press_Start_2P } from "next/font/google";
 const pressStart2P = Press_Start_2P({ weight: "400", subsets: ["latin"], variable: "--font-pixel" });
 
 export const metadata: Metadata = {
-  title: "Next Chapter Retro Game",
-  description: "SNES-styled 2D platformer capstone scaffold",
+  title: "Bytefall: Segfault Summit",
+  description:
+    "A retro action-platformer where you dash, jump, and debug your way up a collapsing codebase.",
 };
 
 export const viewport: Viewport = {

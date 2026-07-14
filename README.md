@@ -1,6 +1,6 @@
-# Next-Chapter-Retro-Game
+# Bytefall: Segfault Summit
 
-A retro-inspired full-stack showcase blending SNES-style 2D sprite art, open-source chiptune SFX, and Python-powered game logic inside a TypeScript/Next.js app — built in collaboration with AI coding agents to demonstrate agentic development workflows alongside core software engineering fundamentals.
+Bytefall: Segfault Summit is a retro-inspired full-stack showcase blending SNES-style 2D sprite art, open-source chiptune SFX, and Python-powered game logic inside a TypeScript/Next.js app — built in collaboration with AI coding agents to demonstrate agentic development workflows alongside core software engineering fundamentals.
 
 ![Game menu](assets/img/screenshots/game-menu.png)
 
