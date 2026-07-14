@@ -2,7 +2,7 @@
 
 > **Purpose:** This document tracks usability issues, gameplay bugs, and feature enhancements identified during human playtesting and QA audits. Each item provides root-cause analysis, actionable step-by-step remediation aligned with the project architecture, and a strict verification checklist.
 >
-> **Last updated:** 2026-07-14 (Tier 2 swm asset-utilization backlog added: AST-014 through AST-020; see `docs/SESSION_LOG.md`)  
+> **Last updated:** 2026-07-14 (Tier 2 swm asset-utilization backlog added: AST-014 through AST-020; code-review findings CR-001..CR-013 added; dashboard statuses refreshed — see `docs/SESSION_LOG.md`)
 > **Maintainer:** StrayDogSyn / QA & Engineering Team  
 > **Rule of Thumb:** All changes must respect existing architectural boundaries (no parallel canvas systems, unified `Game` class logic in `lib/game/game.ts`, asset ingestion strictly via `scripts/prepare-assets.py`).
 
@@ -16,15 +16,15 @@
 | [UI-002](#ui-002-equipment-dashboard-highlight--swap-effects) | UI / FX | Equipment needs stronger HUD highlighting and noticeable swap feedback | Medium | 🔴 Untracked |
 | [BUG-003](#bug-003-unreachable-platform-generation--dead-ends) | Level Gen | Initial floors have unreachable platform heights causing navigation dead-ends | High | ✅ Fixed (verified 2026-07-13) |
 | [UX-004](#ux-004-player-respawn--self-destruct-mechanism) | Controls / UX | No self-destruct/reset mechanism when trapped in soft-locks or dead-ends | High | ✅ Fixed (verified 2026-07-13) |
-| [AST-005](#ast-005-underutilized-sprite--audio-assets) | Asset Pipeline | Game engine only utilizes a small fraction of available sprites and SFX | Medium | 🔴 Untracked |
+| [AST-005](#ast-005-underutilized-sprite--audio-assets) | Asset Pipeline | Game engine only utilizes a small fraction of available sprites and SFX | Medium | 🟡 Partial — audio pass done 2026-07-13 (ADR-016); sprite/visual half deferred |
 | [UX-006](#ux-006-treasure--coin-micro-interactions) | Visuals / Polish | Coins and treasure lack premium micro-interactions and sprite variety | Medium | 🔴 Untracked |
-| [UI-007](#ui-007-dashboard-mini-map-integration) | UI / Navigation | Lack of spatial orientation; mini-map needed in the dashboard | High | 🔴 Untracked |
-| [UI-008](#ui-008-fullscreen-unobtrusive-help-modal) | UI / Accessibility | Fullscreen hides instructions; persistent unobtrusive `?` modal needed | Medium | 🔴 Untracked |
-| [SYS-009](#sys-009-xp-counter--inventory-stats-modal) | Progression / UI | Missing XP counter from defeats and centralized inventory/stats modal | High | 🔴 Untracked |
+| [UI-007](#ui-007-dashboard-mini-map-integration) | UI / Navigation | Lack of spatial orientation; mini-map needed in the dashboard | High | ✅ Fixed — minimap rendered in `GameHeader`/`GameHudOverlay` |
+| [UI-008](#ui-008-fullscreen-unobtrusive-help-modal) | UI / Accessibility | Fullscreen hides instructions; persistent unobtrusive `?` modal needed | Medium | ✅ Fixed — in-canvas help overlay + controls footer; persistent `?` icon not wired |
+| [SYS-009](#sys-009-xp-counter--inventory-stats-modal) | Progression / UI | Missing XP counter from defeats and centralized inventory/stats modal | High | ✅ Fixed — XP bar in `GameHeader`; stats/gear in `GameMenuModal` |
 | [AST-010](#ast-010-ingestion-of-downloads-archive-assets) | Asset Pipeline | Unprocessed asset archives in `./downloads` need pipeline integration | High | 🔴 Untracked |
-| [SYS-011](#sys-011-persistent-checkpoints--save-states) | Persistence | No checkpoint system or persistent save data across sessions | High | 🔴 Untracked |
-| [SYS-012](#sys-012-npc-item-shop--coin-economy-sink) | Gameplay / Economy | Coins lack an economy sink; NPC shop needed for replay value | Medium | 🔴 Untracked |
-| [AST-013](#ast-013-suspect-thumbnail-triage--scraper-hardening) | Asset Pipeline | `project-status.py`'s size-only heuristic flagged 24 assets as suspect; most were false positives | Medium | 🟢 Triage + scraper fix done, re-fetch pending |
+| [SYS-011](#sys-011-persistent-checkpoints--save-states) | Persistence | No checkpoint system or persistent save data across sessions | High | ✅ Fixed — shrines + `localStorage` + server mirroring (ADR-010) |
+| [SYS-012](#sys-012-npc-item-shop--coin-economy-sink) | Gameplay / Economy | Coins lack an economy sink; NPC shop needed for replay value | Medium | ✅ Fixed — shop NPC exists in hub with mystery-box + consumables |
+| [AST-013](#ast-013-suspect-thumbnail-triage--scraper-hardening) | Asset Pipeline | `project-status.py`'s size-only heuristic flagged 24 assets as suspect; most were false positives | Medium | 🟡 Triage + scraper fix done, re-fetch pending |
 | [AST-014](#ast-014-powerups-sheet--rarity-tiered-pickup-art) | Asset Pipeline | swm `powerups-sheet-alpha.png` isn't bound to loot tables; pickups still render as flat colored rects | Medium | 🔴 Untracked |
 | [AST-015](#ast-015-impactsweaponflash-5-color-tiers--rarity-fx) | Asset Pipeline | swm `impacts-*`/`weaponflash-*` 5-color-tier FX sheets are unused; hit/pickup feedback has no rarity-tinted juice | Medium | 🔴 Untracked |
 | [AST-016](#ast-016-one-coherent-swm-biome-tiles--backgrounds--enemies) | Level Gen / Asset Pipeline | swm tiles, backgrounds, and `enemies-sheet-alpha.png` are unused; no single biome uses the coherent swm art language yet | High | 🔴 Untracked |
@@ -32,6 +32,7 @@
 | [AST-018](#ast-018-forestmesadepths-backdrops-for-zone-variety) | Asset Pipeline | `forest.png`/`mesa.png`/`depths_of_terra.png` backdrops are unused; every zone currently shares one background family | Medium | 🔴 Untracked |
 | [AST-019](#ast-019-darksaber--wyrmwolf-boss-integration) | Bosses / Asset Pipeline | Darksaber werewolf pack and `wyrmwolf.png` aren't wired as distinct boss encounters beyond the existing single mid-boss crop | Medium | 🔴 Untracked |
 | [AST-020](#ast-020-purge-list-execution-thumbnails--wrong-projectionera-assets) | Asset Pipeline | 5 known thumbnail/wrong-projection/wrong-era assets (incl. the currently-wired `bat_sprite.png`) should be moved out of pipeline reach, not left where procgen could roll them | Low | 🔴 Untracked |
+| [CR-001](#cr-findings-2026-07-14) | Code Review | Thirteen logic/resource/API/edge-case findings from main-branch review | High | 🔴 Untracked |
 
 ---
 
@@ -360,6 +361,30 @@ Sourced from the 2026-07-14 "Steam-Indie Program" asset audit and `docs/SPRITE_A
 **Effort note:** `Low` effort to move the never-wired files; the `bat_sprite.png` replacement is the one item here with real gameplay risk (removing it without a replacement breaks the bat enemy).
 
 **Verification evidence required to close:** **do not delete anything without explicit user approval** (per this project's standing git-safety discipline — these are irreversible-if-wrong operations on asset files, not code). Confirm via `git status`/`ls` that flagged files were moved (not deleted) and that `bat_sprite.png`'s replacement (if done in the same pass) still renders the bat enemy correctly in a live screenshot.
+
+---
+
+<a name="cr-findings-2026-07-14"></a>
+
+## CR-001–CR-013: Code Review Findings (2026-07-14)
+
+A senior-engineer pass over the main branch surfaced the following issues. **No code changes were applied in this session;** they are queued as the next fix backlog. Each maps to the files/line ranges reviewed.
+
+| ID | File(s) | Issue | Severity | Notes |
+|---|---|---|---|---|
+| CR-001 | `lib/game/asset-url.ts`, `next.config.mjs` | `assetUrl()` reads `process.env.NEXT_PUBLIC_BASE_PATH`, but `next.config.mjs` only sets `basePath` and never writes `NEXT_PUBLIC_BASE_PATH`, relying on external injection. | Medium | Works in CI because `deploy.yml` injects it; local dev without it defaults to `''`. |
+| CR-002 | `lib/game/save-client.ts` | `loadFromServer()` casts the server response and `localStorage` payload without schema validation. | Medium | Corrupted/tampered saves can be restored verbatim. |
+| CR-003 | `lib/audioManager.ts` | Repeated construction of `AudioManager` leaks `AudioContext` instances instead of reusing or closing the prior context. | Medium | Most visible when `GameCanvas` remounts in React Strict Mode. |
+| CR-004 | `components/GameCanvas.tsx` | Fullscreen `requestFullscreen()` / `exitFullscreen()` promises are not caught, so a blocked call can throw an uncaught rejection. | Low | Add `.catch(() => {})` or surface to user. |
+| CR-005 | `components/GameCanvas.tsx` | The `Game` instance is destroyed and recreated on every React render of the parent, losing transient state. | Medium | Should memoize or lift the `Game` reference out of render. |
+| CR-006 | `components/HUD.tsx`, `GameHeader.tsx`, `GameFooter.tsx`, `GameHudOverlay.tsx` | Dead/duplicated HUD path: old `HUD.tsx` overlay still exists alongside the newer header/footer/HudOverlay components. | Low | Remove unused overlay or confirm it is intentionally retained. |
+| CR-007 | `lib/game/rng.ts` | `Rng.weighted()` silently returns `undefined` when total weight is zero. | Low | Callers may crash; throw or return a default. |
+| CR-008 | `lib/game/loot-client.ts` | Loot fetch has no timeout, so a hanging Python service can stall the game. | Medium | Add `AbortSignal.timeout(...)`. |
+| CR-009 | `components/GameCanvas.tsx`, `lib/game/game.ts` | Menu input is handled in two layers (`GameCanvas` polls `input.menu` and `Game`/`InputManager` also flushes it), risking double-toggle or missed presses. | Low | Consolidate modal open/close ownership. |
+| CR-010 | `lib/game/touchInput.ts` | `consumeTacticalFrame()` mutates `InputManager.state` directly instead of returning a delta. | Low | Breaks the abstraction; refactor to output a frame delta. |
+| CR-011 | `lib/game/save-data.ts` | `buildSaveData()` returns mutable references for nested objects (`weapon`, `upgrades`, `visitedRooms`). | Low | Deep-copy the payload before returning. |
+| CR-012 | `lib/game/game.ts` | `drawRunSummary()` and `drawOverlay()` mutate `ctx.textAlign` without `save()`/`restore()`, leaking canvas state. | Low | Wrap text-align changes in save/restore. |
+| CR-013 | `lib/game/player-identity.ts` | `getOrCreatePlayerId()` silently gives up and returns `''` if `crypto.randomUUID` is unavailable. | Low | Fall back to a manual UUID v4 generator. |
 
 ---
 
