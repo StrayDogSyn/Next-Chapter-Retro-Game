@@ -374,6 +374,8 @@ A senior-engineer pass over the main branch surfaced the following issues. **No 
 
 **Update 2026-07-14 (Stability & Security Pass, round 2):** CR-004 and CR-007 were checked and found already fixed (CR-004 already try/catch-wrapped; CR-007 already throws on invalid weight, confirmed by reading the code rather than trusting `7fe645a`'s commit message as Sprint A had left it). **CR-013 and CR-009 were checked and found only partially fixed / not fixed**, and both got real new code this round: CR-013's existing fallback UUID generator produced a string the backend's strict `uuid.UUID` Pydantic field would reject, silently breaking persistence for any client without `crypto.randomUUID`; CR-009 had two independent Tab/KeyI listeners (verified low practical risk via a code trace, but not actually consolidated) — now reduced to one. See each row's Notes column and the dated SESSION_LOG entry for full evidence.
 
+**Update 2026-07-14 (Documentation governance sync):** No new CR findings were introduced in this docs-only pass. This file was reviewed for consistency with the latest verified code/test state; statuses remain unchanged from round 2 (open: CR-001/006/011, fixed: 10 of 13 total).
+
 | ID | File(s) | Issue | Severity | Notes |
 |---|---|---|---|---|
 | CR-001 | `lib/game/asset-url.ts`, `next.config.mjs` | `assetUrl()` reads `process.env.NEXT_PUBLIC_BASE_PATH`, but `next.config.mjs` only sets `basePath` and never writes `NEXT_PUBLIC_BASE_PATH`, relying on external injection. | Medium | Works in CI because `deploy.yml` injects it; local dev without it defaults to `''`. Not in this sprint's scope — still open. |

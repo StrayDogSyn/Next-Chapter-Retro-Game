@@ -39,6 +39,17 @@ An incident entry never doubles as the fix record — the fix gets its own dated
 
 ## Entries
 
+### 2026-07-14 — Documentation governance sync: living docs refresh + stale-beta cleanup
+
+- **Tool used:** GitHub Copilot (GPT-5.3-Codex)
+- **Goal:** Execute the documentation-governance checklist end-to-end: continue AI-Augmentation logging, correct stale documentation claims, and verify doc-link integrity.
+- **Prompt summary:** Continue the 10-point docs-maintenance workflow (session log + workflow status + prompt library + bug guide + beta doc + README consistency + archive/index + link validation) without code changes.
+- **What the agent produced:** Updated living docs to reflect current implementation reality, added this session's process log/workflow trace, and removed stale code-review-backlog items in `BETA_TESTING.md` that were already fixed in CR round 2.
+- **Human review/changes:** Verified updates stayed documentation-only and preserved the existing archive policy (move/redirect, no deletion of historical records).
+- **Outcome:** ✅ merged
+- **Time saved vs. hand-writing (rough estimate):** ~45-60 minutes
+- **Anything worth remembering:** A docs-only maintenance pass should still be treated like engineering work: verify against source/tests, then update docs. Stale review-backlog bullets were more misleading than missing docs because they contradicted already-fixed CR items.
+
 ### 2026-07-14 — Stability & Security Pass, round 2: CR-004/007 already fixed, CR-009/013 genuinely fixed this round
 
 - **Tool used:** Claude Code

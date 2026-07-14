@@ -190,7 +190,7 @@ All third-party assets are CC0 or explicitly licensed for reuse. The runtime ass
 - [x] Senior-engineer code review of main branch; CR-001..CR-013 findings logged
 
 ### In progress / next
-- [ ] Code-review fix backlog (see [docs/BUGS_IMPROVEMENT_GUIDE.md](docs/BUGS_IMPROVEMENT_GUIDE.md#cr-findings-2026-07-14))
+- [ ] Code-review fix backlog (10/13 findings fixed; open: CR-001, CR-006, CR-011 — see [docs/BUGS_IMPROVEMENT_GUIDE.md](docs/BUGS_IMPROVEMENT_GUIDE.md#cr-findings-2026-07-14))
 - [ ] Sprite asset utilization pass (AST-014..AST-020: powerups, impacts/weaponflash rarity FX, swm biome, tile-variation pools, zone backdrops, darksaber+wyrmwolf bosses, purge-list execution)
 - [ ] Zone-specific ambient/music
 - [ ] Bootcamp submission polish pass

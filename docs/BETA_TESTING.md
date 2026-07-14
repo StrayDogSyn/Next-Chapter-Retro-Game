@@ -80,16 +80,14 @@ informational — replaying your daily seed is always allowed.
 
 ## Code review backlog (not blockers, but worth knowing)
 
-A 2026-07-14 senior-engineer pass surfaced several low-to-medium issues that do
-not stop play but can produce edge-case glitches:
+The 2026-07-14 senior-engineer pass originally reported 13 findings. Most have
+now been fixed and re-verified. The remaining open items are:
 
-- Loot/save service calls lack a fetch timeout; a very slow or hanging backend
-could stall the game briefly before fallback kicks in.
-- `localStorage`/server save payloads are cast, not validated — tampering the
-JSON could restore impossible state.
-- Fullscreen API promise rejections are not caught.
-- Repeated `GameCanvas` unmount/remount (e.g. React Strict Mode) leaks
-`AudioContext` instances and recreates the `Game` object.
+- Base-path configuration coupling (`assetUrl()` depends on
+  `NEXT_PUBLIC_BASE_PATH` injection) — CR-001.
+- Legacy/duplicated HUD path (`HUD.tsx` alongside current HUD components) — CR-006.
+- `buildSaveData()` returns mutable nested references (`weapon`, `upgrades`,
+  `visitedRooms`) instead of defensive copies — CR-011.
 
-Full details and severity rankings are in
+Full details, severity ranking, and verification notes are tracked in
 [docs/BUGS_IMPROVEMENT_GUIDE.md](BUGS_IMPROVEMENT_GUIDE.md#cr-findings-2026-07-14).
