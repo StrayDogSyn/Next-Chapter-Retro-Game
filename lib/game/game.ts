@@ -806,9 +806,19 @@ export class Game {
     if (this.input.state.pressed.help || (this.helpOpen && this.input.state.pressed.pause)) {
       this.helpOpen = !this.helpOpen;
     }
-    if (this.input.state.pressed.inventory || (this.inventoryOpen && this.input.state.pressed.pause)) {
-      this.inventoryOpen = !this.inventoryOpen;
-    }
+    // CR-009: Tab/KeyI ("inventory" in input.ts) used to also toggle
+    // this.inventoryOpen here, racing against GameCanvas.tsx's own Tab/KeyI
+    // listener (which drives the React GameMenuModal and always wins in
+    // practice - it runs synchronously off the native keydown event, before
+    // the next update() tick, and setUiModalOpen(true) early-returns above
+    // before this line is ever reached). That made this dead code reachable
+    // only by a timing coincidence, with input.ts's "inventory" action
+    // bound to no other input source (no gamepad button). Removed so
+    // GameCanvas.tsx is the single, unambiguous owner of Tab/KeyI;
+    // this.inventoryOpen and drawInventoryOverlay() are left in place
+    // (still forced false by setUiModalOpen(true) below) rather than torn
+    // out, since retiring that overlay entirely is a separate decision
+    // (see AST/CR-006's dead-UI-path note) outside this fix's scope.
     if (this.shopOpen) {
       this.updateShop();
       this.pushSnapshot(dt);

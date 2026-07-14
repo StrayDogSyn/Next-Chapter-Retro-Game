@@ -42,12 +42,13 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
   const [touchCapable, setTouchCapable] = useState(false);
   const [isLandscape, setIsLandscape] = useState(true);
 
+  // CR-009: setUiModalOpen() is called from exactly one place - the
+  // menuOpen useEffect below - not here too. Calling it as a side effect
+  // inside a setState updater (the previous shape of this function) is an
+  // anti-pattern with a less reliable timing guarantee, and was redundant
+  // with that effect firing on every menuOpen change anyway.
   const setMenuOpenSynced = (next: boolean | ((prev: boolean) => boolean)) => {
-    setMenuOpen((prev) => {
-      const resolved = typeof next === "function" ? (next as (value: boolean) => boolean)(prev) : next;
-      gameRef.current?.setUiModalOpen(resolved);
-      return resolved;
-    });
+    setMenuOpen(next);
   };
 
   useEffect(() => {
