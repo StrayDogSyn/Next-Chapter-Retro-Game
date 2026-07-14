@@ -12,7 +12,7 @@ Use **CC0 1.0 / public-domain** assets wherever possible. Keep attribution notes
 
 ---
 
-## `assets/sprites/` provenance (2026-07-13, revised 2026-07-14)
+## `assets/sprites/` provenance (2026-07-13, revised 2026-07-14, re-verified 2026-07-14)
 
 The ~70 files directly under `assets/sprites/` (`space_merc.png`, `char-sheet-*.png`, `oga-swm-*.png`, `mainchar-*`, etc.) predate this project's tracked download pipeline (`scripts/asset-fetch.py`/`asset-extract.py`) and had no per-file entry in `CREDITS.md`, `manifest.csv`, or `manifest_bulk.csv`. The user confirmed these were sourced from three free/open platforms:
 
@@ -23,9 +23,13 @@ The ~70 files directly under `assets/sprites/` (`space_merc.png`, `char-sheet-*.
 Most of this folder still has only **site-level attestation, not per-file page URLs** — the exact item page for any individual file in this set was not preserved at download time. Two clarifications now matter for integration planning:
 
 - `space_merc.png` is **not** the actual hero source sheet. It is a `1024x1024` palette-mode composite/mockup image representing a larger matched kit. The integration-relevant hero sources are the already-transparent `char-sheet-alpha.png`, the eight `char-sheet-alt-colours-*-alpha.png` variants, and the `char-sheet-layer-*.png` equipment layers. Any future hero-swap or equipment-visibility work should start from those files, not from `space_merc.png`.
-- The `oga-swm-*` filename prefix is still best treated as **strong provenance evidence, not a final citation**. It very likely corresponds to a findable OpenGameArt submission, but until the exact page is recovered and re-documented in this repo, keep the whole `assets/sprites/` folder — including the swm kit — under the honest label **"platform confirmed, exact page unknown."**
+- **Update 2026-07-14 — two subsets are now page-verified, not just site-level attested:**
+  - The hero kit (`char-sheet-alpha.png` + 8 palette variants + 4 equipment layers + `char-parts.png`, `powerups-sheet-alpha.png`, `projectiles-sheet-alpha.png`, `projectiles-rotations.png`, `impacts-sheet-colour-{1..5}-alpha.png`, `weaponflash-sheet-colour-{1..5}-alpha.png`, `palette.png`, `diewhirl-sheet-alpha.png`) is confirmed as **"Super Dead Space Gunner Merc Redux: Platform Shmup Hero"** by Emcee Flesher, https://opengameart.org/content/super-dead-space-gunner-merc-redux-platform-shmup-hero, CC-BY 4.0 (2021-10-23) — confirmed by an exact file-list match against the live page, not by filename-prefix inference. It derives from Surt's "Space Merc" (CC-BY 3.0) and JRob774's explosion sheet (CC-BY 3.0), both also requiring attribution.
+  - `enemies-sheet-alpha.png`'s baked-in attribution text ("SUPER DEAD GUNNER" / BY EMCEE FLESHER / ON OPENGAMEART.ORG / 2021) was read directly off the image and confirmed against **"Super Dead Gunner: Platform Shmup Enemies"**, https://opengameart.org/content/super-dead-gunner-platform-shmup-enemies, CC-BY 4.0 (2021-06-23) — again an exact single-file match. It derives from Surt's "Dead Gunner", Surt's "Space Merc", and Redshrike's "Scifi Creature Tileset", all also requiring attribution.
+  - See `docs/CREDITS.md` for the full attribution rows, including the upstream (Surt/JRob774/Redshrike) credits these two CC-BY 4.0 works pull in.
+- The **remaining ~15 `oga-swm-*` files** (mainchar, tiles, fx, objects/enemies, brainguy boss, backgrounds, shop UI) are still unverified — the "Super Dead Gunner" collection index and its other 11 linked submissions were checked on 2026-07-14 and none matched these filenames. Keep this remaining subset under the honest label **"platform confirmed, exact page unknown"** until a matching page is actually found. Do not assume it shares the two verified pages' exact license just because it likely shares the same author/lineage.
 
-That means `CREDITS.md` should not silently upgrade these files to exact-page attribution yet. See `docs/SPRITE_ART_INVENTORY.md` for measured dimensions, palette/mode notes, compatibility ratings, and the current integration priority order.
+That means `CREDITS.md` should keep the still-unverified files under site-level attestation, while the two subsets above now carry exact-page, exact-license attribution. See `docs/SPRITE_ART_INVENTORY.md` for measured dimensions, palette/mode notes, compatibility ratings, and the current integration priority order.
 
 ---
 
