@@ -61,8 +61,27 @@ File it as a [GitHub Issue on this repo](https://github.com/StrayDogSyn/Next-Cha
 
 ## Sharing a seed
 
-The death screen and the HUD's "seed" button both expose the current run's
-seed phrase (e.g. `WOLF-4207`) - copy it and share it if you want someone
-else to compare notes on the same world layout. There is currently no UI
-to *enter* a specific seed to replay one; that would be a fast-follow if
-testers want it.
+The death/run-summary screen and the HUD's "seed" button both expose the
+current run's seed phrase (e.g. `WOLF-4207`) - copy it and share it if you
+want someone else to compare notes on the same loot/combat sequence.
+
+The start menu also supports **Daily Seed** (a shared seed for the calendar day)
+and **Enter Seed** (paste any seed phrase to replay it). Daily seed attempts are
+recorded in `localStorage` as `ncrg:dailyAttempted`, but the mode is
+informational — replaying your daily seed is always allowed.
+
+## Code review backlog (not blockers, but worth knowing)
+
+A 2026-07-14 senior-engineer pass surfaced several low-to-medium issues that do
+not stop play but can produce edge-case glitches:
+
+- Loot/save service calls lack a fetch timeout; a very slow or hanging backend
+could stall the game briefly before fallback kicks in.
+- `localStorage`/server save payloads are cast, not validated — tampering the
+JSON could restore impossible state.
+- Fullscreen API promise rejections are not caught.
+- Repeated `GameCanvas` unmount/remount (e.g. React Strict Mode) leaks
+`AudioContext` instances and recreates the `Game` object.
+
+Full details and severity rankings are in
+[docs/BUGS_IMPROVEMENT_GUIDE.md](BUGS_IMPROVEMENT_GUIDE.md#cr-findings-2026-07-14).

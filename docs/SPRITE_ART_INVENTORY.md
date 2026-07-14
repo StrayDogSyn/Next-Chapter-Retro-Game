@@ -44,7 +44,7 @@ That changes the integration plan in a useful way:
 
 | Asset family | What it is | STYLE | PROCGEN | EFFORT | Notes |
 |---|---|---|---|---|---|
-| `char-sheet-alpha.png` (`384x2240`, `RGBA`) + 8 alt palettes | Full merc hero with run/jump/crouch/aim/death rows | `A` | — | `Ready` | Real hero source; visually reads as a regular `6x35` sheet of `64px` cells |
+| `char-sheet-alpha.png` (`384x2240`, `RGBA`) + 8 alt palettes | Merc hero **integrated** 2026-07-14 (ADR-020); 8 palettes **registered** in spritemeta (data-only, not preloaded — no unlock UI exists yet) | `A` | — | `Ready` | **Corrected 2026-07-14 (ADR-020):** actual grid is `46x46` (6 cols × 48 rows), confirmed by the sheet's own baked-in "46x46" label - the "6x35 @ 64px" guess above was wrong. Also corrected: every row is the same run+aim-angle-sweep cycle; there is no distinct idle/jump/crouch/hurt/death pose anywhere in this sheet - those clips are aliased onto sweep rows, logged as asset debt in ADR-020, not authored animations. |
 | `char-sheet-layer-{body,boots,gun,silhouette}` (`384x2240`, `RGBA`) | Same hero split into equipment layers | `A` | — | `Ready` | Strong future path for visible equipped gear |
 | `enemies-sheet-alpha.png` (`320x528`, `RGBA`) + `extra-enemies*` + `brainguy` + `objectsandenemies` | 15+ matched side-view enemies | `A` | `High` | `Ready` | Recolors and family swaps are good seed material |
 | `oga-swm-tiles-alpha.png` (`352x144`, `RGBA`) + `oga-swm-earth-tile-variations-alpha.png` (`288x240`, `RGBA`) + `extra-tiles` | Platformer tiles with explicit variation sets | `A` | `High` | `Ready` | Excellent procgen fuel |
@@ -130,9 +130,9 @@ That changes the integration plan in a useful way:
 
 ## Licensing note
 
-CC0-first remains the project policy, but the entire `assets/sprites/` folder — including the swm kit — should currently stay documented as **platform confirmed, exact page unknown** unless and until exact item pages are recovered and committed into the repo docs.
+**Update 2026-07-14:** the hero kit (`char-sheet-*`, palettes, layers, powerups, projectiles, impacts, weaponflash) and `enemies-sheet-alpha.png` are now page-verified — **CC-BY 4.0**, Emcee Flesher, both requiring attribution to Flesher and to the upstream authors (Surt, JRob774, Redshrike) they derive from. See `docs/CREDITS.md` for the exact rows and `docs/ASSET_SOURCES.md` for the search record.
 
-The `oga-swm-` prefix is a strong clue, not a finished citation. One manual source-recovery pass could upgrade a large chunk of this folder at once, but until that work is actually done, the docs should keep the honest soft-attribution posture rather than promoting likely sources into definitive ones.
+The remaining ~15 `oga-swm-*` files (tiles, fx, objects/enemies, brainguy, backgrounds, shop UI) stay documented as **platform confirmed, exact page unknown** — a same-day search across the "Super Dead Gunner" collection index and its other submissions did not turn up a match. The `oga-swm-` prefix remains a strong clue (same likely author/lineage as the two verified subsets), not a finished citation for these specific files.
 
 ---
 

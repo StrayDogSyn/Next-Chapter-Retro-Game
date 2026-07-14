@@ -705,6 +705,68 @@ React component lifecycle safety issues.
 
 ---
 
+### Review-only code review prompt (main branch)
+
+**Used for:** Senior-engineer code review without implementing fixes — surface logic errors, edge cases, null/undefined refs, race conditions, resource leaks, API contract violations, caching issues, and convention violations for a future fix sprint.
+
+**Tool:** Windsurf Cascade
+
+**Effectiveness:** ⭐⭐⭐⭐⭐
+
+**Prompt:**
+> Perform a thorough code review of all changes in the main branch.
+>
+> Focus on:
+> - Logic errors and incorrect behavior
+> - Edge cases that aren't handled
+> - Null/undefined reference issues
+> - Race conditions or concurrency issues
+> - Security vulnerabilities
+> - Improper resource management or resource leaks
+> - API contract violations
+> - Incorrect caching behavior
+> - Violations of existing code patterns or conventions
+>
+> Do not report speculative or low-confidence issues.
+>
+> Meta: No code changes or implementations are requested, only review and reporting.
+
+**Why it worked:**
+- Explicitly excluding implementation prevents an agent from "fixing" findings mid-review and keeps the output focused.
+- A ranked severity list with concrete file/line references gives the next fix sprint a clean backlog.
+
+---
+
+### Documentation update prompt
+
+**Used for:** Refreshing all project documentation after a development or review session — archive old docs, update session logs, prompt library, ADRs, bug/improvement guide, and README, and validate internal links.
+
+**Tool:** Cascade / Claude Code
+
+**Effectiveness:** ⭐⭐⭐⭐☆ (to be validated after first complete run)
+
+**Prompt:**
+> Update all documentation to continue the logging of the AI-Augmentation process and development of this game application. Do not delete old documentation; move it to `<repo>/docs/archive`. Ensure links are valid, and enhance the root README.md with the current state of the project.
+>
+> Specifically:
+> 1. Identify documentation files that are superseded or duplicated and move them to `docs/archive/historical/`.
+> 2. Add a new dated entry to `docs/SESSION_LOG.md` describing the latest work.
+> 3. Update `docs/AGENTIC_WORKFLOW.md` status and session tables.
+> 4. Update `docs/PROMPT_LIBRARY.md` with any reusable prompts from this session.
+> 5. Update `docs/BUGS_IMPROVEMENT_GUIDE.md` with any new bugs or findings.
+> 6. Correct stale claims in `docs/BETA_TESTING.md`.
+> 7. Refresh `docs/WORKFLOW.md` if its guidance conflicts with living docs.
+> 8. Add an ADR in `docs/DECISIONS.md` if any architectural decision was made.
+> 9. Enhance `README.md` with current features, tech stack, live URL, and roadmap.
+> 10. Verify all internal documentation links resolve.
+
+**Why it worked / design notes:**
+- Treating docs as a deliverable with a checklist prevents the session from drifting into code changes.
+- "Move, don't delete" preserves historical context for bootcamp reviewers and future audits.
+- Link validation catches stale paths caused by the archive step.
+
+---
+
 ## Prompts that didn't work as well
 
 ### Vague "make it better" UI prompt

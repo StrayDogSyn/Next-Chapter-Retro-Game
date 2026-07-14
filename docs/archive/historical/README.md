@@ -9,7 +9,8 @@ This folder stores deprecated or superseded documentation retained for traceabil
 
 ## Current archived files
 
-- `session-briefs/ui-refactor-brief-2026-07-08.md`
+- `session-briefs/ui-refactor-brief-2026-07-08.md` (original handoff brief)
+- `session-briefs/ui-refactor-brief-root.md` (root `docs/UI_REFACTOR_BRIEF.md` archived here)
 - `legacy-imports/asset-sources-from-sibling-branch.md`
 - `legacy-imports/bugs-improvement-guide-from-sibling-branch.md`
 
