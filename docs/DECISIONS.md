@@ -312,4 +312,18 @@ _(Renumbered from a duplicate "ADR-003" during the 2026-07-08 merge-conflict cle
 
 ---
 
+## ADR-022: Documentation archival — phase2-overhaul orchestrator prompt superseded by workflow consolidation
+
+- **Date:** 2026-07-14
+- **Status:** Accepted
+- **Originated from:** Agent proposal during the 2026-07-14 documentation refresh session
+- **Context:** `docs/PHASE2_OVERHAUL.md` was a one-time VS Code Agent orchestrator prompt ("Iterate → Audit → Proliferate") written after the first playtest. Its content (session-start audit ritual, universal gate commands, per-increment commit protocol, doc-update checklist) was subsequently absorbed into `docs/WORKFLOW.md` (Verification Commands, Archiving Old Documentation sections) and `docs/PROMPT_LIBRARY.md` (Systematic bug-fix agent prompt, Sequential sprints orchestration prompt). Keeping both the original brief and the consolidated version active at the root created duplicate search hits and risked agent confusion about which was authoritative.
+- **Decision:** Move `docs/PHASE2_OVERHAUL.md` to `docs/archive/historical/session-briefs/phase2-overhaul-2026-07-08.md` with a root-level redirect stub (matching the `docs/UI_REFACTOR_BRIEF.md` pattern). Update `docs/archive/historical/README.md` to index the new entry. Active workflow guidance remains in `docs/WORKFLOW.md`; reusable prompt text remains in `docs/PROMPT_LIBRARY.md`.
+- **Alternatives considered:**
+  - Delete the brief — rejected per ADR-019's "move, don't delete" policy; the original wording is part of the AI-Augmentation process trail.
+  - Keep both at root — rejected; creates stale search hits and contradicts the "no parallel documentation paths" rule in WORKFLOW.md.
+- **Consequences:** Agents looking for the orchestrator prompt pattern will find it in PROMPT_LIBRARY.md under "Systematic bug-fix agent prompt" and "Sequential sprints orchestration prompt" rather than in a standalone brief. The original is preserved in the archive for reviewers who want to see how the workflow evolved.
+
+---
+
 _Add new ADRs as decisions are made — including ones where you overrode an agent's suggestion. Those are often the most interesting entries for a reviewer._

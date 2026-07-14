@@ -767,6 +767,40 @@ React component lifecycle safety issues.
 
 ---
 
+### Hero Integration Mission prompt (M1-M3 self-contained)
+
+**Used for:** Executing a multi-mission asset integration with gate/increment/commit protocol — provenance recovery (M1), hero sprite swap with grid verification (M2), and Tier-2 backlog documentation (M3).
+
+**Tool:** Claude Code
+
+**Effectiveness:** ⭐⭐⭐⭐⭐
+
+**Prompt (abridged):**
+
+> You are operating as the build agent for Next-Chapter-Retro-Game on branch `feature/hero-swm-integration`. Your mission is a self-contained "Hero Integration Mission" with three sub-missions, each with its own session protocol.
+>
+> **Session Protocol (applies to every increment):**
+> 1. Session-start git ritual: `git fetch`, reconcile with `origin/main`, confirm branch is clean or stash WIP.
+> 2. Universal gate before AND after every increment: `npm test`, `npm run build`, `python scripts/project-status.py`, working tree clean.
+> 3. One commit per increment with conventional message format.
+> 4. Ask before push — never push without explicit user confirmation.
+>
+> **M1 — Provenance:** Confirm the exact OpenGameArt source of the swm sprite kit and upgrade CREDITS.md only where exact page-level evidence is found. Do not force a match.
+>
+> **M2 — Hero Integration:** Replace the player character sprite using `char-sheet-alpha.png`. Before trusting any grid claim from prior docs, measure the actual image: read baked-in labels, verify column/row pitch with alpha-band occupancy analysis, produce a labeled grid overlay, visually inspect every row. Map clips to the actual available rows (aliased where the sheet has no distinct pose — log as asset debt, do not invent rects). Extract pure logic to `lib/game/player-sprite.ts` mirroring the `jump-physics.ts`/`save-data.ts` extraction pattern. Verify live: idle, walk-right, walk-left, jump screenshots; confirm no moonwalk/armband artifact on flip; confirm skin-variant geometry parity.
+>
+> **M3 — Tier-2 Backlog:** Add AST-014 through AST-020 to BUGS_IMPROVEMENT_GUIDE.md with goal/files/effort/verification-evidence-required for each. Explicitly mark items NOT consumed by M2's hero-only scope.
+>
+> **Commit discipline:** one commit per mission (652d352-pattern M1, 27bbed4-pattern M2, 7aede87-pattern M3). Do not batch missions. Do not push without asking.
+
+**Why it worked:**
+- Self-contained protocol with explicit session-start/finish gates prevents scope creep and working-tree drift.
+- "Measure before trusting" discipline (alpha-band analysis, baked-in label cross-check, labeled grid overlay) caught two independent wrong claims from prior docs (cell size and pose count).
+- The asset-debt logging convention (alias nearest available row, don't invent rects) keeps the spritemeta honest without blocking the visual swap.
+- Separate M1/M2/M3 commits make the PR reviewable and allow partial rollback if any mission hits an unforeseen blocker.
+
+---
+
 ## Prompts that didn't work as well
 
 ### Vague "make it better" UI prompt

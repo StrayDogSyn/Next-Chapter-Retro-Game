@@ -39,6 +39,28 @@ An incident entry never doubles as the fix record — the fix gets its own dated
 
 ## Entries
 
+### 2026-07-14 — Documentation refresh: archive superseded docs, refresh living docs, verify links
+
+- **Tool used:** Claude Code
+- **Goal:** Continue logging the AI-Augmentation process by refreshing all living documentation, moving superseded docs to the archive, correcting stale claims, and verifying internal links resolve — per the documentation update prompt in PROMPT_LIBRARY.md.
+- **Archives performed:**
+  - `docs/PHASE2_OVERHAUL.md` → `docs/archive/historical/session-briefs/phase2-overhaul-2026-07-08.md` (the VS Code Agent Iterate→Audit→Proliferate orchestrator prompt; content absorbed into WORKFLOW.md and PROMPT_LIBRARY.md). Root stub left with a redirect, matching the UI_REFACTOR_BRIEF.md pattern.
+  - `docs/archive/historical/README.md` index updated to list the new entry.
+- **Docs refreshed:**
+  - `SESSION_LOG.md`: this entry added; full chronological log now covers every pairing session from 2026-07-07 through 2026-07-14 closeout.
+  - `AGENTIC_WORKFLOW.md`: latest-session table row added (this session), Quick Status frontend line corrected (fixed broken glyph on the playable-state line), date bumped to 2026-07-14.
+  - `PROMPT_LIBRARY.md`: hero-integration mission prompt added (M1-M3 self-contained prompt with gate/increment/commit protocol); documentation-update prompt updated to reflect this session's execution.
+  - `BUGS_IMPROVEMENT_GUIDE.md`: status table verified consistent with SESSION_LOG entries; CR-001..CR-013 section unchanged (no new review findings this pass); Tier-2 AST-014..AST-020 entries confirmed current.
+  - `BETA_TESTING.md`: save-reliability section cross-referenced to ADR-010 (not ADR-019) for the save-trigger map; hero sprite swap noted as shipped (char-sheet-alpha.png, ADR-020); diewhirl license discrepancy logged as unresolved per ADR-020.
+  - `WORKFLOW.md`: verified no deprecation-label conflicts with living docs (ADR-019's correction was already clean); no edits needed.
+  - `DECISIONS.md`: no new architectural decision this session; existing ADR-020 entry confirmed current.
+  - `README.md`: verified current (already enhanced by prior sessions); live URL and roadmap confirmed accurate.
+- **Link validation:** verified internal markdown links across all docs; no broken paths found. All `docs/` internal links use relative paths that resolve correctly.
+- **Verification:** `npm test` pass count confirmed from session log (59/59 on feature/hero-swm-integration); `npm run build` exit 0 confirmed.
+- **Outcome:** ✅ merged. All living documentation is current, archive index is accurate, no broken links.
+
+---
+
 ### 2026-07-14 — [closeout] Hero Integration Mission (M1-M3) complete on `feature/hero-swm-integration`
 
 - **Tool used:** Claude Code

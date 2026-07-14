@@ -22,7 +22,7 @@ glance; hover it for the raw `lootSource`/`saveSource` values.
   are any fights spike-y or trivial, does loot progression feel earned.
 - **Save reliability:** does "Continue Game" actually resume where you left
   off (room, HP, coins, level, equipment)? Save triggers on room transition,
-  level-up, and equipping new gear (not on every pickup) - see ADR-010 for
+  level-up, and equipping new gear (not on every pickup) — see ADR-010 for
   the full trigger map and why death itself doesn't save.
 - **Death/respawn:** dying sends you back to the starting room with your
   level/gear intact (not a full reset) - does that feel fair, or should more
@@ -45,6 +45,14 @@ glance; hover it for the raw `lootSource`/`saveSource` values.
   starts a fresh run. This is intentional for the beta (ADR-009), not a bug.
 - **One save slot.** Starting a new run overwrites the previous save, both
   locally and on the server.
+- **Hero sprite (2026-07-14, ADR-020):** Player character was swapped to
+  `char-sheet-alpha.png` (swm "Super Dead Space Gunner" kit, CC-BY 4.0 Emcee
+  Flesher). The sheet contains only a run+aim-angle sweep — idle/jump/crouch/
+  hurt/death clips are single-frame aliases, not authored animations. The
+  `diewhirl-sheet-alpha.png` death-VFX candidate has an unresolved license
+  date discrepancy (baked-in label: OGA-BY 3.0+, 2023; listed under a 2021
+  CC-BY 4.0 page) — not used for the death clip. Report any visual artifacts
+  in the hero's walk/idle/jump rendering, or skin-variant palette mismatches.
 
 ## Filing a bug
 

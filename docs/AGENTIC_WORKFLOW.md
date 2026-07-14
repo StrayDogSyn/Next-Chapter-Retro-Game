@@ -38,7 +38,7 @@
 
 | Area | State |
 |---|---|
-| Frontend game (24 rooms, combat, loot, 3 bosses) | � playable; senior code review logged 2026-07-14, fixes pending |
+| Frontend game (24 rooms, combat, loot, 3 bosses) | ✅ playable; hero sprite swapped to char-sheet-alpha.png (ADR-020), code review findings logged CR-001..CR-013 |
 | Python service (loot + save endpoints) | 🟢 authoritative — verified on the wire 2026-07-13 |
 | Live deployment | 🟢 https://straydogsyn.github.io/Next-Chapter-Retro-Game/ (Pages → Render → Neon) |
 | Sprite/audio assets | 🟢 wired via scripts/prepare-assets.py + public/assets/manifest.json |
@@ -55,6 +55,7 @@
 
 | Date | Tool | Task | Human Role | Agent Role | Outcome | Notes |
 |---|---|---|---|---|---|---|
+| 2026-07-14 | Claude Code | Documentation refresh: archive superseded docs, refresh living docs, verify links | Directed documentation updates | Archived PHASE2_OVERHAUL.md; refreshed SESSION_LOG, AGENTIC_WORKFLOW, PROMPT_LIBRARY, BETA_TESTING, BUGS_IMPROVEMENT_GUIDE; verified all internal links | ✅ all docs current, archive updated | See [SESSION_LOG.md](SESSION_LOG.md) |
 | 2026-07-14 | Windsurf Cascade | Code-review findings logged + AI-Augmentation documentation refresh | Scoped review + docs update; verified test pass | Reviewed main branch for logic/resource/API issues; updated all docs + README; archived duplicate brief | 🟡 docs complete, fixes pending | See [SESSION_LOG.md](SESSION_LOG.md) |
 | 2026-07-14 | Claude Code | M1: swm kit provenance recovery | Directed hero-asset investigation | Recovered exact OGA pages for swm hero/enemy subsets; updated CREDITS.md + ASSET_SOURCES.md | ✅ M1 complete, 15 files still unverified | See [SESSION_LOG.md](SESSION_LOG.md) |
 | 2026-07-14 | GitHub Copilot | Sprite inventory correction | Asked for repo-grounded asset audit | Added docs/SPRITE_ART_INVENTORY.md; corrected space_merc vs char-sheet-alpha relationship | ✅ documentation corrected | See [SESSION_LOG.md](SESSION_LOG.md) |
