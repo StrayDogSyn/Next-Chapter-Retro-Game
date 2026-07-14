@@ -1,0 +1,10 @@
+pack,files,images,audio,other,top_dims,palette_png_no_alpha,small_or_thumb_images
+archive_runtime_audio_100-cc0-sfx_source,100,0,100,0,,0,0
+archive_runtime_audio_8bit-sfx-pack_source,75,0,75,0,,0,0
+archive_runtime_audio_nes-shooter-music_source,8,0,0,8,,0,0
+archive_runtime_bg_living-tissue_source,6,4,0,2,432x288;144x144,0,0
+archive_runtime_bg_mountain-at-dusk_source,14,10,0,4,544x160;272x160,0,2
+archive_runtime_sprite_beast-boss-darksaber_source,385,381,0,4,663x512;424x457;1092x557;500x497;758x523;577x547;772x413;115x129,0,0
+archive_runtime_sprite_demon-flower_source,9,9,0,0,1024x512,0,0
+archive_runtime_sprite_goblin-pack_source,2,1,0,1,1276x585,0,0
+archive_runtime_sprite_lpc-imp_source,10,10,0,0,256x256,0,0

@@ -41,6 +41,10 @@ python-service/__pycache__/
 
 # asset pipeline temp + ground-truth snapshot (regenerated)
 .asset-tmp/
+.asset-tmp/*
+.asset-tmp-inspect/*
+.asset-tmp-vitest/*
+.github/*
 STATUS.txt
 
 # duplicate backup of assets/, not source of truth

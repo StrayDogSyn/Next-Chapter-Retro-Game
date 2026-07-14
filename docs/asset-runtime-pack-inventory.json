@@ -1,0 +1,135 @@
+{
+  "packs": [
+    {
+      "pack": "archive_runtime_audio_100-cc0-sfx_source",
+      "files": 100,
+      "images": 0,
+      "audio": 100,
+      "other": 0,
+      "top_dims": "",
+      "palette_png_no_alpha": 0,
+      "small_or_thumb_images": 0,
+      "ext_counts": {
+        ".ogg": 100
+      }
+    },
+    {
+      "pack": "archive_runtime_audio_8bit-sfx-pack_source",
+      "files": 75,
+      "images": 0,
+      "audio": 75,
+      "other": 0,
+      "top_dims": "",
+      "palette_png_no_alpha": 0,
+      "small_or_thumb_images": 0,
+      "ext_counts": {
+        ".wav": 75
+      }
+    },
+    {
+      "pack": "archive_runtime_audio_nes-shooter-music_source",
+      "files": 8,
+      "images": 0,
+      "audio": 0,
+      "other": 8,
+      "top_dims": "",
+      "palette_png_no_alpha": 0,
+      "small_or_thumb_images": 0,
+      "ext_counts": {
+        ".ftm": 8
+      }
+    },
+    {
+      "pack": "archive_runtime_bg_living-tissue_source",
+      "files": 6,
+      "images": 4,
+      "audio": 0,
+      "other": 2,
+      "top_dims": "432x288;144x144",
+      "palette_png_no_alpha": 0,
+      "small_or_thumb_images": 0,
+      "ext_counts": {
+        ".png": 4,
+        ".txt": 2
+      }
+    },
+    {
+      "pack": "archive_runtime_bg_mountain-at-dusk_source",
+      "files": 14,
+      "images": 10,
+      "audio": 0,
+      "other": 4,
+      "top_dims": "544x160;272x160",
+      "palette_png_no_alpha": 0,
+      "small_or_thumb_images": 2,
+      "ext_counts": {
+        ".txt": 2,
+        ".psd": 2,
+        ".png": 10
+      }
+    },
+    {
+      "pack": "archive_runtime_sprite_beast-boss-darksaber_source",
+      "files": 385,
+      "images": 381,
+      "audio": 0,
+      "other": 4,
+      "top_dims": "663x512;424x457;1092x557;500x497;758x523;577x547;772x413;115x129",
+      "palette_png_no_alpha": 0,
+      "small_or_thumb_images": 0,
+      "ext_counts": {
+        ".png": 381,
+        ".zip": 1,
+        ".txt": 3
+      }
+    },
+    {
+      "pack": "archive_runtime_sprite_demon-flower_source",
+      "files": 9,
+      "images": 9,
+      "audio": 0,
+      "other": 0,
+      "top_dims": "1024x512",
+      "palette_png_no_alpha": 0,
+      "small_or_thumb_images": 0,
+      "ext_counts": {
+        ".gif": 7,
+        ".png": 1,
+        ".jpg": 1
+      }
+    },
+    {
+      "pack": "archive_runtime_sprite_goblin-pack_source",
+      "files": 2,
+      "images": 1,
+      "audio": 0,
+      "other": 1,
+      "top_dims": "1276x585",
+      "palette_png_no_alpha": 0,
+      "small_or_thumb_images": 0,
+      "ext_counts": {
+        ".txt": 1,
+        ".png": 1
+      }
+    },
+    {
+      "pack": "archive_runtime_sprite_lpc-imp_source",
+      "files": 10,
+      "images": 10,
+      "audio": 0,
+      "other": 0,
+      "top_dims": "256x256",
+      "palette_png_no_alpha": 0,
+      "small_or_thumb_images": 0,
+      "ext_counts": {
+        ".png": 10
+      }
+    }
+  ],
+  "space_merc": {
+    "zip_exists": true,
+    "png_files": 31,
+    "palette_no_alpha": 0,
+    "example": null
+  }
+}
