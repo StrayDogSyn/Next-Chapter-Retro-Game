@@ -50,6 +50,12 @@ import {
   type WeaponInstance,
 } from "./items";
 import { Rng, generateSeedPhrase } from "./rng";
+import {
+  NON_LOOPING_HERO_ANIMS,
+  resolveClipFrame,
+  selectPlayerAnim,
+  shouldFlipHeroSprite,
+} from "./player-sprite";
 import { loadAssetManifest, resolveManifestAsset, type AssetManifest } from "./assetManifest";
 import type { TouchInputManager } from "./touchInput";
 
@@ -2396,7 +2402,7 @@ export class Game {
     if (!img || !metaEntry || !("anims" in metaEntry)) return;
     const animDef = metaEntry.anims[anim] ?? metaEntry.anims[Object.keys(metaEntry.anims)[0]];
     if (!animDef) return;
-    const frame = Math.floor(animTime * fps) % animDef.frames;
+    const frame = resolveClipFrame(animDef.frames, animTime, fps, !NON_LOOPING_HERO_ANIMS.has(anim));
     const sx = frame * metaEntry.cellW;
     const sy = animDef.row * metaEntry.cellH;
     ctx.save();
@@ -2415,17 +2421,23 @@ export class Game {
     const ctx = this.ctx;
     if (this.iframes > 0 && Math.floor(this.animT * 12) % 2 === 0) return; // flicker
 
+    // Anchor math (ADR-020): hitbox (this.pw/this.ph) is unchanged by the
+    // swm hero swap. The sprite anchors at feet-center of the physics box —
+    // horizontal offset centers the wider render box on the narrower hitbox,
+    // vertical offset aligns the render box's bottom edge with the hitbox's
+    // bottom edge, so the character's feet touch the same ground line the
+    // physics box stands on. Visual overhang beyond the hitbox is expected.
     const drawW = 32;
     const drawH = 34;
     const dx = this.px + this.pw / 2 - drawW / 2;
     const dy = this.py + this.ph - drawH;
-    const moving = Math.abs(this.pvx) > 10;
-    // The hero sheet has dedicated walkLeft/walkRight rows (distinct walk-cycle
-    // timing, and an asymmetric armband) — mirroring walkRight instead of using
-    // the authored walkLeft row put the armband on the wrong arm when facing
-    // left. Use the correct row directly; no runtime flip needed.
-    const anim = this.facing > 0 ? "walkRight" : "walkLeft";
-    this.drawSheetAnim("hero", anim, moving ? this.animT : 0, dx, dy, drawW, drawH, false, 9);
+    // ADR-020: char-sheet-alpha.png is single-facing (always faces right in
+    // the source art, unlike the retired hero_0.png which had dedicated
+    // walkLeft/walkRight rows). Flip via canvas transform when runtime facing
+    // differs from HERO_NATIVE_FACING, matching the existing enemy pattern.
+    const anim = selectPlayerAnim({ grounded: this.onGround, vx: this.pvx, vy: this.pvy });
+    const flip = shouldFlipHeroSprite(this.facing);
+    this.drawSheetAnim("hero", anim, this.animT, dx, dy, drawW, drawH, flip, 9);
 
     // UI-002: gold flash ring on equip/swap, fading out over equipFlashT's lifespan
     if (this.equipFlashT > 0) {

@@ -39,11 +39,54 @@ An incident entry never doubles as the fix record — the fix gets its own dated
 
 ## Entries
 
+### 2026-07-14 — M2: swm hero integration — 46×46 grid correction, run+aim-sweep-only finding, native-facing + flip (ADR-020)
+
+- **Tool used:** Claude Code
+- **Goal:** M2 of the hero-integration mission — replace the player character with `char-sheet-alpha.png`, correct facing, decoupled hitbox, 8 palette variants registered (data-only).
+- **What happened:** Rejected `docs/SPRITE_ART_INVENTORY.md`'s unverified "6x35 grid of 64px cells" claim after independent alpha-band occupancy analysis converged on a 46px column/row pitch instead — then found the sheet has its own baked-in "46x46" label confirming it directly (a full-width row scan had been misled into reporting zero empty rows by a solid legend/palette strip at x∈[276,384) that a naive scan doesn't exclude). A labeled 46×46 grid overlay across all 48 rows confirmed zero frames cross any cell boundary, including the last row (which an earlier band-based analysis had wrongly flagged as anomalous/truncated - it isn't, it's a complete, correctly-pitched row). Visually reviewed all 48 rows in 4 twelve-row chunks and found **every row is the same run+aim-angle-sweep cycle at a different arm angle - there is no idle, jump, crouch, hurt, or death pose anywhere in the sheet**, contradicting both the mission prompt's assumption and the inventory doc's "run/jump/crouch/aim/death rows" claim. Checked `diewhirl-sheet-alpha.png` as a candidate death source: it's a particle-burst VFX, not a character pose, and its baked-in label ("OGA-BY 3.0+", 2023) conflicts with the 2021 CC-BY 4.0 hero-kit page it was listed under during M1's provenance fetch - not used, discrepancy logged as unresolved.
+- **Implementation:** New `scripts/prepare-assets.py` block (placed before the boss-werewolf block so it survives the pre-existing darksaber-zip failure) direct-copies the already-alpha'd, already grid-regular sheet plus its 8 palette variants (dimension-matched, verified `384x2240 RGBA` for all 9 files) and writes an aliased clip map (`run`/`attack` real 6-frame cycles from rows 0/12; `idle`/`jump`/`fall`/`hurt` single-frame aliases from rows 0/20/36/6; `death` a 2-frame alias from row 47) - logged as asset debt per the mission's own explicit allowance, not invented rects. Since the pre-existing darksaber bug crashes `main()` before its final `spritemeta.json` write, the hero block merges its own entries into the on-disk file immediately rather than depending on that write succeeding. New pure module `lib/game/player-sprite.ts` (`shouldFlipHeroSprite`, `selectPlayerAnim`, `resolveClipFrame`, `NON_LOOPING_HERO_ANIMS`) mirrors the `jump-physics.ts`/`save-data.ts` extraction pattern; `drawSheetAnim()` now supports real non-looping/clamping frame resolution (previously always wrapped via modulo), verified not to affect any existing enemy clip. `drawPlayer()` swapped from the retired sheet's dedicated-walkLeft/walkRight-rows pattern to the same native-facing+flip pattern already used for enemies, since the swm sheet is single-facing.
+- **Tests:** 20 new vitest cases (`player-sprite.test.ts`: facing/anim-selection/frame-clamping pure-function coverage; `hero-spritemeta.test.ts`: every clip on the base sheet and all 8 skins has in-bounds, non-degenerate frame rects, the required clip set is present, and all 8 skins have byte-identical geometry to the base). `npm test` 59/59, `npm run build` exit 0, `npx tsc --noEmit` exit 0.
+- **Live verification:** Playwright screenshots against the dev server - idle, walk-right (facing right, feet grounded), walk-left (correctly mirrored, no moonwalk/armband-style artifact), jump (airborne pose renders). Additionally swapped in `hero_skin_1` via a temporary two-line edit, screenshotted (distinct cyan/red palette rendered with identical geometry/anchor), then reverted and re-confirmed via `grep` that only the original two `"hero"` references remain in `game.ts`.
+- **Also logged this session:** an incident entry for `fa911c7`'s commit message claiming "ADR-018" without ever writing the entry (still open, out of scope here); a numbering correction where this ADR was originally planned as ADR-019 but a concurrent session claimed that number first for a documentation-archival-policy decision, caught by re-reading `docs/DECISIONS.md` fresh rather than trusting a number reserved earlier in this same session - renumbered to **ADR-020** across all code comments and docs before committing.
+- **Outcome:** ✅ merged. Hero visibly swapped and verified live. Explicitly unresolved, logged as asset debt rather than silently dropped: `attack`/`hurt` clips have no live game-state trigger (registered per the mission's mapping instruction, not wired to new gameplay hooks - out of the mission's scope wall), the diewhirl license-date discrepancy, and the pre-existing darksaber-zip pipeline gap (worked around, not fixed).
+
+### 2026-07-14 — Code-review findings logged + AI-Augmentation documentation refresh
+
+- **Tool used:** Windsurf Cascade
+- **Goal:** Perform a senior-engineer code review of the main branch (no code changes, review and report only), then update all AI-Augmentation process documentation and the root README.md.
+- **Code review summary:** Focused on logic errors, edge cases, null/undefined refs, race conditions, resource leaks, API contract violations, and convention violations. Confirmed the full test suite passed first (`npm test`: 37/37). Findings documented in `docs/BUGS_IMPROVEMENT_GUIDE.md` and `docs/DECISIONS.md` (ADR-019):
+  - `assetUrl()` depends on `NEXT_PUBLIC_BASE_PATH`, which `next.config.mjs` never sets; subpath asset resolution only works when the env var is injected externally.
+  - `save-client.ts` / `loadFromServer()` cast server/localStorage payloads without schema validation.
+  - `AudioManager` can leak `AudioContext` instances on repeated construction.
+  - Fullscreen toggles in `GameCanvas.tsx` do not catch promise rejections.
+  - `GameCanvas` destroys and recreates the `Game` instance on every React render of its parent, losing in-memory state.
+  - Dead/duplicated HUD path: the old `components/HUD.tsx` overlay still exists alongside `GameHeader`/`GameFooter`.
+  - `Rng.weighted()` silently returns `undefined` when total weight is zero.
+  - Loot rolling has no fetch timeout, risking hangs when the Python service is unreachable.
+  - Menu input is handled in two layers (`GameCanvas` and `InputManager`/`Game`).
+  - `TouchInputManager.consumeTacticalFrame()` mutates `InputManager.state` directly.
+  - `buildSaveData()` returns mutable nested object references.
+  - `drawRunSummary()` / `drawOverlay()` mutate `ctx.textAlign` without save/restore.
+  - `player-identity.ts` silently gives up if `crypto.randomUUID` is unavailable.
+- **Documentation work performed:**
+  - Archived the root `docs/UI_REFACTOR_BRIEF.md` (a duplicate/superseded handoff brief) into `docs/archive/historical/session-briefs/ui-refactor-brief-root.md` and left the root file as a redirect.
+  - Updated `docs/archive/historical/README.md` index to list the newly archived file.
+  - Updated `docs/AGENTIC_WORKFLOW.md` status table and latest-session summary.
+  - Added this entry and updated `docs/PROMPT_LIBRARY.md` with the review-only code-review prompt and the documentation-update prompt.
+  - Refreshed `docs/BUGS_IMPROVEMENT_GUIDE.md` status table and added a dedicated "Code Review Findings" section.
+  - Corrected stale claims in `docs/BETA_TESTING.md` about seed-entry UI and loot-source indicators.
+  - Cleaned up `docs/WORKFLOW.md` to stop mis-labeling living docs (`AGENTIC_WORKFLOW.md`, `SESSION_LOG.md`, `PROMPT_LIBRARY.md`, `DECISIONS.md`) as deprecated.
+  - Added `docs/DECISIONS.md` ADR-019 formalizing the documentation archival policy.
+  - Enhanced `README.md` with current feature set, live URL, architecture summary, tech stack, and roadmap.
+- **Human review/changes:** none yet — documentation changes only.
+- **Outcome:** 🟡 partial — documentation fully updated; code review findings are reported for future fix sprints, not implemented in this session per instruction.
+- **Anything worth remembering:** The working tree contains uncommitted code modifications from earlier sessions (`git status --short` showed 11 modified files). These were intentionally not touched because the session scope was review + docs only. Any future fix sprint should start from a clean tree or intentionally commit/stash those changes first.
+
 ### 2026-07-14 — [incident] ADR-018 claimed in a commit message but never written to DECISIONS.md
 
 - **What happened:** Reconciling git state at the start of the hero-integration mission found `fa911c7 feat(touch): mobile controls - virtual gamepad + tactical tap modes (ADR-018)` on `main` — an auto-checkpointed commit (author `StrayDogSyndications`, not this session) whose message claims ADR-018, but `docs/DECISIONS.md` has no ADR-018 entry; the file's last real entry is still ADR-017.
 - **Root cause of the failure:** The commit that introduced touch controls referenced an ADR number in its message without actually writing the corresponding entry to `DECISIONS.md` — a "claimed done, not actually done" gap of the same shape this project has caught from other tools before.
-- **Resolution:** Did not claim ADR-018 for this mission's hero-integration decision to avoid a collision if the touch-controls ADR is retroactively written later. This mission's hero-integration ADR uses **ADR-019** instead. ADR-018 stays reserved/pending for whoever documents the touch-controls decision.
+- **Resolution:** Did not claim ADR-018 for this mission's hero-integration decision to avoid a collision if the touch-controls ADR is retroactively written later. This mission's hero-integration ADR was initially planned as ADR-019, but a concurrent session claimed that number first for a documentation-archival-policy ADR (caught by re-reading `docs/DECISIONS.md` fresh before writing, rather than trusting the number reserved earlier in this same session) — hero integration uses **ADR-020** instead. ADR-018 stays reserved/pending for whoever documents the touch-controls decision.
 - **Status of the underlying bug:** OPEN — `docs/DECISIONS.md` still needs an ADR-018 entry for the touch-controls commit (`fa911c7`); out of scope for this mission, not fixed here.
 
 ### 2026-07-14 — M1: swm kit provenance recovery — hero kit + enemies-sheet verified, 15 files still unverified

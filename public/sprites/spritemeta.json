@@ -34,20 +34,36 @@
     }
   },
   "hero": {
-    "cellW": 48,
-    "cellH": 48,
+    "cellW": 46,
+    "cellH": 46,
     "anims": {
-      "walkRight": {
+      "run": {
         "row": 0,
-        "frames": 4
+        "frames": 6
       },
-      "walkLeft": {
-        "row": 1,
-        "frames": 4
+      "idle": {
+        "row": 0,
+        "frames": 1
       },
-      "front": {
-        "row": 2,
-        "frames": 4
+      "attack": {
+        "row": 12,
+        "frames": 6
+      },
+      "jump": {
+        "row": 20,
+        "frames": 1
+      },
+      "fall": {
+        "row": 36,
+        "frames": 1
+      },
+      "hurt": {
+        "row": 6,
+        "frames": 1
+      },
+      "death": {
+        "row": 47,
+        "frames": 2
       }
     }
   },
@@ -139,5 +155,277 @@
       "platform",
       "fillDark"
     ]
+  },
+  "hero_skin_1": {
+    "cellW": 46,
+    "cellH": 46,
+    "anims": {
+      "run": {
+        "row": 0,
+        "frames": 6
+      },
+      "idle": {
+        "row": 0,
+        "frames": 1
+      },
+      "attack": {
+        "row": 12,
+        "frames": 6
+      },
+      "jump": {
+        "row": 20,
+        "frames": 1
+      },
+      "fall": {
+        "row": 36,
+        "frames": 1
+      },
+      "hurt": {
+        "row": 6,
+        "frames": 1
+      },
+      "death": {
+        "row": 47,
+        "frames": 2
+      }
+    }
+  },
+  "hero_skin_2": {
+    "cellW": 46,
+    "cellH": 46,
+    "anims": {
+      "run": {
+        "row": 0,
+        "frames": 6
+      },
+      "idle": {
+        "row": 0,
+        "frames": 1
+      },
+      "attack": {
+        "row": 12,
+        "frames": 6
+      },
+      "jump": {
+        "row": 20,
+        "frames": 1
+      },
+      "fall": {
+        "row": 36,
+        "frames": 1
+      },
+      "hurt": {
+        "row": 6,
+        "frames": 1
+      },
+      "death": {
+        "row": 47,
+        "frames": 2
+      }
+    }
+  },
+  "hero_skin_3": {
+    "cellW": 46,
+    "cellH": 46,
+    "anims": {
+      "run": {
+        "row": 0,
+        "frames": 6
+      },
+      "idle": {
+        "row": 0,
+        "frames": 1
+      },
+      "attack": {
+        "row": 12,
+        "frames": 6
+      },
+      "jump": {
+        "row": 20,
+        "frames": 1
+      },
+      "fall": {
+        "row": 36,
+        "frames": 1
+      },
+      "hurt": {
+        "row": 6,
+        "frames": 1
+      },
+      "death": {
+        "row": 47,
+        "frames": 2
+      }
+    }
+  },
+  "hero_skin_4": {
+    "cellW": 46,
+    "cellH": 46,
+    "anims": {
+      "run": {
+        "row": 0,
+        "frames": 6
+      },
+      "idle": {
+        "row": 0,
+        "frames": 1
+      },
+      "attack": {
+        "row": 12,
+        "frames": 6
+      },
+      "jump": {
+        "row": 20,
+        "frames": 1
+      },
+      "fall": {
+        "row": 36,
+        "frames": 1
+      },
+      "hurt": {
+        "row": 6,
+        "frames": 1
+      },
+      "death": {
+        "row": 47,
+        "frames": 2
+      }
+    }
+  },
+  "hero_skin_5": {
+    "cellW": 46,
+    "cellH": 46,
+    "anims": {
+      "run": {
+        "row": 0,
+        "frames": 6
+      },
+      "idle": {
+        "row": 0,
+        "frames": 1
+      },
+      "attack": {
+        "row": 12,
+        "frames": 6
+      },
+      "jump": {
+        "row": 20,
+        "frames": 1
+      },
+      "fall": {
+        "row": 36,
+        "frames": 1
+      },
+      "hurt": {
+        "row": 6,
+        "frames": 1
+      },
+      "death": {
+        "row": 47,
+        "frames": 2
+      }
+    }
+  },
+  "hero_skin_6": {
+    "cellW": 46,
+    "cellH": 46,
+    "anims": {
+      "run": {
+        "row": 0,
+        "frames": 6
+      },
+      "idle": {
+        "row": 0,
+        "frames": 1
+      },
+      "attack": {
+        "row": 12,
+        "frames": 6
+      },
+      "jump": {
+        "row": 20,
+        "frames": 1
+      },
+      "fall": {
+        "row": 36,
+        "frames": 1
+      },
+      "hurt": {
+        "row": 6,
+        "frames": 1
+      },
+      "death": {
+        "row": 47,
+        "frames": 2
+      }
+    }
+  },
+  "hero_skin_7": {
+    "cellW": 46,
+    "cellH": 46,
+    "anims": {
+      "run": {
+        "row": 0,
+        "frames": 6
+      },
+      "idle": {
+        "row": 0,
+        "frames": 1
+      },
+      "attack": {
+        "row": 12,
+        "frames": 6
+      },
+      "jump": {
+        "row": 20,
+        "frames": 1
+      },
+      "fall": {
+        "row": 36,
+        "frames": 1
+      },
+      "hurt": {
+        "row": 6,
+        "frames": 1
+      },
+      "death": {
+        "row": 47,
+        "frames": 2
+      }
+    }
+  },
+  "hero_skin_8": {
+    "cellW": 46,
+    "cellH": 46,
+    "anims": {
+      "run": {
+        "row": 0,
+        "frames": 6
+      },
+      "idle": {
+        "row": 0,
+        "frames": 1
+      },
+      "attack": {
+        "row": 12,
+        "frames": 6
+      },
+      "jump": {
+        "row": 20,
+        "frames": 1
+      },
+      "fall": {
+        "row": 36,
+        "frames": 1
+      },
+      "hurt": {
+        "row": 6,
+        "frames": 1
+      },
+      "death": {
+        "row": 47,
+        "frames": 2
+      }
+    }
   }
 }
