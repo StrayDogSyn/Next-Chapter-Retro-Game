@@ -30,6 +30,72 @@ export function maxJumps(hasDoubleJump: boolean): number {
   return hasDoubleJump ? 2 : 1;
 }
 
+/** Default frame step used by the simulation below; matches a 60fps loop. */
+export const SIM_DT = 1 / 60;
+
+export type FlightSim = { apexPx: number; airtimeS: number };
+
+/**
+ * Frame-stepped simulation of one jump's vertical flight, reproducing the
+ * EXACT integration order game.ts's update() uses (semi-implicit/symplectic
+ * Euler: velocity updated by gravity first, then position by the new
+ * velocity, every frame - not the continuous-time v^2/2g formula). Used to
+ * cross-check the analytic apex (jumpApexPx()) and the hand-derived tile
+ * constants in levelLoader.ts's reachability auditor, per the "Fix Pack"
+ * mission's own instruction: "if analytic and simulated don't agree, trust
+ * the simulation - discrete integration order matters."
+ *
+ * y is treated in the same canvas-Y-down convention as game.ts (up = more
+ * negative); apexPx is returned as a positive rise distance for readability.
+ * dt defaults to SIM_DT (60fps) since the mission's tolerance check assumes
+ * a realistic frame step, not the continuous-time limit.
+ */
+export function simulateJumpFlight(launchVelocity: number, dt: number = SIM_DT): FlightSim {
+  let vy = -launchVelocity; // launchVelocity is the positive upward speed; canvas convention is negative-up
+  let y = 0;
+  let minY = 0;
+  let t = 0;
+  // Landing = returning to y=0 while moving downward again (full flight,
+  // not just to apex) - this is what a horizontal-gap estimate needs.
+  while (true) {
+    vy += GRAVITY * dt;
+    y += vy * dt;
+    t += dt;
+    if (y < minY) minY = y;
+    if (y >= 0 && vy > 0) break;
+    if (t > 10) throw new Error("simulateJumpFlight: flight did not land within 10s - check inputs");
+  }
+  return { apexPx: -minY, airtimeS: t };
+}
+
+/**
+ * Frame-stepped simulation of a double jump where the second impulse is
+ * applied at the exact apex of the first (the worst case for total rise
+ * levelLoader.ts's UPGRADED_JUMP_RISE_TILES comment describes: "a second
+ * jump at any point in the arc roughly doubles achievable rise").
+ */
+export function simulateDoubleJumpFlight(launchVelocity: number, dt: number = SIM_DT): FlightSim {
+  let vy = -launchVelocity;
+  let y = 0;
+  let minY = 0;
+  let t = 0;
+  let usedSecondJump = false;
+  while (true) {
+    vy += GRAVITY * dt;
+    y += vy * dt;
+    t += dt;
+    if (y < minY) minY = y;
+    if (!usedSecondJump && vy >= 0) {
+      usedSecondJump = true;
+      vy = -launchVelocity;
+      continue;
+    }
+    if (usedSecondJump && y >= 0 && vy > 0) break;
+    if (t > 10) throw new Error("simulateDoubleJumpFlight: flight did not land within 10s - check inputs");
+  }
+  return { apexPx: -minY, airtimeS: t };
+}
+
 export type JumpState = {
   onGround: boolean;
   coyoteT: number;

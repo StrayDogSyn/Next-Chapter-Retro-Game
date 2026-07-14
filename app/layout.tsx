@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+// eslint-disable-next-line @next/next/no-page-custom-font
+import { Press_Start_2P } from "next/font/google";
+
+const pressStart2P = Press_Start_2P({ weight: "400", subsets: ["latin"], variable: "--font-pixel" });
 
 export const metadata: Metadata = {
   title: "Next Chapter Retro Game",
@@ -18,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={pressStart2P.variable}>
       <body>{children}</body>
     </html>
   );

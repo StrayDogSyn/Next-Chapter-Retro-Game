@@ -85,9 +85,10 @@
 - [x] Reachability validator implemented in `lib/game/levelLoader.ts` (`// reachability validation (BUG-003)`, `floodReachable()`, `validateReachability()`) — BFS flood-fill from each room's entry points, run separately for base and fully-upgraded ability profiles.
 - [x] Re-verified 2026-07-13 via a live `loadWorld()` probe (vitest): **0 dead-ends across all 24 rooms**, 26 items correctly reported as intentionally ability-gated. Console output: `"[world] Reachability audit: no dead-ends. 26 item(s) are intentionally ability-gated."` / `"[world] Loaded 24 rooms, all exits validated."`
 - [x] `loadWorld()` throws on structural room errors (missing start room, wrong spawn count) and warns (does not crash) on any genuine dead-end, so a bad layout can't silently ship — no separate "client freeze" fallback path was needed since static rooms are audited at build/load time rather than proc-gen at runtime.
-- [ ] Python level-generator-side validation not present (static ASCII rooms only; no live proc-gen path exists yet to validate).
+- [ ] Python level-generator-side validation not present (static ASCII rooms only; no live proc-gen path exists yet to validate). `/generate-level` in `python-service/main.py` is a genuinely dead endpoint ("original scaffold demo" per its own comment), never called by the TS client - confirmed 2026-07-14, not just assumed.
+- [x] Re-verified again 2026-07-14 (Fix Pack mission, ADR-023): the four tile constants (`JUMP_RISE_TILES`, `JUMP_GAP_TILES`, `UPGRADED_JUMP_RISE_TILES`, `UPGRADED_JUMP_GAP_TILES`) were cross-checked against a frame-stepped simulation of the *actual* game-loop integration order (not just the continuous analytic formula) - all four confirmed as safe conservative floors, none needed changing. A prompt asking to "constrain procedural platform/pickup generation" was found not to apply: no such generation exists (room layout and pickup positions are both static ASCII-map data, per ADR-004/ADR-017).
 
-**Status note (2026-07-13):** Already fixed in an earlier session; table was stale. Verified fixed by running the real audit, not just reading code.
+**Status note (2026-07-13, reconfirmed 2026-07-14):** Already fixed in an earlier session; table was stale. Verified fixed by running the real audit, not just reading code. Simulation cross-check (2026-07-14) found the envelope constants still hold under a more rigorous check than the original analytic derivation used.
 
 ---
 

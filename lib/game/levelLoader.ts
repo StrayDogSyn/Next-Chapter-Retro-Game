@@ -132,11 +132,14 @@ function hasOpening(room: LoadedRoom, edge: "left" | "right" | "up" | "down"): b
 // JUMP_RISE_TILES is rounded DOWN to 3 tiles: validation must hold for a player
 // who has not yet found the double-jump upgrade, and 3 leaves a safety margin
 // for the horizontal-motion-eats-into-vertical-reach tradeoff a real parabola has.
-const JUMP_RISE_TILES = 3;
+// Exported so jump-physics.test.ts can cross-check these hand-derived
+// constants against a real frame-stepped simulation (Fix Pack mission,
+// Increment 2.1) without duplicating the numbers.
+export const JUMP_RISE_TILES = 3;
 // Full up-and-down airtime at base jump velocity = 2 * (330/900) = 0.733s.
 // At base move speed (150px/s) that's 110px = ~6.9 tiles of horizontal travel
 // across a dead-air gap; rounded down to 6 tiles for the same safety-margin reason.
-const JUMP_GAP_TILES = 6;
+export const JUMP_GAP_TILES = 6;
 // Falling (no ascent needed) gets extra horizontal drift credit per tile of
 // drop, since airtime -- and therefore horizontal travel while falling -- keeps
 // growing the longer the drop. Capped so the estimate doesn't run away on deep
@@ -151,8 +154,8 @@ const FALL_DRIFT_BONUS_CAP = 6;
 // base jump gap. This profile exists so the auditor doesn't flag intentional
 // ability-gated bonus content (ADR-004) as broken — only report an item as a
 // genuine dead-end if it's unreachable even with the full movement kit.
-const UPGRADED_JUMP_RISE_TILES = 7;
-const UPGRADED_JUMP_GAP_TILES = 11;
+export const UPGRADED_JUMP_RISE_TILES = 7;
+export const UPGRADED_JUMP_GAP_TILES = 11;
 
 type Cell = { c: number; r: number };
 type ReachProfile = { riseTiles: number; gapTiles: number };

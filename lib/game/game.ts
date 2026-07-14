@@ -2421,14 +2421,32 @@ export class Game {
     const ctx = this.ctx;
     if (this.iframes > 0 && Math.floor(this.animT * 12) % 2 === 0) return; // flicker
 
-    // Anchor math (ADR-020): hitbox (this.pw/this.ph) is unchanged by the
-    // swm hero swap. The sprite anchors at feet-center of the physics box —
-    // horizontal offset centers the wider render box on the narrower hitbox,
-    // vertical offset aligns the render box's bottom edge with the hitbox's
-    // bottom edge, so the character's feet touch the same ground line the
-    // physics box stands on. Visual overhang beyond the hitbox is expected.
-    const drawW = 32;
-    const drawH = 34;
+    // Anchor math (ADR-020, scale corrected under the hero-scale fix pack):
+    // hitbox (this.pw/this.ph) is unchanged. The sprite anchors at
+    // feet-center of the physics box — horizontal offset centers the wider
+    // render box on the narrower hitbox, vertical offset aligns the render
+    // box's bottom edge with the hitbox's bottom edge. Visual overhang
+    // beyond the hitbox is expected.
+    //
+    // Scale derivation (measured, not assumed - see SESSION_LOG for the
+    // full pixel measurements): drawW/drawH were never actually the bug.
+    // They were 32x34 before AND after the ADR-020 swap - identical. What
+    // changed is how much of that box the source art fills. The retired
+    // hero_0.png went through pack_rows(), which trims each frame to its
+    // content bbox and rescales it to fill its packed cell (fill ratio
+    // ~37/48 = 0.7708 measured on its walkRight row). char-sheet-alpha.png
+    // was copied into the pipeline as-is (ADR-020's "no pack_rows() needed"
+    // call), so its cells carry real unfilled padding (fill ratio ~32/46 =
+    // 0.6957 measured on its run row). Same 32x34 box, less of it filled ->
+    // the character reads smaller even though nothing about "S" was ever
+    // set below 1. Fix: scale the box by S = 0.7708/0.6957 ~= 1.108 to
+    // restore the old sheet's effective on-screen stature, using the
+    // existing per-entity draw-scale mechanism (drawW/drawH are already a
+    // per-call parameter to drawSheetAnim(), the same one every enemy uses
+    // via ENEMY_DEFS[...].drawW/drawH) rather than reprocessing the sheet.
+    const HERO_SCALE = 1.108;
+    const drawW = Math.round(32 * HERO_SCALE); // 35
+    const drawH = Math.round(34 * HERO_SCALE); // 38
     const dx = this.px + this.pw / 2 - drawW / 2;
     const dy = this.py + this.ph - drawH;
     // ADR-020: char-sheet-alpha.png is single-facing (always faces right in

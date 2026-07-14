@@ -26,59 +26,37 @@ export default function Home() {
     <main className="game-shell">
       <section className={`game-panel${gameStarted ? " game-panel--runtime" : ""}`}>
         {!gameStarted ? (
-          <>
-            <h1>Next Chapter Retro Game</h1>
-            <p>
-              A SNES-styled Metroidvania platformer — 24 interconnected rooms,
-              Diablo-style loot rolled by a Python service, and boss fights.
-              Hand-rolled canvas engine, no game library.
-            </p>
-          </>
-        ) : null}
-
-        {!gameStarted ? (
-          <>
-            <StartMenu
-              onStart={() => {
-                // A fresh run must not clobber the continue-save until the
-                // first save trigger actually fires (ADR-010's triggers) -
-                // starting a new run here only affects in-memory state.
-                setContinueFromSave(false);
-                setSeedOverride(undefined);
-                setGameStarted(true);
-              }}
-              onContinue={() => {
-                setContinueFromSave(true);
-                setSeedOverride(undefined);
-                setGameStarted(true);
-              }}
-              onDaily={() => {
-                try {
-                  localStorage.setItem(DAILY_ATTEMPTED_KEY, dailySeed());
-                } catch {
-                  // localStorage unavailable - daily still works, just not tracked
-                }
-                setContinueFromSave(false);
-                setSeedOverride(dailySeed());
-                setGameStarted(true);
-              }}
-              onEnterSeed={(seed) => {
-                setContinueFromSave(false);
-                setSeedOverride(seed);
-                setGameStarted(true);
-              }}
-              hasSave={hasSave}
-            />
-            <div style={{ fontFamily: "monospace", fontSize: 13, lineHeight: 1.7 }}>
-              <strong>Keyboard:</strong> LEFT/RIGHT or A/D move, SPACE/W/Z jump
-              (air-jump with Aether Wings), X/J attack, C/K dodge, V/L swap,
-              S/DOWN drop through platforms, ESC/P pause
-              <br />
-              <strong>Xbox controller:</strong> left stick or D-pad move, A
-              jump, X or RB/RT attack, B or LT dodge, Y or LB swap weapon,
-              START pause (plug in any time, detected automatically)
-            </div>
-          </>
+          <StartMenu
+            onStart={() => {
+              // A fresh run must not clobber the continue-save until the
+              // first save trigger actually fires (ADR-010's triggers) -
+              // starting a new run here only affects in-memory state.
+              setContinueFromSave(false);
+              setSeedOverride(undefined);
+              setGameStarted(true);
+            }}
+            onContinue={() => {
+              setContinueFromSave(true);
+              setSeedOverride(undefined);
+              setGameStarted(true);
+            }}
+            onDaily={() => {
+              try {
+                localStorage.setItem(DAILY_ATTEMPTED_KEY, dailySeed());
+              } catch {
+                // localStorage unavailable - daily still works, just not tracked
+              }
+              setContinueFromSave(false);
+              setSeedOverride(dailySeed());
+              setGameStarted(true);
+            }}
+            onEnterSeed={(seed) => {
+              setContinueFromSave(false);
+              setSeedOverride(seed);
+              setGameStarted(true);
+            }}
+            hasSave={hasSave}
+          />
         ) : null}
 
         {gameStarted ? (
