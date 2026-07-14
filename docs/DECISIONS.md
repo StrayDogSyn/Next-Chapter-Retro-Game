@@ -261,4 +261,23 @@ _(Renumbered from a duplicate "ADR-003" during the 2026-07-08 merge-conflict cle
 
 ---
 
+## ADR-018: Mobile touch controls architecture (Pointer Events + Auto/On/Off policy)
+
+- **Date:** 2026-07-14
+- **Status:** Accepted
+- **Originated from:** Joint (user-requested execution plan + agent implementation)
+- **Context:** The repo's touch stack was Touch Events with a two-mode `virtualGamepad`/`tacticalTap` model, while the mobile execution plan required pointer-id safety, policy-driven visibility (`auto`/`on`/`off`), and a landscape-safe viewport posture.
+- **Decision:**
+  - Standardized touch ingestion to Pointer Events (`pointerdown/move/up/cancel` + `lostpointercapture`) in `lib/game/touchInput.ts`.
+  - Kept the existing gameplay-facing touch frame contract intact for `InputManager` while deprecating tactical gestures (compat stubs remain so gameplay code does not regress).
+  - Introduced persisted preference key `ncrg:touchControls` (`auto|on|off`) in `components/GameCanvas.tsx`:
+    - `auto`: hidden until first touch, then visible unless recent physical (keyboard/mouse/gamepad) activity is detected.
+    - `on`: touch controls always enabled/visible on touch-capable devices.
+    - `off`: touch controls disabled and hidden.
+  - Added viewport-safe mobile posture: `viewportFit: cover` metadata and safe-area-aware shell padding.
+- **Alternatives considered:** Keep Touch Events and retrofit policy in React only (rejected: no pointer-id capture semantics, weaker cancellation handling, harder to avoid ghost input states on mixed interactions).
+- **Consequences:** Better pointer lifecycle safety and clearer user control over overlays, at the cost of maintaining temporary tactical compatibility stubs until the game loop's legacy tactical branch is removed.
+
+---
+
 _Add new ADRs as decisions are made — including ones where you overrode an agent's suggestion. Those are often the most interesting entries for a reviewer._
