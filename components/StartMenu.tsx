@@ -667,6 +667,9 @@ export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }
 
   return (
     <div className="start-screen-wrap">
+      <div className="glass-pane glass-pane-3" aria-hidden="true" />
+      <div className="glass-pane glass-pane-2" aria-hidden="true" />
+      <div className="glass-pane glass-pane-1" aria-hidden="true" />
       <canvas
         ref={canvasRef}
         className="start-screen-canvas"
