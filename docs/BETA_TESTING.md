@@ -30,11 +30,11 @@ glance; hover it for the raw `lootSource`/`saveSource` values.
 
 ## Known limitations
 
-- **Touch controls are beta-quality.** Mobile now exposes an arcade overlay
-  and a tactical touch mode toggle, but the tactical mode is gesture-driven
-  camera/tap control layered onto the existing platformer, not a dedicated
-  grid-tactics ruleset. Report misfires, accidental browser gestures, and
-  orientation-specific layout issues.
+- **Touch controls are beta-quality.** Mobile now uses Pointer Events with a
+  persisted touch-controls mode toggle (`auto`/`on`/`off`). `auto` reveals on
+  first touch and may suppress while physical inputs are active. Report
+  misfires, accidental browser gestures, mode confusion, and orientation-
+  specific layout issues.
 - **Cold-start delay (once hosted):** the Python backend will run on a free
   hosting tier that sleeps after ~15 minutes idle. The *first* loot roll or
   save after a period of inactivity may take several seconds while it wakes

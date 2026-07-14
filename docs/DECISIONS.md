@@ -261,6 +261,24 @@ _(Renumbered from a duplicate "ADR-003" during the 2026-07-08 merge-conflict cle
 
 ---
 
+<<<<<<< HEAD
+## ADR-018: Mobile touch controls architecture (Pointer Events + Auto/On/Off policy)
+
+- **Date:** 2026-07-14
+- **Status:** Accepted
+- **Originated from:** Joint (user-requested execution plan + agent implementation)
+- **Context:** The repo's touch stack was Touch Events with a two-mode `virtualGamepad`/`tacticalTap` model, while the mobile execution plan required pointer-id safety, policy-driven visibility (`auto`/`on`/`off`), and a landscape-safe viewport posture.
+- **Decision:**
+  - Standardized touch ingestion to Pointer Events (`pointerdown/move/up/cancel` + `lostpointercapture`) in `lib/game/touchInput.ts`.
+  - Kept the existing gameplay-facing touch frame contract intact for `InputManager` while deprecating tactical gestures (compat stubs remain so gameplay code does not regress).
+  - Introduced persisted preference key `ncrg:touchControls` (`auto|on|off`) in `components/GameCanvas.tsx`:
+    - `auto`: hidden until first touch, then visible unless recent physical (keyboard/mouse/gamepad) activity is detected.
+    - `on`: touch controls always enabled/visible on touch-capable devices.
+    - `off`: touch controls disabled and hidden.
+  - Added viewport-safe mobile posture: `viewportFit: cover` metadata and safe-area-aware shell padding.
+- **Alternatives considered:** Keep Touch Events and retrofit policy in React only (rejected: no pointer-id capture semantics, weaker cancellation handling, harder to avoid ghost input states on mixed interactions).
+- **Consequences:** Better pointer lifecycle safety and clearer user control over overlays, at the cost of maintaining temporary tactical compatibility stubs until the game loop's legacy tactical branch is removed.
+=======
 ## ADR-019: Documentation archival policy — move, don't delete, old docs
 
 - **Date:** 2026-07-14
@@ -290,6 +308,7 @@ _(Renumbered from a duplicate "ADR-003" during the 2026-07-08 merge-conflict cle
   - **Pure logic extracted to `lib/game/player-sprite.ts`** (`shouldFlipHeroSprite`, `selectPlayerAnim`, `resolveClipFrame`, `NON_LOOPING_HERO_ANIMS`), mirroring the `jump-physics.ts`/`save-data.ts` pattern from ADR-014/ADR-010 so this logic is unit-testable without a canvas-backed `Game`. `drawSheetAnim()`'s frame-index math now goes through `resolveClipFrame()`, adding real clamp-on-final-frame support for non-looping clips (previously every clip wrapped via modulo unconditionally) — verified not to change behavior for any existing enemy clip, since no enemy anim currently uses the `jump`/`fall`/`death` names that trigger non-looping.
 - **Alternatives considered:** Using `space_merc.png` (the mockup/composite) directly — already rejected in an earlier session and reconfirmed wrong here; it's a reference board, not a frame-addressable sheet. Building a full 8-directional aim-angle system to actually use the sweep's granularity — rejected as out of this mission's scope wall ("no new abilities"); the sweep is real but unused beyond picking a few representative rows.
 - **Consequences:** Player sprite is now visibly the swm merc (green/blue palette) instead of the retired blonde `hero_0.png`; verified live via Playwright screenshots (idle, walk-right, walk-left, jump) plus a temporary `hero_skin_1` swap-and-revert proving skin geometry parity — all reverted cleanly (confirmed via `grep` showing only the original two `"hero"` references remain). `hero_0.png` itself was left on disk and in `public/sprites/hero.png`'s old role is now filled by the swm sheet; the old file is simply unreferenced now, not deleted (matches ADR-019's "move/orphan, don't delete" spirit for now — an explicit cleanup pass is future work, not done here). **Unresolved, logged as asset debt:** `attack` and `hurt` clips are registered in spritemeta but have no live game-state trigger wiring them to actually play (the existing melee-swing arc and hit-flash effects are unchanged, separate visual systems) — mapped per the mission's own "map to nearest available row" instruction, not full feature work. The `diewhirl-sheet-alpha.png` license-date discrepancy (2021 CC-BY 4.0 vs. baked-in 2023 OGA-BY 3.0+) is unresolved. The pre-existing, unrelated `assets/img/beast_boss_darksaber.zip`-missing bug (logged 2026-07-14, blocks a full `prepare-assets.py` run) was worked around by ordering the new hero pipeline block before the boss block and merging into the existing `spritemeta.json` directly rather than depending on `main()`'s final write — not fixed.
+>>>>>>> origin/main
 
 ---
 

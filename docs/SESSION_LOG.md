@@ -434,3 +434,22 @@ User explicitly waived rotating the credential leaked/cleaned up in the `0fc8f0f
 - **Anything worth remembering:** Treat "done" from any coding agent as a claim to verify against the actual file tree, not as ground truth on its own — especially across multi-tool handoffs, where one tool's summary of another tool's work compounds the risk of drift. This is arguably the most authentic "agentic collaboration" finding of the whole project.
 
 _Add new entries above this line, most recent first or last — pick one convention and stay consistent._
+
+### 2026-07-14 — Mobile touch controls refactor (Pointer Events + Auto/On/Off + landscape viewport pass)
+
+- **Tool used:** GitHub Copilot (GPT-5.3-Codex)
+- **Goal:** Execute the mobile-touch/landscape implementation plan with frontend-only scope and explicit discrepancy logging.
+- **Prompt-vs-repo discrepancy captured before edits:**
+  - The prompt assumed a Pointer Events touch stack with Auto/On/Off semantics.
+  - The repo actually had `lib/game/touchInput.ts` built on Touch Events (`touchstart/move/end/cancel`) with a two-scheme model (`virtualGamepad`/`tacticalTap`) and no persisted Auto/On/Off preference.
+- **What changed:**
+  - Reworked `lib/game/touchInput.ts` to pointer-id tracking via Pointer Events (`pointerdown/move/up/cancel` + `lostpointercapture`) and added explicit disabled/visibility controls for UI-managed touch policy.
+  - Updated `components/GameCanvas.tsx` to a persisted three-state preference (`ncrg:touchControls` = `auto|on|off`), with:
+    - Auto behavior: reveals controls after first touch and suppresses while recent keyboard/mouse/gamepad input is active.
+    - On behavior: always show and enable touch controls on touch-capable devices.
+    - Off behavior: hide and disable touch controls.
+  - Added a portrait rotate hint overlay and compact coarse-landscape chrome handling.
+  - Added safe-area/viewport-fit coverage via `app/layout.tsx` (`viewportFit: "cover"`) and `app/globals.css` safe-area-aware shell padding.
+  - Updated `components/TouchControlsOverlay.tsx` for ghost-mode rendering and removed tactical hotbar branch.
+  - Updated tests in `lib/game/touchInput.test.ts` for pointer-event behavior.
+- **Outcome:** 🟡 in progress at log time — implementation complete, awaiting final gate run (`npm test`, `npm run build`) and any follow-up fixes.

@@ -5,7 +5,11 @@ import { Game, VIEW_W, VIEW_H, type HudSnapshot } from "@/lib/game/game";
 import { GameHudOverlay } from "@/components/GameHudOverlay";
 import { GameMenuModal } from "@/components/GameMenuModal";
 import { TouchControlsOverlay } from "@/components/TouchControlsOverlay";
-import { TouchInputManager, type TouchControlScheme, type TouchRenderState } from "@/lib/game/touchInput";
+import { TouchInputManager, type TouchRenderState } from "@/lib/game/touchInput";
+
+type TouchControlsPreference = "auto" | "on" | "off";
+
+const TOUCH_CONTROLS_KEY = "ncrg:touchControls";
 
 type GameCanvasProps = {
   onSnapshot: (snapshot: HudSnapshot) => void;
@@ -20,18 +24,23 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const gamepadMenuPressedRef = useRef(false);
+  const lastPhysicalInputAtRef = useRef(0);
   const touchInputRef = useRef<TouchInputManager | null>(null);
   const [snapshot, setSnapshot] = useState<HudSnapshot | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [touchScheme, setTouchScheme] = useState<TouchControlScheme>("virtualGamepad");
+  const [touchPreference, setTouchPreference] = useState<TouchControlsPreference>("auto");
+  const [touchSeen, setTouchSeen] = useState(false);
   const [touchState, setTouchState] = useState<TouchRenderState>({
     scheme: "virtualGamepad",
     active: false,
+    visible: true,
+    ghosted: false,
     joystick: { baseX: 0, baseY: 0, knobX: 0, knobY: 0, radius: 64, engaged: false },
     buttons: [],
     hotbar: [],
   });
   const [touchCapable, setTouchCapable] = useState(false);
+  const [isLandscape, setIsLandscape] = useState(true);
 
   const setMenuOpenSynced = (next: boolean | ((prev: boolean) => boolean)) => {
     setMenuOpen((prev) => {
@@ -42,8 +51,30 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
   };
 
   useEffect(() => {
-    setTouchCapable(typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0));
+    if (typeof window === "undefined") return;
+    setTouchCapable("ontouchstart" in window || navigator.maxTouchPoints > 0 || window.matchMedia("(pointer: coarse)").matches);
+    setIsLandscape(window.innerWidth >= window.innerHeight);
+
+    const stored = localStorage.getItem(TOUCH_CONTROLS_KEY);
+    if (stored === "auto" || stored === "on" || stored === "off") {
+      setTouchPreference(stored);
+    }
+
+    const updateOrientation = () => {
+      setIsLandscape(window.innerWidth >= window.innerHeight);
+    };
+    window.addEventListener("resize", updateOrientation);
+    window.addEventListener("orientationchange", updateOrientation);
+    return () => {
+      window.removeEventListener("resize", updateOrientation);
+      window.removeEventListener("orientationchange", updateOrientation);
+    };
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(TOUCH_CONTROLS_KEY, touchPreference);
+  }, [touchPreference]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -68,10 +99,7 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
     // Ensure deterministic first frame sizing before starting the game loop.
     updateCanvasSize();
 
-    const touchInput = new TouchInputManager({
-      scheme: touchScheme,
-      onRenderStateChange: setTouchState,
-    });
+    const touchInput = new TouchInputManager({ onRenderStateChange: setTouchState });
     touchInput.setViewportRect(stage.getBoundingClientRect());
     touchInput.bind(stage);
     touchInputRef.current = touchInput;
@@ -96,6 +124,19 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
     };
   }, [onSnapshot, continueFromSave, seedOverride]);
 
+  useEffect(() => {
+    const now = performance.now();
+    const physicalActive = now - lastPhysicalInputAtRef.current < 1700;
+    const touchEnabled = touchCapable && touchPreference !== "off";
+    const visible =
+      touchCapable &&
+      touchPreference !== "off" &&
+      (touchPreference === "on" || (touchPreference === "auto" && touchSeen && !physicalActive));
+    const ghosted = visible && (!touchState.active || touchPreference === "auto");
+    touchInputRef.current?.setEnabled(touchEnabled);
+    touchInputRef.current?.setVisible(visible, ghosted);
+  }, [touchCapable, touchPreference, touchSeen, touchState.active]);
+
   const handleFocus = () => {
     shellRef.current?.focus();
   };
@@ -104,9 +145,19 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
     const onFocus = () => {
       handleFocus();
     };
+    const onKeyDown = () => {
+      lastPhysicalInputAtRef.current = performance.now();
+    };
+    const onMouseDown = () => {
+      lastPhysicalInputAtRef.current = performance.now();
+    };
     window.addEventListener("focus", onFocus);
+    window.addEventListener("keydown", onKeyDown, { capture: true });
+    window.addEventListener("mousedown", onMouseDown, { capture: true });
     return () => {
       window.removeEventListener("focus", onFocus);
+      window.removeEventListener("keydown", onKeyDown, { capture: true });
+      window.removeEventListener("mousedown", onMouseDown, { capture: true });
     };
   }, []);
 
@@ -128,10 +179,6 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
   useEffect(() => {
     gameRef.current?.setUiModalOpen(menuOpen);
   }, [menuOpen]);
-
-  useEffect(() => {
-    touchInputRef.current?.setScheme(touchScheme);
-  }, [touchScheme]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -163,6 +210,7 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
       );
 
       if (pressed && !gamepadMenuPressedRef.current) {
+        lastPhysicalInputAtRef.current = performance.now();
         setMenuOpenSynced((open) => !open);
       }
       gamepadMenuPressedRef.current = pressed;
@@ -192,16 +240,18 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
       tabIndex={0}
       onMouseDown={handleFocus}
       onTouchStart={handleFocus}
+      onPointerDown={(event) => {
+        if (event.pointerType !== "touch") return;
+        setTouchSeen(true);
+      }}
     >
       <div className="stage-toolbar">
         {touchCapable ? (
-          <button
-            type="button"
-            className="fullscreen-toggle"
-            onClick={() => setTouchScheme((current) => (current === "virtualGamepad" ? "tacticalTap" : "virtualGamepad"))}
-          >
-            {touchScheme === "virtualGamepad" ? "tactical" : "arcade"}
-          </button>
+          <div className="touch-pref-toolbar" role="group" aria-label="Touch controls mode">
+            <button type="button" className="fullscreen-toggle" onClick={() => setTouchPreference("auto")} aria-pressed={touchPreference === "auto"}>auto</button>
+            <button type="button" className="fullscreen-toggle" onClick={() => setTouchPreference("on")} aria-pressed={touchPreference === "on"}>on</button>
+            <button type="button" className="fullscreen-toggle" onClick={() => setTouchPreference("off")} aria-pressed={touchPreference === "off"}>off</button>
+          </div>
         ) : null}
         <button type="button" className="fullscreen-toggle" onClick={toggleFullscreen}>
           fullscreen
@@ -225,7 +275,13 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
             }}
           />
         </div>
-        <TouchControlsOverlay state={touchState} visible={touchCapable} />
+        <TouchControlsOverlay state={touchState} visible={touchCapable && touchState.visible} />
+        {touchCapable && !isLandscape ? (
+          <div className="rotate-overlay" role="status" aria-live="polite">
+            <strong>Rotate device for landscape</strong>
+            <span>You can still play in portrait, but controls are tighter.</span>
+          </div>
+        ) : null}
         <GameHudOverlay snapshot={snapshot} onToggleMenu={() => setMenuOpenSynced((open) => !open)} onCopySeed={copySeed} />
         <GameMenuModal open={menuOpen} snapshot={snapshot} onClose={() => setMenuOpenSynced(false)} />
       </div>
