@@ -2,32 +2,40 @@
 
 **Purpose:** Single source of truth for project workflow, documentation standards, and agent collaboration guidelines.
 
-**Last updated:** 2026-07-08
+**Last updated:** 2026-07-14
 
 ---
 
 ## Documentation Structure
 
-This project uses a consolidated documentation system to avoid agent confusion:
+This project uses a consolidated documentation system to avoid agent confusion.
+Superseded or duplicated docs are moved to the historical archive rather than
+deleted so the AI-Augmentation trail stays traceable.
 
 ### Core Documentation Files
 
 | File | Purpose | Maintainer |
 |------|---------|------------|
-| `README.md` | Project overview, setup, and current status | Human |
+| `README.md` | Project overview, setup, current status, and roadmap | Human + Agent |
 | `ARCHITECTURE.md` | System design, data flow, and technical decisions | Human + Agent |
 | `WORKFLOW.md` | **This file** - Workflow guidelines and doc structure | Human |
+| `AGENTIC_WORKFLOW.md` | Living record of AI-paired sessions, status, and contribution map | Human + Agent |
+| `SESSION_LOG.md` | Full chronological archive of every pairing session | Agent |
+| `PROMPT_LIBRARY.md` | Reusable prompts and prompt-effectiveness notes | Agent |
+| `DECISIONS.md` | Architecture Decision Records (ADRs) | Agent |
 | `CREDITS.md` | Asset licensing and attribution | Agent (script-generated) |
 | `ASSET_SOURCES.md` | Asset sourcing plan and manifests | Human |
+| `BUGS_IMPROVEMENT_GUIDE.md` | Tracked bugs, QA findings, and improvement roadmap | Agent |
+| `BETA_TESTING.md` | Beta-tester instructions, known limitations, and bug-filing guide | Human + Agent |
+| `MASTER_BUILD_SPEC.md` | Forward build plan and phase-gate verification checklist | Human + Agent |
 
 ### Historical Documentation (Archive)
 
-| File | Purpose | Status |
-|------|---------|--------|
-| `AGENTIC_WORKFLOW.md` | **DEPRECATED** - Content moved here | ⚠️ Remove |
-| `SESSION_LOG.md` | **DEPRECATED** - Session history archived | ⚠️ Remove |
-| `PROMPT_LIBRARY.md` | **DEPRECATED** - Prompts moved to WORKFLOW.md | ⚠️ Remove |
-| `DECISIONS.md` | **DEPRECATED** - ADRs moved to ARCHITECTURE.md | ⚠️ Remove |
+| Path | Purpose |
+|------|---------|
+| `docs/archive/historical/session-briefs/` | Point-in-time implementation briefs that are no longer active docs |
+| `docs/archive/historical/legacy-imports/` | Preserved documents imported from retired branches/worktrees |
+| `docs/archive/historical/README.md` | Index of all archived files |
 
 ---
 
@@ -167,19 +175,19 @@ npm run build
 
 ---
 
-## Cleanup Instructions
+## Archiving Old Documentation
 
-**To be completed after this file is created:**
+When a core doc is superseded by a consolidated version or a one-time brief has
+been addressed, **move it to `docs/archive/historical/`** rather than deleting it.
+The AI-Augmentation process is itself a deliverable; preserving historical docs
+lets reviewers trace how decisions evolved.
 
-1. Remove deprecated files:
-   - `docs/AGENTIC_WORKFLOW.md`
-   - `docs/SESSION_LOG.md` 
-   - `docs/PROMPT_LIBRARY.md`
-   - `docs/DECISIONS.md`
-
-2. Update any remaining cross-references to point to this file
-
-3. Archive any essential content from deprecated files in appropriate locations
+1. Move superseded briefs to `docs/archive/historical/session-briefs/`.
+2. Move imported legacy docs to `docs/archive/historical/legacy-imports/`.
+3. Update `docs/archive/historical/README.md` so the index lists every archived file.
+4. Update any cross-references that broke because of the move.
+5. Never delete a doc unless it is an exact byte-for-byte duplicate and is already
+   present in the archive.
 
 ---
 

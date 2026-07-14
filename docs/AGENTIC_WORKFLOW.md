@@ -2,7 +2,7 @@
 
 > **Purpose:** This is the working record of how this project was built in collaboration with an AI coding agent — what was asked, what came back, what was kept, changed, or thrown out, and why. It's updated after every pairing session, not written retroactively at submission time.
 >
-> **Last updated:** _2026-07-08_
+> **Last updated:** _2026-07-14_
 > **Maintainer:** StrayDogSyn
 
 ---
@@ -38,14 +38,15 @@
 
 | Area | State |
 |---|---|
-| Frontend game (24 rooms, combat, loot, 3 bosses) | 🟢 playable; bug-fix pass 2026-07-08 (4 review findings verified/fixed) |
-| Python service (loot + level endpoints) | 🟢 authoritative — verified on the wire 2026-07-08 |
-| Sprite/audio assets | 🟢 wired via scripts/prepare-assets.py + spritemeta.json |
-| Input system (keyboard + gamepad) | 🟢 unified InputState; stuck-input fixes 2026-07-08 (blur release, disconnect handling) |
+| Frontend game (24 rooms, combat, loot, 3 bosses) | � playable; senior code review logged 2026-07-14, fixes pending |
+| Python service (loot + save endpoints) | 🟢 authoritative — verified on the wire 2026-07-13 |
+| Live deployment | 🟢 https://straydogsyn.github.io/Next-Chapter-Retro-Game/ (Pages → Render → Neon) |
+| Sprite/audio assets | 🟢 wired via scripts/prepare-assets.py + public/assets/manifest.json |
+| Input system (keyboard + gamepad + touch) | 🟢 unified InputState; touch controls added 2026-07-13 |
 | Level/world system | 🟢 24 single-screen rooms, 5 zones, validated exit graph |
 | Enemy AI | 🟢 4 regular kinds + 3 bosses with distinct patterns |
-| Weapon/loot system | 🟢 data-driven, Python-authoritative (280 combos; 6/6 prefix effects now wired) |
-| Documentation | 🟢 living doc active |
+| Weapon/loot system | 🟢 data-driven, Python-authoritative (280 combos; 6/6 prefix effects wired) |
+| Documentation | 🟢 living docs updated 2026-07-14; archive established at docs/archive/historical |
 
 ## Session Log
 
@@ -54,9 +55,11 @@
 
 | Date | Tool | Task | Human Role | Agent Role | Outcome | Notes |
 |---|---|---|---|---|---|---|
-| 2026-07-08 | Copilot CLI (autonomous) | Overnight architecture audit + gameplay hardening | Provided overnight requirements + verification constraints | Implemented burn/freeze/shock/curse combat effects, refreshed credits to wired-only assets, ran lint/build + ground-truth status snapshots | ✅ complete (runtime/browser + wire authority proof captured) | See [SESSION_LOG.md](SESSION_LOG.md#2026-07-08--overnight-architecture-audit--combat-effect-wiring--runtime-proof-pass) |
-| 2026-07-07 | Copilot CLI (autonomous) | Build core gameplay systems (input, levels, enemies, loot, boss) | Verified state with project-status.py periodically, wrote final report | Generated LevelManager, EnemyManager, BossManager, ItemManager, extended Python service, refactored GameCanvas for multi-level play, unified gamepad+keyboard input | ✅ merged, fully playable 4-level world | See [SESSION_LOG.md](SESSION_LOG.md#2026-07-07--build-core-gameplay-systems) for full details |
-| _YYYY-MM-DD_ | Copilot cloud agent | Initial scaffold (Next.js + FastAPI structure) | Wrote scoped prompt, reviewed PR | Generated file structure, boilerplate | ✅ merged | See [PROMPT_LIBRARY.md](PROMPT_LIBRARY.md#scaffold-prompt) |
+| 2026-07-14 | Windsurf Cascade | Code-review findings logged + AI-Augmentation documentation refresh | Scoped review + docs update; verified test pass | Reviewed main branch for logic/resource/API issues; updated all docs + README; archived duplicate brief | 🟡 docs complete, fixes pending | See [SESSION_LOG.md](SESSION_LOG.md) |
+| 2026-07-14 | Claude Code | M1: swm kit provenance recovery | Directed hero-asset investigation | Recovered exact OGA pages for swm hero/enemy subsets; updated CREDITS.md + ASSET_SOURCES.md | ✅ M1 complete, 15 files still unverified | See [SESSION_LOG.md](SESSION_LOG.md) |
+| 2026-07-14 | GitHub Copilot | Sprite inventory correction | Asked for repo-grounded asset audit | Added docs/SPRITE_ART_INVENTORY.md; corrected space_merc vs char-sheet-alpha relationship | ✅ documentation corrected | See [SESSION_LOG.md](SESSION_LOG.md) |
+| 2026-07-13 | Claude Code | First successful public deploy | Enabled GitHub Pages in repo settings | Retriggered deploy.yml; verified Pages → Render → Neon round-trip | ✅ live site verified | See [SESSION_LOG.md](SESSION_LOG.md) |
+| 2026-07-13 | Claude Code | F3: run summary + daily seed mode | Scoped to two high-value pieces | Added drawRunSummary, seedOverride, Daily/Enter Seed UI | ✅ merged, death-summary rendering gap noted | See [SESSION_LOG.md](SESSION_LOG.md) |
 
 Full history: [docs/SESSION_LOG.md](SESSION_LOG.md) — keep this table above to the 3-5 most recent sessions, archive the rest there.
 
@@ -70,6 +73,8 @@ A running collection of prompts that worked (and a few that didn't) — full det
 <summary><strong>Preview: top prompts by usefulness</strong></summary>
 
 - **Scaffold prompt** — structured, file-by-file spec → clean PR, minimal rework
+- **Code review prompt (branch vs main)** — scoping to a branch diff with explicit focus criteria cuts noise significantly
+- **Documentation update prompt** — README + ARCHITECTURE refresh, session entry, link validation
 - _(add more as sessions accumulate)_
 
 </details>
@@ -84,6 +89,10 @@ Architecture Decision Records (ADRs) — every time the agent's suggestion was a
 | # | Decision | Agent Suggested? | Outcome |
 |---|---|---|---|
 | ADR-001 | Python service isolated from Next.js API routes rather than embedded | Yes | Accepted — see full ADR |
+| ADR-014 | jumpPower cap to preserve double-jump gate identity | Yes | Accepted |
+| ADR-016 | Asset-utilization pass — event-to-stem mapping conventions | Yes | Accepted |
+| ADR-017 | Replayability architecture — run summary + daily seed | Yes | Accepted |
+| ADR-019 | Documentation archival policy — move, don't delete, old docs | Yes | Accepted |
 
 </details>
 
@@ -104,7 +113,7 @@ This is the honesty section. Bootcamp reviewers care about this more than the co
 | Boss AI system | Agent (current) | 100% agent-authored; includes multi-phase behavior, attack patterns |
 | Weapon/loot system | Agent (current) | 100% agent-authored; data-driven JSON stat model |
 | Input system (keyboard + gamepad) | Agent (current) | Extended from keyboard-only to unified InputState interface; gamepad polling in render loop |
-| This documentation system | Human (prompted structure to Claude in prior session) | Agent updated status tables and session log entry |
+| This documentation system | Human (prompted structure to Claude in prior session) | Agent updated status tables, session log, README, and archive index 2026-07-14 |
 
 **Guiding rule:** if a component is >70% agent-generated, say so plainly here rather than letting the README imply otherwise.
 
@@ -119,7 +128,8 @@ This is the honesty section. Bootcamp reviewers care about this more than the co
 
 - **What worked:** Splitting sprite/SFX sourcing from asset-download automation into two distinct sessions kept scope manageable. Using a scraper script rather than manual downloads made the licensing/attribution tracking systematic instead of ad hoc.
 - **What didn't:** Across two separate coding-agent sessions (Windsurf, then VS Copilot), both narrated task completion — "moved files," "created docs/CREDITS.md," "regenerated the manifest" — that didn't match the actual file tree or file contents afterward. In one case an agent's own script-fix summary was pasted back verbatim in a later turn as if it were a fresh run, with identical output, suggesting the fix had never actually been applied.
-- **What I'd prompt differently next time:** Build a ground-truth verification step in from the start rather than bolting it on after multiple rounds of mismatched claims. `scripts/project-status.py` now exists for exactly this — it reads the filesystem/git state directly instead of relying on any agent's self-report, and every pairing session should run it before accepting a "done."
+- **What also didn't:** Stale tracking tables (`docs/BUGS_IMPROVEMENT_GUIDE.md`) kept generating prompts that assumed features were missing when code already fixed them. A senior code review surfaced additional unverified claims (seed-entry UI, offline loot-source behavior) that had drifted from the code.
+- **What I'd prompt differently next time:** Build a ground-truth verification step in from the start rather than bolting it on after multiple rounds of mismatched claims. `scripts/project-status.py` now exists for exactly this — it reads the filesystem/git state directly instead of relying on any agent's self-report, and every pairing session should run it before accepting a "done." For documentation sessions, cross-check every asserted UI/behavior claim against the current source before writing it down.
 
 </details>
 
@@ -132,5 +142,6 @@ This is the honesty section. Bootcamp reviewers care about this more than the co
 | [DECISIONS.md](DECISIONS.md) | ADR-style record of architecture decisions |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | System design and the Python-service rationale |
 | [CREDITS.md](CREDITS.md) | Third-party sprite/audio sourcing, licenses, and attribution status |
+| [WORKFLOW.md](WORKFLOW.md) | Project workflow, documentation structure, and agent collaboration guidelines |
 | [archive/historical/README.md](archive/historical/README.md) | Archived/deprecated documentation index |
 | [../STATUS.txt](../STATUS.txt) | Ground-truth project snapshot — generated by `scripts/project-status.py`, not narrated by any agent |

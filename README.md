@@ -5,7 +5,8 @@ A retro-inspired full-stack showcase blending SNES-style 2D sprite art, open-sou
 ![Game menu](assets/img/screenshots/game-menu.png)
 
 ![Status](https://img.shields.io/badge/status-in--progress-yellow)
-![Stack](https://img.shields.io/badge/stack-Next.js%20%2B%20FastAPI-blue)
+![Stack](https://img.shields.io/badge/stack-Next.js%2014%20%2B%20React%2018%20%2B%20TypeScript%205.9%20%2B%20FastAPI-blue)
+![Tests](https://img.shields.io/badge/tests-vitest%204.1-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 > Built for the **Next Chapter bootcamp** capstone submission.
@@ -58,11 +59,11 @@ The Python backend isn't decorative — it owns procedural loot and level genera
 
 ```mermaid
 flowchart LR
-    A[Browser Canvas Renderer] -->|fetch| B[Next.js API Routes]
-    B -->|HTTP| C[FastAPI Python Service]
-    C -->|JSON| B
-    B -->|JSON| A
-    A --> D[Web Audio Manager]
+    A[Browser Canvas Renderer] -->|fetch| C[FastAPI Python Service]
+    C -->|JSON| A
+    A -->|fallback| D[Client-side loot roller]
+    A --> E[Web Audio Manager]
+    A --> F[localStorage save mirror]
 ```
 
 The Next.js app owns rendering, input, and UI. The Python service owns logic that benefits from being outside the request/render cycle — see the full writeup and rationale in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
@@ -81,17 +82,22 @@ The Next.js app owns rendering, input, and UI. The Python service owns logic tha
 - `requestAnimationFrame`-based game loop with delta-time movement
 - 24 single-screen rooms across 5 zones, validated at load by `lib/game/levelLoader.ts`
 - Sprite animation state machine (idle / walk / jump / attack)
-- Unified keyboard + Xbox gamepad input handler
-- React HUD header and footer layered outside the canvas (HP, coins, weapon, loot source, control hints)
+- Unified keyboard + Xbox gamepad + touch input handler; virtual gamepad and tactical tap modes
+- React HUD header and footer layered outside the canvas (HP, XP, coins, weapon, minimap, loot/save source, control hints)
 - 4 regular enemy types + 3 bosses with distinct AI patterns
+- Deterministic seeded RNG with forked loot/combat/shop streams; Daily Seed and Enter Seed modes
+- Run-summary screen on death/victory showing seed, time, rooms visited, coins, level, and enemies defeated
+- Save system: shrine checkpoints + server mirroring + `localStorage` fallback (ADR-010)
+- Status chip showing online/degraded mode at a glance
 
 </details>
 
 <details>
 <summary><strong>Frontend ↔ backend integration</strong></summary>
 
-- The browser calls the Python FastAPI service directly (`lib/game/loot-client.ts` → `/loot/roll`) — no Next.js API-route proxy, since the site deploys as a static export with no server at runtime (ADR-008); python-service has CORS enabled for the dev and GitHub Pages origins
-- Client-side fallback mirrors the loot tables for offline resilience; every drop is tagged `python-service` or `client-fallback`
+- The browser calls the Python FastAPI service directly (`lib/game/loot-client.ts` → `/loot/roll`, `lib/game/save-client.ts` → `/save`, `/load`, `/players/register`) — no Next.js API-route proxy, since the site deploys as a static export with no server at runtime (ADR-008/ADR-009); python-service has CORS enabled for the dev and GitHub Pages origins
+- Client-side loot fallback mirrors the loot tables for offline resilience; every drop is tagged `python-service` or `client-fallback`
+- Anonymous player identity via UUID stored in `localStorage`; saves round-trip to the hosted Render service and Neon database when online, or fall back to browser storage when offline
 
 </details>
 
@@ -120,15 +126,18 @@ The browser fetches the Python service directly at `NEXT_PUBLIC_PYTHON_SERVICE_U
 
 ```
 ├── app/                # Next.js routes and API routes
-├── components/         # Canvas renderer, header/footer HUD, menu components
-├── lib/                # Game loop, input, world, items, audio manager
-├── python-service/     # FastAPI app for procedural generation and loot
+├── components/         # Canvas renderer, header/footer HUD, menu components, touch overlay
+├── lib/                # Game loop, input, world, items, audio manager, save/loot clients
+├── python-service/     # FastAPI app for loot rolling, persistence, and procedural generation
 ├── public/
+│   ├── assets/          # Extracted asset packs + manifest.json
 │   ├── sprites/         # Packed spritesheets + spritemeta.json
 │   └── audio/           # CC0/open-source SFX and music
-├── assets/              # Source assets, manifests, and screenshots
+├── assets/              # Source asset zips, manifests, and screenshots
+├── downloads/           # Archived source zip downloads
 ├── scripts/             # Asset pipeline and ground-truth status tools
-└── docs/                # Living documentation (see below)
+└── docs/                # Living documentation
+    └── archive/historical/  # Superseded briefs and legacy imports (not deleted)
 ```
 
 ## Screenshots
@@ -147,9 +156,11 @@ The canvas keeps its internal 640×352 resolution but scales to fit the viewport
 
 ## AI Collaboration
 
-This project was built through paired programming with an AI coding agent. Every session, prompt, and architectural decision made in that process is tracked as living documentation rather than folded silently into the commit history.
+This project was built through paired programming with AI coding agents. Every session, prompt, and architectural decision made in that process is tracked as living documentation rather than folded silently into the commit history. A senior-engineer code review of the current main branch is also logged as a first-class artifact.
 
 **Start here:** [docs/AGENTIC_WORKFLOW.md](docs/AGENTIC_WORKFLOW.md)
+
+**Latest review backlog:** [docs/BUGS_IMPROVEMENT_GUIDE.md](docs/BUGS_IMPROVEMENT_GUIDE.md#cr-001cr-013-code-review-findings-2026-07-14)
 
 ## Assets & Credits
 
@@ -165,12 +176,22 @@ All third-party assets are CC0 or explicitly licensed for reuse. The runtime ass
 
 ## Roadmap
 
+### Shipped
 - [x] Core render loop + sprite animation state machine
-- [x] Python service wired to loot and procedural level generation
-- [x] Real sprite/audio assets swapped in via `scripts/prepare-assets.py`
+- [x] Python service wired to loot generation and persistence
+- [x] Real sprite/audio assets swapped in via the asset pipeline
 - [x] Living documentation structure and ADRs
 - [x] Responsive canvas + header/footer HUD refactor
-- [ ] Level progression save state and inventory persistence
+- [x] Level progression save state and inventory persistence (shrines + server + localStorage fallback)
+- [x] Daily/Enter Seed modes and run-summary screen
+- [x] Touch controls (virtual gamepad + tactical tap)
+- [x] Public deploy on GitHub Pages + Render + Neon
+
+### In progress / next
+- [ ] Code-review fix backlog (see [docs/BUGS_IMPROVEMENT_GUIDE.md](docs/BUGS_IMPROVEMENT_GUIDE.md#cr-findings-2026-07-14))
+- [ ] Sprite asset utilization pass (per-zone tile/decor variety, enemy-sheet variants)
+- [ ] Hero sprite swap to a verified `char-sheet-alpha.png` kit
+- [ ] Zone-specific ambient/music
 - [ ] Bootcamp submission polish pass
 
 ## License
