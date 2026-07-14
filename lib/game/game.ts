@@ -1844,6 +1844,7 @@ export class Game {
 
   private saveGame() {
     if (typeof localStorage === "undefined") return;
+    const safeHp = this.phase === "dead" ? 0 : clampNumber(this.hp, 1, this.maxHp(), this.maxHp());
     const data = buildSaveData({
       roomId: this.world.has(this.roomId) ? this.roomId : START_ROOM,
       px: this.px,
@@ -1853,7 +1854,7 @@ export class Game {
       playerW: this.pw,
       playerH: this.ph,
       maxHp: this.maxHp(),
-      hp: this.hp,
+      hp: safeHp,
       coins: this.coins,
       level: this.level,
       xp: this.xp,
@@ -1936,7 +1937,7 @@ export class Game {
       this.level = level;
       this.xpToNext = xpToNext;
       this.xp = xp;
-      this.hp = Math.round(clampNumber(d.hp, 0, maxHpAtLevel, maxHpAtLevel));
+      this.hp = Math.round(clampNumber(d.hp, 1, maxHpAtLevel, maxHpAtLevel));
       this.coins = Math.round(clampNumber(d.coins, 0, 999_999, 0));
       this.weapon = { ...d.weapon };
       this.secondary = d.secondary ? { ...d.secondary } : null;
