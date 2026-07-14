@@ -78,6 +78,20 @@ export const RARITIES: Record<
   epic: { weight: 4, statMult: 2.0, rollSpread: 0.25, color: "#c084fc" },
 };
 
+/**
+ * AST-014/015: sprite art for dropped loot pickups, kept here (not
+ * hardcoded in game.ts's drawPickups()) so this data-driven items module
+ * stays the single source of truth for what a piece of loot looks like -
+ * same reasoning as RARITIES living here rather than in the renderer.
+ * Sheet contents come from scripts/prepare-assets.py's AST-014/015 blocks
+ * (public/sprites/lootIcon.png, impactBurst_<rarity>.png).
+ */
+export const LOOT_PICKUP_SPRITE = { sheet: "lootIcon", anim: "shimmer" } as const;
+
+export function impactBurstSheet(rarity: Rarity): string {
+  return `impactBurst_${rarity}`;
+}
+
 /** A fully rolled weapon instance, as returned by the Python loot service. */
 export type WeaponInstance = {
   itemType: "weapon";

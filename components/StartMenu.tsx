@@ -85,7 +85,11 @@ function drawRoundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: n
 
 // Shine sweep: returns 0..1 progress for a looping metallic shimmer
 function shinePct(t: number, period = 3.5): number {
-  return ((t % period) / period);
+  // JS's `%` can return a negative result for negative t (e.g. an early
+  // frame before the animation clock stabilizes), which produced a
+  // slightly-negative gradient stop and crashed addColorStop(). Clamped to
+  // [0,1] since every caller uses this directly as a CanvasGradient stop.
+  return Math.max(0, Math.min(1, (t % period) / period));
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
