@@ -314,6 +314,96 @@ def main() -> None:
     _meta_path.write_text(json.dumps(_existing_meta, indent=2))
     log(f"merged hero entries into {_meta_path.relative_to(ROOT)} (main() may not reach its own write this run)")
 
+    # ---------- AST-014: loot pickup icon (powerups-sheet-alpha.png) ----------
+    # Grid verified empirically, not guessed: the sheet is a dense, multi-
+    # section icon collage (badges/chalices/gems/pill capsules at several
+    # different cell sizes - visually confirmed, NOT a single uniform grid
+    # like the hero sheet). Rather than derive the whole collage, this pass
+    # measured and uses only ONE clean, verified region: the "gem" icon rows.
+    # Verification method: content-band row scan located two 16px-tall rows
+    # of circular gem icons; a labeled grid overlay at y0=342 confirmed 12
+    # columns with zero icons crossing a cell boundary (same discriminating
+    # test as ADR-020's hero-sheet derivation). Row 0 (y=342-358) is a
+    # teal/green palette; row 1 (y=358-374) is a red/orange palette - either
+    # works as a generic "loot gem" pickup icon, row 0 was picked arbitrarily.
+    POWERUPS_CELL = 16
+    powerups_src = ASSETS / "sprites" / "powerups-sheet-alpha.png"
+    powerups_im = Image.open(powerups_src)
+    if powerups_im.size != (640, 544) or powerups_im.mode != "RGBA":
+        raise RuntimeError(
+            f"powerups-sheet-alpha.png geometry drifted from the verified "
+            f"640x544 RGBA (got {powerups_im.size} {powerups_im.mode}) - "
+            f"re-verify the gem-row y-offset (342) before trusting it."
+        )
+    gem_row = powerups_im.crop((0, 342, 12 * POWERUPS_CELL, 342 + POWERUPS_CELL))
+    gem_sheet = Image.new("RGBA", gem_row.size, (0, 0, 0, 0))
+    gem_sheet.paste(gem_row, (0, 0))
+    gem_sheet.save(SPRITES_OUT / "lootIcon.png")
+    WIRED.append("assets/sprites/powerups-sheet-alpha.png")
+    META["lootIcon"] = {
+        "cellW": POWERUPS_CELL,
+        "cellH": POWERUPS_CELL,
+        "anims": {"shimmer": {"row": 0, "frames": 12}},
+    }
+    log(f"wrote {(SPRITES_OUT / 'lootIcon.png').relative_to(ROOT)} (16x16 cells, 12-frame shimmer, cropped from powerups-sheet-alpha.png)")
+
+    # ---------- AST-015: rarity-tiered impact burst FX ----------
+    # Grid verified empirically: impacts-sheet-colour-N-alpha.png (384x960)
+    # stacks FOUR size tiers (16/24/32/48px cells) with irregular packing in
+    # the upper three tiers. Rather than guess those boundaries, this pass
+    # used the one unambiguous, cleanly-isolated region: a full-width empty-
+    # row gap (row-band scan) isolates y=[624,960) as a self-contained
+    # 48x48 grid; a labeled overlay confirmed exactly 7 columns x 7 rows
+    # with zero icons crossing a cell boundary. weaponflash-sheet-colour-*
+    # was measured too (49 evenly-pitched ~16px bands across 2608px) but its
+    # semantic frame-grouping did not resolve with the same confidence in
+    # this pass's time budget - deliberately NOT wired this pass, logged as
+    # asset debt (SESSION_LOG/BUGS_IMPROVEMENT_GUIDE) rather than guessed.
+    #
+    # Colour-to-rarity mapping (a design judgment call, not a measurement -
+    # documented so it can be revisited): sampled each colour file's
+    # dominant non-white edge hue. colour1=cyan/teal, colour2=green,
+    # colour3=orange/red/yellow, colour4=cyan-green (close to colour1),
+    # colour5=orange/red (close to colour3, darker). None are an exact hue
+    # match for RARITIES' existing common/uncommon/rare/epic hex colors, so
+    # this maps by relative visual "heat" instead: common gets the calmest
+    # (colour1), uncommon keeps colour2's green (already matches
+    # RARITIES.uncommon's green closely), rare gets colour4 (still cool,
+    # distinct enough from common), epic gets colour3 (warmest/most
+    # dramatic - the strongest available contrast against common's cyan,
+    # satisfying the "common visibly differs from epic" requirement).
+    # colour5 is measured/verified but unused.
+    IMPACT_CELL = 48
+    IMPACT_COLS = 7
+    IMPACT_ROWS = 7
+    IMPACT_Y0 = 624
+    RARITY_TO_IMPACT_COLOUR = {"common": 1, "uncommon": 2, "rare": 4, "epic": 3}
+    for rarity, colour_n in RARITY_TO_IMPACT_COLOUR.items():
+        src = ASSETS / "sprites" / f"impacts-sheet-colour-{colour_n}-alpha.png"
+        im = Image.open(src)
+        if im.size != (384, 960) or im.mode != "RGBA":
+            raise RuntimeError(
+                f"impacts-sheet-colour-{colour_n}-alpha.png geometry drifted "
+                f"from the verified 384x960 RGBA (got {im.size} {im.mode}) - "
+                f"re-verify the y=624 section offset before trusting it."
+            )
+        region = im.crop((0, IMPACT_Y0, IMPACT_COLS * IMPACT_CELL, IMPACT_Y0 + IMPACT_ROWS * IMPACT_CELL))
+        out_name = f"impactBurst_{rarity}"
+        region.save(SPRITES_OUT / f"{out_name}.png")
+        WIRED.append(f"assets/sprites/impacts-sheet-colour-{colour_n}-alpha.png")
+        META[out_name] = {
+            "cellW": IMPACT_CELL,
+            "cellH": IMPACT_CELL,
+            "anims": {"burst": {"row": 0, "frames": IMPACT_COLS}},
+        }
+    log("wrote 4 rarity-tiered impactBurst_<rarity>.png sheets (48x48 cells, 7-frame burst, cropped from impacts-sheet-colour-*)")
+
+    _ast_keys = ["lootIcon"] + [f"impactBurst_{r}" for r in RARITY_TO_IMPACT_COLOUR]
+    _existing_meta = json.loads(_meta_path.read_text())
+    _existing_meta.update({k: META[k] for k in _ast_keys})
+    _meta_path.write_text(json.dumps(_existing_meta, indent=2))
+    log(f"merged AST-014/015 entries into {_meta_path.relative_to(ROOT)}")
+
     # ---------- Boss: Dark Saber Werewolf (CC-BY 3.0 MindChamber) ----------
     ds = extract("img/beast_boss_darksaber.zip", TMP / "ds", ("DarkSaber/",)) / "DarkSaber"
 

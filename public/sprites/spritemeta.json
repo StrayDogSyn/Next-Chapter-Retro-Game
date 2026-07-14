@@ -427,5 +427,55 @@
         "frames": 2
       }
     }
+  },
+  "lootIcon": {
+    "cellW": 16,
+    "cellH": 16,
+    "anims": {
+      "shimmer": {
+        "row": 0,
+        "frames": 12
+      }
+    }
+  },
+  "impactBurst_common": {
+    "cellW": 48,
+    "cellH": 48,
+    "anims": {
+      "burst": {
+        "row": 0,
+        "frames": 7
+      }
+    }
+  },
+  "impactBurst_uncommon": {
+    "cellW": 48,
+    "cellH": 48,
+    "anims": {
+      "burst": {
+        "row": 0,
+        "frames": 7
+      }
+    }
+  },
+  "impactBurst_rare": {
+    "cellW": 48,
+    "cellH": 48,
+    "anims": {
+      "burst": {
+        "row": 0,
+        "frames": 7
+      }
+    }
+  },
+  "impactBurst_epic": {
+    "cellW": 48,
+    "cellH": 48,
+    "anims": {
+      "burst": {
+        "row": 0,
+        "frames": 7
+      }
+    }
   }
 }

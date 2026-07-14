@@ -40,7 +40,9 @@ import { buildSaveData } from "./save-data";
 import {
   describeLoot,
   fallbackRoll,
+  impactBurstSheet,
   isWeaponInstance,
+  LOOT_PICKUP_SPRITE,
   RARITIES,
   STARTING_WEAPON,
   UPGRADE_DEFS,
@@ -318,6 +320,9 @@ export class Game {
 
   // UI-002 / UX-006: cosmetic feedback state
   private particles: Particle[] = [];
+  // AST-015: rarity-tinted impact burst FX (hits + pickups), separate from
+  // the generic dot/text Particle system since these are sprite-animated.
+  private rarityBursts: { x: number; y: number; rarity: Rarity; animT: number }[] = [];
   private equipFlashT = 0;
   private comboCount = 0;
   private comboT = 0;
@@ -401,6 +406,8 @@ export class Game {
       "bg_sky",
       "bg_mangrove",
       "bg_tissue",
+      LOOT_PICKUP_SPRITE.sheet,
+      ...(["common", "uncommon", "rare", "epic"] as const).map(impactBurstSheet),
     ];
     await Promise.all(
       sheetNames.map(
@@ -818,6 +825,7 @@ export class Game {
     if (this.equipFlashT > 0) this.equipFlashT -= dt;
     if (this.comboT > 0) this.comboT -= dt;
     this.updateParticles(dt);
+    this.updateRarityBursts(dt);
 
     if (this.input.state.pressed.pause) {
       if (this.phase === "playing") {
@@ -1044,6 +1052,10 @@ export class Game {
       !options.bypassStatusMult && enemy.curseT > 0 ? amount * 1.22 : amount;
     enemy.hp -= scaled;
     enemy.animTime = 0;
+    // AST-015: hit FX reflects the equipped weapon's rarity - a heavier,
+    // more dramatic burst for a rarer weapon reinforces its quality on
+    // every swing, not just on the moment it was picked up.
+    this.spawnRarityBurst(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, this.weapon.rarity);
     if (
       options.applyOnHitEffects !== false &&
       (this.weapon.effect === "lifesteal" || this.stat("lifeSteal") > 0)
@@ -1492,6 +1504,39 @@ export class Game {
     this.particles.push({ x, y, vx: 0, vy: -34, life: 0.6, maxLife: 0.6, color, text });
   }
 
+  // AST-015: 48x48 7-frame burst sheets, cropped/registered per-rarity by
+  // scripts/prepare-assets.py (see its comment block for the colour-to-
+  // rarity mapping rationale). Non-looping - one play-through then removed.
+  private static readonly IMPACT_BURST_FPS = 14;
+  private spawnRarityBurst(x: number, y: number, rarity: Rarity) {
+    this.rarityBursts.push({ x, y, rarity, animT: 0 });
+  }
+
+  private updateRarityBursts(dt: number) {
+    const BURST_FRAMES = 7;
+    const maxT = BURST_FRAMES / Game.IMPACT_BURST_FPS;
+    this.rarityBursts = this.rarityBursts.filter((b) => {
+      b.animT += dt;
+      return b.animT < maxT;
+    });
+  }
+
+  private drawRarityBursts() {
+    for (const b of this.rarityBursts) {
+      this.drawSheetAnim(
+        impactBurstSheet(b.rarity),
+        "burst",
+        b.animT,
+        b.x - 24,
+        b.y - 24,
+        48,
+        48,
+        false,
+        Game.IMPACT_BURST_FPS,
+      );
+    }
+  }
+
   private updateParticles(dt: number) {
     this.particles = this.particles.filter((p) => {
       p.life -= dt;
@@ -1620,7 +1665,7 @@ export class Game {
         }
         case "loot": {
           if (!pickup.loot) return false;
-          this.applyLoot(pickup.loot);
+          this.applyLoot(pickup.loot, pickup.x + pickup.w / 2, pickup.y + pickup.h / 2);
           return false;
         }
       }
@@ -1637,7 +1682,12 @@ export class Game {
     epic: "collectEpic",
   };
 
-  private applyLoot(loot: LootDrop) {
+  /** x/y default to the player's center (shop/mystery-box purchases have no
+   *  world pickup location) so every call site doesn't need to special-case it. */
+  private applyLoot(loot: LootDrop, x = this.px + this.pw / 2, y = this.py + this.ph / 2) {
+    // AST-015: rarity-colored burst on every pickup, not just weapon
+    // equips (which already get triggerEquipFx()'s separate gold ring).
+    this.spawnRarityBurst(x, y, loot.rarity);
     if (loot.itemType === "upgrade") {
       const current = this.upgrades[loot.upgradeId] ?? 0;
       this.upgrades[loot.upgradeId] = current + loot.value;
@@ -2098,6 +2148,7 @@ export class Game {
     this.drawPlayer();
     this.drawProjectiles();
     this.drawParticles();
+    this.drawRarityBursts();
     ctx.restore();
     if (this.phase === "paused") this.drawOverlay("PAUSED", "press START / ESC / P to resume");
     if (this.phase === "dead") this.drawRunSummary("YOU DIED", "press JUMP to rise again");
@@ -2589,15 +2640,29 @@ export class Game {
           ctx.fillRect(x + 8, y + 5, 4, 4);
           break;
         case "loot": {
+          // AST-014: real sprite art (a 12-frame shimmering gem, cropped
+          // from powerups-sheet-alpha.png) instead of a flat rotated rect.
+          // Rarity is still communicated by color - a ring drawn around the
+          // sprite in RARITIES[rarity].color, preserving the existing
+          // color-coding scheme (RARITY_SOUND, HUD chips) rather than
+          // inventing a second, inconsistent rarity-to-hue mapping.
           const color = pickup.loot ? RARITIES[pickup.loot.rarity].color : "#fff";
-          ctx.fillStyle = color;
-          ctx.save();
-          ctx.translate(x + 8, y + 8);
-          ctx.rotate(Math.PI / 4);
-          ctx.fillRect(-6, -6, 12, 12);
-          ctx.restore();
-          ctx.strokeStyle = "#fff";
-          ctx.strokeRect(x + 2, y + 2, 12, 12);
+          this.drawSheetAnim(
+            LOOT_PICKUP_SPRITE.sheet,
+            LOOT_PICKUP_SPRITE.anim,
+            pickup.bobT,
+            x,
+            y,
+            16,
+            16,
+            false,
+            6,
+          );
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(x + 8, y + 8, 10, 0, Math.PI * 2);
+          ctx.stroke();
           break;
         }
       }
