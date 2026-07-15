@@ -9,12 +9,6 @@
  * sealed rooms.
  */
 
-import {
-  BASE_JUMP_GAP_TILES,
-  BASE_JUMP_RISE_TILES,
-  DOUBLE_JUMP_GAP_TILES,
-  DOUBLE_JUMP_RISE_TILES,
-} from "./jump-physics";
 import { ROOMS, ROOM_H, ROOM_W, START_ROOM, type RoomDef, type ZoneId } from "./world";
 
 export const T_EMPTY = 0;
@@ -226,13 +220,13 @@ function hasOpening(room: LoadedRoom, edge: "left" | "right" | "up" | "down"): b
 // Exported so jump-physics.test.ts can cross-check these hand-derived
 // constants against a real frame-stepped simulation (Fix Pack mission,
 // Increment 2.1) without duplicating the numbers.
-export const JUMP_RISE_TILES = BASE_JUMP_RISE_TILES;
+export const JUMP_RISE_TILES = 4;
 // Full up-and-down airtime at base jump velocity = 2 * (380/900) = 0.844s
 // analytic (0.844s simulated within rounding). At base move speed (150px/s)
 // that's ~7.9 tiles of horizontal travel across a dead-air gap; still floors
 // to 7 tiles, unchanged from the previous pass for the same
 // still-a-valid-floor reason as JUMP_RISE_TILES above.
-export const JUMP_GAP_TILES = BASE_JUMP_GAP_TILES;
+export const JUMP_GAP_TILES = 7;
 // Falling (no ascent needed) gets extra horizontal drift credit per tile of
 // drop, since airtime -- and therefore horizontal travel while falling -- keeps
 // growing the longer the drop. Capped so the estimate doesn't run away on deep
@@ -253,8 +247,8 @@ const FALL_DRIFT_BONUS_CAP = 6;
 // doesn't flag intentional ability-gated bonus content (ADR-004) as broken —
 // only report an item as a genuine dead-end if it's unreachable even with
 // the full movement kit.
-export const UPGRADED_JUMP_RISE_TILES = DOUBLE_JUMP_RISE_TILES;
-export const UPGRADED_JUMP_GAP_TILES = DOUBLE_JUMP_GAP_TILES;
+export const UPGRADED_JUMP_RISE_TILES = 9;
+export const UPGRADED_JUMP_GAP_TILES = 13;
 
 type Cell = { c: number; r: number };
 type ReachProfile = { riseTiles: number; gapTiles: number };

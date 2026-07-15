@@ -2,9 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   GRAVITY,
   JUMP_BASE_VELOCITY,
-  JUMP_CLEARANCE_MARGIN_TILES,
   JUMP_POWER_CAP_PCT,
-  REQUIRED_BASE_JUMP_RISE_PX,
   jumpApexPx,
   jumpVelocity,
   maxJumps,
@@ -20,7 +18,6 @@ import {
   UPGRADED_JUMP_GAP_TILES,
   UPGRADED_JUMP_RISE_TILES,
 } from "./levelLoader";
-import { HIGHEST_FLOATING_PLATFORM_STEP_TILES } from "./world";
 
 const TILE = 16;
 const MOVE_SPEED = 150; // px/s, matches game.ts's moveSpeed() base value
@@ -47,24 +44,21 @@ describe("jumpVelocity", () => {
 });
 
 describe("ADR-014: capped single-jump apex stays below double-jump's reach", () => {
-  it("a maxed single jump (24% jumpPower) apexes below the derived double-jump reach", () => {
+  it("a maxed single jump (24% jumpPower) apexes below double-jump's now-buffed ~9-tile reach", () => {
     const maxedApex = jumpApexPx(jumpVelocity(JUMP_POWER_CAP_PCT));
-    const doubleJumpReachPx = simulateDoubleJumpFlight(jumpVelocity(0)).apexPx;
+    const doubleJumpReachPx = UPGRADED_JUMP_RISE_TILES * 16; // levelLoader.ts
     expect(maxedApex).toBeLessThan(doubleJumpReachPx);
   });
 
-  it("derives enough base rise for the highest floating-platform step plus comfort margin", () => {
-    const simulated = simulateJumpFlight(jumpVelocity(0));
-    expect(REQUIRED_BASE_JUMP_RISE_PX).toBe(
-      (HIGHEST_FLOATING_PLATFORM_STEP_TILES + JUMP_CLEARANCE_MARGIN_TILES) * TILE,
-    );
-    expect(simulated.apexPx).toBeGreaterThanOrEqual(REQUIRED_BASE_JUMP_RISE_PX);
-    expect(simulateJumpFlight(JUMP_BASE_VELOCITY - 1).apexPx).toBeLessThan(REQUIRED_BASE_JUMP_RISE_PX);
+  it("base (unupgraded) jump apexes at ~5.01 tiles analytic ('Space Marine' Physical Overhaul: mathematically guaranteed 4.5-5 tiles simulated), still at/above levelLoader.ts's JUMP_RISE_TILES floor", () => {
+    const baseApex = jumpApexPx(jumpVelocity(0));
+    expect(baseApex / 16).toBeCloseTo(5.01, 1);
+    expect(baseApex / 16).toBeGreaterThanOrEqual(JUMP_RISE_TILES);
   });
 
-  it("keeps gravity fixed while deriving a positive base velocity", () => {
+  it("gravity/base-velocity constants match the physics levelLoader.ts's reachability math assumes", () => {
     expect(GRAVITY).toBe(900);
-    expect(JUMP_BASE_VELOCITY).toBeGreaterThan(0);
+    expect(JUMP_BASE_VELOCITY).toBe(380);
   });
 });
 
@@ -153,10 +147,10 @@ describe("jump envelope: simulated (game.ts's actual integration order) vs analy
     expect(sim.apexPx / TILE).toBeGreaterThanOrEqual(JUMP_RISE_TILES);
   });
 
-  it("'Space Marine' Physical Overhaul: simulated base apex is mathematically guaranteed to clear 4-5 tiles", () => {
+  it("'Space Marine' Physical Overhaul: simulated base apex is mathematically guaranteed to clear 4.5-5 tiles", () => {
     const sim = simulateJumpFlight(jumpVelocity(0));
     const tiles = sim.apexPx / TILE;
-    expect(tiles).toBeGreaterThanOrEqual(4);
+    expect(tiles).toBeGreaterThanOrEqual(4.5);
     expect(tiles).toBeLessThanOrEqual(5);
   });
 

@@ -96,6 +96,7 @@ function shinePct(t: number, period = 3.5): number {
 
 export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }: StartMenuProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const stencilRef = useRef<HTMLImageElement | null>(null);
   const rafRef = useRef<number>(0);
   const tRef = useRef<number>(0);
   const lastTRef = useRef<number>(0);
@@ -125,6 +126,12 @@ export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }
     seedFormVisibleRef.current = seedFormVisible;
     if (seedFormVisible) setTimeout(() => seedInputRef.current?.focus(), 40);
   }, [seedFormVisible]);
+
+  useEffect(() => {
+    const img = new Image();
+    img.src = "/assets/branding/stray-stencil.png";
+    stencilRef.current = img;
+  }, []);
 
   // ── Activation ───────────────────────────────────────────────────────────────
   const activateMenuIndex = useCallback((index: number) => {
@@ -635,7 +642,19 @@ export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }
       ctx.font = pixelFont(5);
       ctx.fillStyle = "#2a4a6a";
       ctx.textAlign = "right";
-      ctx.fillText("v0.1.0  |  24 ROOMS  |  DIABLO LOOT", W - 10, H - 6);
+      const brandW = 72;
+      const brandH = 16;
+      const brandX = W - 10 - brandW;
+      const brandY = H - 8 - brandH;
+
+      ctx.fillText("v0.2.0", brandX - 8, H - 6);
+
+      const stencil = stencilRef.current;
+      if (stencil && stencil.complete && stencil.naturalWidth > 0) {
+        ctx.globalAlpha = 0.5;
+        ctx.drawImage(stencil, brandX, brandY, brandW, brandH);
+        ctx.globalAlpha = 1;
+      }
       ctx.textAlign = "left";
 
       ctx.restore(); // end logical scale

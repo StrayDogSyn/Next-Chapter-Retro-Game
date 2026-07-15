@@ -2,6 +2,8 @@
 
 **Live now (latest documented target):** **https://straydogsyn.github.io/Next-Chapter-Retro-Game/**
 
+**Current milestone build:** **v0.2.0** (includes the StrayDog Syndications stencil watermark on the start-screen footer).
+
 The intended production path is Python backend (Render) + Neon persistence,
 with loot and saves routed through the service when reachable (ADR-009).
 If the backend is briefly unreachable (for example a cold start after idle),
@@ -54,7 +56,7 @@ glance; hover it for the raw `lootSource`/`saveSource` values.
 ## Filing a bug
 
 Include, if visible:
-- **Version** (short commit SHA, shown in the footer as `v<sha>`)
+- **Version** (`v0.2.0` milestone + short commit SHA chip shown in runtime footer as `v<sha>`)
 - **Seed** (death screen, or the "seed" button in the HUD - copies to
   clipboard)
 - **Room** you were in

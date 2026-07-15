@@ -42,7 +42,7 @@ import {
   fallbackRoll,
   impactBurstSheet,
   isWeaponInstance,
-  LOOT_PICKUP_SPRITES,
+  LOOT_PICKUP_SPRITE,
   RARITIES,
   STARTING_WEAPON,
   UPGRADE_DEFS,
@@ -50,7 +50,6 @@ import {
   type Rarity,
   type UpgradeId,
   type WeaponInstance,
-  weaponFlashSheet,
 } from "./items";
 import { Rng, generateSeedPhrase } from "./rng";
 import {
@@ -335,7 +334,7 @@ export class Game {
   private particles: Particle[] = [];
   // AST-015: rarity-tinted impact burst FX (hits + pickups), separate from
   // the generic dot/text Particle system since these are sprite-animated.
-  private rarityBursts: { x: number; y: number; rarity: Rarity; animT: number; kind: "impact" | "flash" }[] = [];
+  private rarityBursts: { x: number; y: number; rarity: Rarity; animT: number }[] = [];
   private equipFlashT = 0;
   private comboCount = 0;
   private comboT = 0;
@@ -418,9 +417,8 @@ export class Game {
       "bg_sky",
       "bg_mangrove",
       "bg_tissue",
-      LOOT_PICKUP_SPRITES.weapon.sheet,
+      LOOT_PICKUP_SPRITE.sheet,
       ...(["common", "uncommon", "rare", "epic"] as const).map(impactBurstSheet),
-      ...(["common", "uncommon", "rare", "epic"] as const).map(weaponFlashSheet),
     ];
     await Promise.all(
       sheetNames.map(
@@ -1064,7 +1062,7 @@ export class Game {
     // AST-015: hit FX reflects the equipped weapon's rarity - a heavier,
     // more dramatic burst for a rarer weapon reinforces its quality on
     // every swing, not just on the moment it was picked up.
-    this.spawnRarityBurst(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, this.weapon.rarity, "flash");
+    this.spawnRarityBurst(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, this.weapon.rarity);
     if (
       options.applyOnHitEffects !== false &&
       (this.weapon.effect === "lifesteal" || this.stat("lifeSteal") > 0)
@@ -1524,31 +1522,29 @@ export class Game {
   // scripts/prepare-assets.py (see its comment block for the colour-to-
   // rarity mapping rationale). Non-looping - one play-through then removed.
   private static readonly IMPACT_BURST_FPS = 14;
-  private spawnRarityBurst(x: number, y: number, rarity: Rarity, kind: "impact" | "flash" = "impact") {
-    this.rarityBursts.push({ x, y, rarity, animT: 0, kind });
+  private spawnRarityBurst(x: number, y: number, rarity: Rarity) {
+    this.rarityBursts.push({ x, y, rarity, animT: 0 });
   }
 
   private updateRarityBursts(dt: number) {
+    const BURST_FRAMES = 7;
+    const maxT = BURST_FRAMES / Game.IMPACT_BURST_FPS;
     this.rarityBursts = this.rarityBursts.filter((b) => {
       b.animT += dt;
-      const frames = b.kind === "impact" ? 7 : 6;
-      return b.animT < frames / Game.IMPACT_BURST_FPS;
+      return b.animT < maxT;
     });
   }
 
   private drawRarityBursts() {
     for (const b of this.rarityBursts) {
-      const impact = b.kind === "impact";
-      const drawW = impact ? 48 : 36;
-      const drawH = impact ? 48 : 53;
       this.drawSheetAnim(
-        impact ? impactBurstSheet(b.rarity) : weaponFlashSheet(b.rarity),
-        impact ? "burst" : "flash",
+        impactBurstSheet(b.rarity),
+        "burst",
         b.animT,
-        b.x - drawW / 2,
-        b.y - drawH / 2,
-        drawW,
-        drawH,
+        b.x - 24,
+        b.y - 24,
+        48,
+        48,
         false,
         Game.IMPACT_BURST_FPS,
       );
@@ -2631,12 +2627,9 @@ export class Game {
           // color-coding scheme (RARITY_SOUND, HUD chips) rather than
           // inventing a second, inconsistent rarity-to-hue mapping.
           const color = pickup.loot ? RARITIES[pickup.loot.rarity].color : "#fff";
-          const sprite = pickup.loot
-            ? LOOT_PICKUP_SPRITES[pickup.loot.itemType]
-            : LOOT_PICKUP_SPRITES.upgrade;
           this.drawSheetAnim(
-            sprite.sheet,
-            sprite.anim,
+            LOOT_PICKUP_SPRITE.sheet,
+            LOOT_PICKUP_SPRITE.anim,
             pickup.bobT,
             x,
             y,

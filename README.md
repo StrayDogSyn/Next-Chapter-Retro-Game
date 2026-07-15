@@ -45,6 +45,7 @@ The Python backend isn't decorative — it owns procedural loot and level genera
 ## Current Project State
 
 - **Live URL:** [straydogsyn.github.io/Next-Chapter-Retro-Game](https://straydogsyn.github.io/Next-Chapter-Retro-Game/)
+- **Current version:** **v0.2.0** (start-screen footer now includes StrayDog Syndications stencil watermark).
 - **Gameplay status:** Playable 24-room build with 5 zones, 4 regular enemies, 3 bosses, seeded runs, run summary, and shrine-backed save flow.
 - **Service status:** Static frontend export on GitHub Pages with Python persistence/loot service designed for Render + Neon.
 - **Quality status:** Vitest suite wired in-project (`npm test`), with active code-review backlog tracked in `docs/BUGS_IMPROVEMENT_GUIDE.md`.

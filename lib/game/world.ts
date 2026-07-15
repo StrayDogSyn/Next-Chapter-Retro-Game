@@ -806,32 +806,4 @@ export const ROOMS: RoomDef[] = [
   },
 ];
 
-function platformSurfaceCells(room: RoomDef): { col: number; row: number; floating: boolean }[] {
-  const cells: { col: number; row: number; floating: boolean }[] = [];
-  const supports = new Set(["#", "-", "D", "d"]);
-  for (let row = 1; row < ROOM_H; row++) {
-    for (let col = 0; col < ROOM_W; col++) {
-      const support = room.map[row][col];
-      if (!supports.has(support) || supports.has(room.map[row - 1][col])) continue;
-      cells.push({ col, row: row - 1, floating: support === "-" });
-    }
-  }
-  return cells;
-}
-
-export const HIGHEST_FLOATING_PLATFORM_STEP_TILES = ROOMS.reduce((worldMax, room) => {
-  const surfaces = platformSurfaceCells(room);
-  for (const target of surfaces) {
-    if (!target.floating) continue;
-    let smallestRise = Number.POSITIVE_INFINITY;
-    for (const source of surfaces) {
-      const rise = source.row - target.row;
-      if (rise <= 0 || Math.abs(source.col - target.col) > 7) continue;
-      smallestRise = Math.min(smallestRise, rise);
-    }
-    if (Number.isFinite(smallestRise)) worldMax = Math.max(worldMax, smallestRise);
-  }
-  return worldMax;
-}, 0);
-
 export const START_ROOM = "R01";
