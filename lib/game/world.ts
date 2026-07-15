@@ -110,8 +110,15 @@ export const ROOMS: RoomDef[] = [
     name: "Crossroads Hub",
     zone: "outskirts",
     exits: { left: "R02", right: "R04", down: "R07", up: "R18" },
+    // Space Marine Overhaul: the "up" ceiling opening was widened from a
+    // 4-tile gap (cols18-21) to a 10-tile gap (cols15-24) so the platform
+    // directly beneath it (row 3, cols16-23) has real headroom clearance
+    // along its whole top surface instead of only its center - a headroom
+    // audit found its edge columns (16,17,22,23) left only 2-3 tiles of
+    // clearance under the old narrower opening, too tight for the enlarged
+    // hitbox (ph=44px=2.75 tiles).
     map: [
-      "##################....##################",
+      "###############..........###############",
       "#......................................#",
       "#......................................#",
       "#...............--------...............#",
@@ -140,6 +147,13 @@ export const ROOMS: RoomDef[] = [
     name: "Watcher's Walk",
     zone: "outskirts",
     exits: { left: "R03", right: "R05" },
+    // Space Marine Overhaul: the floating solid block that used to sit at
+    // row 12, cols22-26 (directly above the row-15 walkway) was opened up -
+    // a headroom audit found it left only 2 tiles of clearance for anyone
+    // walking that stretch, a genuine choke point that the enlarged hitbox
+    // (ph=44px=2.75 tiles) can no longer fit through at all. Moving it up a
+    // row instead was considered and rejected: row 11 has an 'f' spawn at
+    // col24 that a shifted block would have overwritten.
     map: [
       "########################################",
       "#......................................#",
@@ -153,7 +167,7 @@ export const ROOMS: RoomDef[] = [
       "#......................................#",
       "#..........c...........................#",
       "#........------.........f..............#",
-      "#.....................#####............#",
+      "#......................................#",
       "#......................................#",
       "#......................................#",
       "#........----------------------........#",
@@ -232,8 +246,13 @@ export const ROOMS: RoomDef[] = [
     name: "Sinkhole",
     zone: "caverns",
     exits: { up: "R03", down: "R08" },
+    // Space Marine Overhaul: widened the "up" ceiling opening from a 4-tile
+    // gap (cols18-21) to a 15-tile gap (cols14-28) so both platforms near
+    // the ceiling (row 4, cols15-18 and cols24-27) get real headroom along
+    // their whole top surface - a headroom audit found their edges left
+    // only ~3 tiles of clearance under the old narrower opening.
     map: [
-      "##################....##################",
+      "##############...............###########",
       "#......................................#",
       "#......................................#",
       "#......................................#",
@@ -505,6 +524,10 @@ export const ROOMS: RoomDef[] = [
     name: "Winged Reliquary",
     zone: "hive",
     exits: { left: "R15", up: "R17" },
+    // Space Marine Overhaul: trimmed 1 column (col23) off the right edge of
+    // the row-8 solid block - a headroom audit found that column left only
+    // 2 tiles of clearance for the platform edge directly beneath it (row
+    // 11, cols23-26), too tight for the enlarged hitbox.
     map: [
       "##################....##################",
       "#......................................#",
@@ -514,7 +537,7 @@ export const ROOMS: RoomDef[] = [
       "#......................................#",
       "#......................................#",
       "#..................J...................#",
-      "#...............########...............#",
+      "#...............#######................#",
       "#......................................#",
       "#......................................#",
       "#..........----........----............#",
@@ -567,8 +590,13 @@ export const ROOMS: RoomDef[] = [
     name: "Updraft Shaft",
     zone: "sky",
     exits: { down: "R03", up: "R19" },
+    // Space Marine Overhaul: widened the "up" ceiling opening from a 4-tile
+    // gap (cols18-21) to a 10-tile gap (cols13-22) so the platform near the
+    // ceiling (row 4, cols14-17) gets real headroom along its whole top
+    // surface - a headroom audit found its edge left only 3 tiles of
+    // clearance under the old narrower opening.
     map: [
-      "##################....##################",
+      "#############..........#################",
       "#......................................#",
       "#......................................#",
       "#......................................#",
@@ -777,5 +805,33 @@ export const ROOMS: RoomDef[] = [
     ],
   },
 ];
+
+function platformSurfaceCells(room: RoomDef): { col: number; row: number; floating: boolean }[] {
+  const cells: { col: number; row: number; floating: boolean }[] = [];
+  const supports = new Set(["#", "-", "D", "d"]);
+  for (let row = 1; row < ROOM_H; row++) {
+    for (let col = 0; col < ROOM_W; col++) {
+      const support = room.map[row][col];
+      if (!supports.has(support) || supports.has(room.map[row - 1][col])) continue;
+      cells.push({ col, row: row - 1, floating: support === "-" });
+    }
+  }
+  return cells;
+}
+
+export const HIGHEST_FLOATING_PLATFORM_STEP_TILES = ROOMS.reduce((worldMax, room) => {
+  const surfaces = platformSurfaceCells(room);
+  for (const target of surfaces) {
+    if (!target.floating) continue;
+    let smallestRise = Number.POSITIVE_INFINITY;
+    for (const source of surfaces) {
+      const rise = source.row - target.row;
+      if (rise <= 0 || Math.abs(source.col - target.col) > 7) continue;
+      smallestRise = Math.min(smallestRise, rise);
+    }
+    if (Number.isFinite(smallestRise)) worldMax = Math.max(worldMax, smallestRise);
+  }
+  return worldMax;
+}, 0);
 
 export const START_ROOM = "R01";

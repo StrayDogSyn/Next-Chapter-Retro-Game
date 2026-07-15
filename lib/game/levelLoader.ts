@@ -9,6 +9,12 @@
  * sealed rooms.
  */
 
+import {
+  BASE_JUMP_GAP_TILES,
+  BASE_JUMP_RISE_TILES,
+  DOUBLE_JUMP_GAP_TILES,
+  DOUBLE_JUMP_RISE_TILES,
+} from "./jump-physics";
 import { ROOMS, ROOM_H, ROOM_W, START_ROOM, type RoomDef, type ZoneId } from "./world";
 
 export const T_EMPTY = 0;
@@ -124,12 +130,13 @@ function isPassableEdgeTile(tile: number): boolean {
 /**
  * Some authored rooms had single-cell edge openings; after transition the
  * player could be wedged against nearby solids and feel trapped. Normalize
- * every declared exit to a minimum 3-cell portal and clear one tile inward.
+ * every declared exit to a minimum 4-cell portal and clear one tile inward.
  *
- * Space Marine Overhaul: widened from 2 cells (32px) to 3 cells (48px) so a
- * 3-tile-wide, 2-tile-tall hitbox (game.ts's pw=18/ph=32, up from 14/26) has
- * a full tile of clearance passing through, instead of exactly filling a
- * 2-tile-tall portal with zero margin.
+ * Space Marine Overhaul: widened 2 cells (32px) -> 3 cells (48px) -> now 4
+ * cells (64px) as the hitbox itself grew across two passes (14x26 -> 18x32
+ * -> 24x44). ph=44 is 2.75 tiles; a 4-tile portal leaves a full 1.25-tile
+ * (20px) margin passing through, instead of the near-zero margin a 3-tile
+ * portal would now leave.
  */
 function ensureExitClearance(room: LoadedRoom) {
   const midRow = Math.floor(ROOM_H / 2);
@@ -155,8 +162,8 @@ function ensureExitClearance(room: LoadedRoom) {
 
   const carveVerticalPortal = (edgeCol: number, innerCol: number) => {
     const anchor = chooseRow(edgeCol);
-    const top = Math.max(1, Math.min(ROOM_H - 4, anchor - 1));
-    for (let row = top; row <= top + 2; row++) {
+    const top = Math.max(1, Math.min(ROOM_H - 5, anchor - 1));
+    for (let row = top; row <= top + 3; row++) {
       setTile(room, edgeCol, row, T_EMPTY);
       setTile(room, innerCol, row, T_EMPTY);
     }
@@ -164,8 +171,8 @@ function ensureExitClearance(room: LoadedRoom) {
 
   const carveHorizontalPortal = (edgeRow: number, innerRow: number) => {
     const anchor = chooseCol(edgeRow);
-    const left = Math.max(1, Math.min(ROOM_W - 4, anchor - 1));
-    for (let col = left; col <= left + 2; col++) {
+    const left = Math.max(1, Math.min(ROOM_W - 5, anchor - 1));
+    for (let col = left; col <= left + 3; col++) {
       setTile(room, col, edgeRow, T_EMPTY);
       setTile(room, col, innerRow, T_EMPTY);
     }
@@ -195,32 +202,37 @@ function hasOpening(room: LoadedRoom, edge: "left" | "right" | "up" | "down"): b
 // ─────────────────────── reachability validation (BUG-003) ───────────────────────
 //
 // Jump metrics, derived from the real player physics in game.ts (not guessed):
-//   jumpVelocity() = -355 px/s (base, no upgrades; buffed from 330 under the
-//   Space Marine Overhaul - see jump-physics.ts's JUMP_BASE_VELOCITY
-//   comment), gravity = 900 px/s^2.
-//   Rise to apex = v^2 / (2*g) = 355^2 / 1800 = 70.0px = 4.38 tiles analytic,
-//   4.19 tiles per simulateJumpFlight() (16px tiles).
-// JUMP_RISE_TILES is rounded DOWN to 4 tiles (raised from 3 under the "Space
-// Marine" Physical Overhaul mission's explicit instruction to update this
-// constant to match the buffed trajectory - see SESSION_LOG for the earlier
-// "buff velocity but leave this floor alone" version of this decision that
-// this supersedes). This floor is also the classification threshold the
-// world's ability-gating relies on (ADR-004/ADR-023): raising it DOES
-// reclassify some previously double-jump-gated content (rise 3-4 tiles) as
-// base-reachable - a real, deliberate consequence, not an oversight. See
-// UPGRADED_JUMP_RISE_TILES below: it was raised by the same proportion
-// (double-jump reuses this base velocity for its second impulse), so the
-// relative gap between "base-reachable" and "ability-gated" content is
-// preserved rather than collapsed, even though the absolute floor moved.
+//   jumpVelocity() = -380 px/s (base, no upgrades; buffed from an original
+//   330 through intermediate 345/355 steps to 380 under the "Space Marine"
+//   Physical Overhaul - see jump-physics.ts's JUMP_BASE_VELOCITY comment),
+//   gravity = 900 px/s^2.
+//   Rise to apex = v^2 / (2*g) = 380^2 / 1800 = 80.2px = 5.01 tiles analytic,
+//   4.82 tiles per simulateJumpFlight() (16px tiles).
+// JUMP_RISE_TILES is rounded DOWN to 4 tiles (raised from an original 3
+// under this mission's explicit instruction to update this constant to
+// match the buffed trajectory). Still 4, unchanged from the previous 355px/s
+// pass: floor(4.82) is still 4, so this floor remains a correct (not
+// overclaiming) lower bound even at the new velocity - it does NOT need to
+// track every velocity bump 1:1, only stay a valid floor of the simulated
+// value. This floor is also the classification threshold the world's
+// ability-gating relies on (ADR-004/ADR-023): raising it from 3 to 4 (in the
+// earlier pass) reclassified some previously double-jump-gated content as
+// base-reachable - a real, deliberate, already-measured consequence (see
+// ADR-025), not an oversight. See UPGRADED_JUMP_RISE_TILES below: it moves
+// with the base velocity too (double-jump reuses this same base velocity
+// for its second impulse), keeping the relative gap between
+// "base-reachable" and "ability-gated" content roughly the same shape
+// rather than collapsing it.
 // Exported so jump-physics.test.ts can cross-check these hand-derived
 // constants against a real frame-stepped simulation (Fix Pack mission,
 // Increment 2.1) without duplicating the numbers.
-export const JUMP_RISE_TILES = 4;
-// Full up-and-down airtime at base jump velocity = 2 * (355/900) = 0.789s
-// analytic (0.783s simulated). At base move speed (150px/s) that's ~7.3-7.4
-// tiles of horizontal travel across a dead-air gap; rounded down to 7 tiles
-// (raised from 6), for the same reason as JUMP_RISE_TILES above.
-export const JUMP_GAP_TILES = 7;
+export const JUMP_RISE_TILES = BASE_JUMP_RISE_TILES;
+// Full up-and-down airtime at base jump velocity = 2 * (380/900) = 0.844s
+// analytic (0.844s simulated within rounding). At base move speed (150px/s)
+// that's ~7.9 tiles of horizontal travel across a dead-air gap; still floors
+// to 7 tiles, unchanged from the previous pass for the same
+// still-a-valid-floor reason as JUMP_RISE_TILES above.
+export const JUMP_GAP_TILES = BASE_JUMP_GAP_TILES;
 // Falling (no ascent needed) gets extra horizontal drift credit per tile of
 // drop, since airtime -- and therefore horizontal travel while falling -- keeps
 // growing the longer the drop. Capped so the estimate doesn't run away on deep
@@ -230,18 +242,19 @@ const FALL_DRIFT_BONUS_CAP = 6;
 
 // "Upgraded" profile: a player who found Aether Wings (double jump) and the
 // Phase Dash Module. A second jump applied at the first jump's exact apex
-// (the worst case) simulates to 8.38 tiles of total rise at the Space Marine
-// Overhaul's buffed 355px/s base velocity (raised from ~7.56 analytic / 7
-// floor at the old 330px/s), floored to 8; the 0.22s dash burst at 2.6x move
-// speed adds horizontal reach on top of the base jump gap, simulating to
-// ~12.5 tiles, floored to 12 (raised from 11). Both raised in step with
-// JUMP_RISE_TILES/JUMP_GAP_TILES above since double-jump reuses the same
-// base velocity for its second impulse - this profile exists so the auditor
+// (the worst case) simulates to 9.63 tiles of total rise at the Space Marine
+// Overhaul's now-380px/s base velocity (up from 8.38 tiles at the previous
+// 355px/s pass), floored to 9 (raised from 8); the 0.22s dash burst at 2.6x
+// move speed adds horizontal reach on top of the base jump gap, simulating
+// to ~13.4 tiles, floored to 13 (raised from 12). Both raised in step with
+// the base velocity bump above (not with JUMP_RISE_TILES/JUMP_GAP_TILES,
+// which didn't move this pass) since double-jump reuses the same base
+// velocity for its second impulse - this profile exists so the auditor
 // doesn't flag intentional ability-gated bonus content (ADR-004) as broken —
 // only report an item as a genuine dead-end if it's unreachable even with
 // the full movement kit.
-export const UPGRADED_JUMP_RISE_TILES = 8;
-export const UPGRADED_JUMP_GAP_TILES = 12;
+export const UPGRADED_JUMP_RISE_TILES = DOUBLE_JUMP_RISE_TILES;
+export const UPGRADED_JUMP_GAP_TILES = DOUBLE_JUMP_GAP_TILES;
 
 type Cell = { c: number; r: number };
 type ReachProfile = { riseTiles: number; gapTiles: number };

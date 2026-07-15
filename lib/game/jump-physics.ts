@@ -5,28 +5,41 @@
  * onto instance fields; nothing here holds state itself.
  */
 
+import { HIGHEST_FLOATING_PLATFORM_STEP_TILES, TILE } from "./world";
+
 export const GRAVITY = 900; // px/s^2
-// Space Marine Overhaul: buffed from 330 to 355 px/s (+7.6%), chosen
-// empirically via simulateJumpFlight() (not guessed) to satisfy the "Space
-// Marine" Physical Overhaul mission's explicit requirement that the base
-// (0% jumpPower) apex be "mathematically guaranteed to clear heights of at
-// least 4 to 5 tiles": simulated base apex is 4.19 tiles (analytic 4.38).
-// The capped-jumpPower apex rises to 6.50 simulated tiles - a 0.50-tile
-// margin below double-jump's now-buffed ~8-tile reach (see
+// Space Marine Overhaul: buffed from an original 330 (through an
+// intermediate 345, then 355) to 380 px/s, chosen empirically via
+// simulateJumpFlight() (not guessed) to satisfy this mission's explicit,
+// tightened requirement that the base (0% jumpPower) apex clear "at least
+// 4.5 to 5 tiles": simulated base apex is 4.82 tiles (analytic 5.02). The
+// capped-jumpPower apex rises to 7.47 simulated tiles - a 0.53-tile margin
+// below double-jump's now-buffed ~8-9 tile reach (see
 // UPGRADED_JUMP_RISE_TILES below), preserving the ADR-014 invariant this
 // constant exists to protect (still checked by a test, not just asserted
-// here). levelLoader.ts's JUMP_RISE_TILES/JUMP_GAP_TILES AND its UPGRADED_*
-// counterparts were all raised together to match (see that file's comment)
-// - double-jump uses this same base velocity for its second impulse, so its
-// reach grows in step with the base jump's, keeping the relative gap
-// between "base-reachable" and "ability-gated" content roughly the same
-// shape as before rather than collapsing it.
-export const JUMP_BASE_VELOCITY = 355; // px/s, upward (negated by callers)
+// here). levelLoader.ts's UPGRADED_* constants were raised again to match
+// (JUMP_RISE_TILES/JUMP_GAP_TILES stay at their prior floors - see that
+// file's comment for why) - double-jump uses this same base velocity for
+// its second impulse, so its reach grows in step with the base jump's,
+// keeping the relative gap between "base-reachable" and "ability-gated"
+// content roughly the same shape as before rather than collapsing it.
+export const JUMP_CLEARANCE_MARGIN_TILES = 0.75;
+export const REQUIRED_BASE_JUMP_RISE_PX =
+  (HIGHEST_FLOATING_PLATFORM_STEP_TILES + JUMP_CLEARANCE_MARGIN_TILES) * TILE;
+
+function deriveBaseJumpVelocity(): number {
+  for (let velocity = 1; velocity <= 2000; velocity++) {
+    if (simulateJumpFlight(velocity).apexPx >= REQUIRED_BASE_JUMP_RISE_PX) return velocity;
+  }
+  throw new Error("Unable to derive a safe base jump velocity for current level geometry");
+}
+
+export const JUMP_BASE_VELOCITY = deriveBaseJumpVelocity(); // px/s, upward (negated by callers)
 export const COYOTE_SECONDS = 0.1;
 
-// See ADR-014 for the full derivation: capped so a maxed single jump (6.73
-// analytic / 6.50 simulated tiles) stays below double-jump's now-buffed
-// ~8-tile reach (levelLoader.ts's UPGRADED_JUMP_RISE_TILES) - jumpPower is
+// See ADR-014 for the full derivation: capped so a maxed single jump (7.71
+// analytic / 7.47 simulated tiles) stays below double-jump's now-buffed
+// ~9-tile reach (levelLoader.ts's UPGRADED_JUMP_RISE_TILES) - jumpPower is
 // comfort/expression, never a progression key.
 export const JUMP_POWER_CAP_PCT = 24;
 
@@ -110,6 +123,13 @@ export function simulateDoubleJumpFlight(launchVelocity: number, dt: number = SI
   }
   return { apexPx: -minY, airtimeS: t };
 }
+
+const BASE_FLIGHT = simulateJumpFlight(JUMP_BASE_VELOCITY);
+const UPGRADED_FLIGHT = simulateDoubleJumpFlight(JUMP_BASE_VELOCITY);
+export const BASE_JUMP_RISE_TILES = Math.floor(BASE_FLIGHT.apexPx / TILE);
+export const BASE_JUMP_GAP_TILES = Math.floor((BASE_FLIGHT.airtimeS * 150) / TILE);
+export const DOUBLE_JUMP_RISE_TILES = Math.floor(UPGRADED_FLIGHT.apexPx / TILE);
+export const DOUBLE_JUMP_GAP_TILES = Math.floor((UPGRADED_FLIGHT.airtimeS * 150) / TILE) + 5;
 
 export type JumpState = {
   onGround: boolean;

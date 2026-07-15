@@ -42,7 +42,7 @@ import {
   fallbackRoll,
   impactBurstSheet,
   isWeaponInstance,
-  LOOT_PICKUP_SPRITE,
+  LOOT_PICKUP_SPRITES,
   RARITIES,
   STARTING_WEAPON,
   UPGRADE_DEFS,
@@ -50,6 +50,7 @@ import {
   type Rarity,
   type UpgradeId,
   type WeaponInstance,
+  weaponFlashSheet,
 } from "./items";
 import { Rng, generateSeedPhrase } from "./rng";
 import {
@@ -291,18 +292,20 @@ export class Game {
   private py = 0;
   private pvx = 0;
   private pvy = 0;
-  // Space Marine Overhaul: hitbox enlarged from 14x26 to 18x32 (+29%/+23%) for
-  // a heavier physical presence, rounding ph to exactly 2 tiles (32px @
-  // TILE=16) - a clean, standard platformer convention. This deliberately
-  // reverses the "Fix Pack: Hero Scale + Reachable Platforms" mission's
-  // Increment 1 decision to leave the hitbox untouched; that mission flagged
-  // hitbox resizing as "a gameplay-feel decision for the user" rather than
-  // making it unilaterally, and the user has now made that call explicitly.
-  // See the draw-scale block below for how drawW/drawH/anchors were
-  // recomputed to match, and levelLoader.ts's door-carve height for the
+  // Space Marine Overhaul: hitbox enlarged from 14x26 (then a first pass to
+  // 18x32) to 24x44 (+71%/+69% over the original), per the mission's own
+  // explicit example target ("roughly 24x44"). ph=44 is 2.75 tiles, pw=24 is
+  // 1.5 tiles @ TILE=16 - a genuinely heavy, chunky "space marine" presence,
+  // not a clean tile-aligned box. This deliberately reverses the "Fix Pack:
+  // Hero Scale + Reachable Platforms" mission's Increment 1 decision to
+  // leave the hitbox untouched; that mission flagged hitbox resizing as "a
+  // gameplay-feel decision for the user" rather than making it unilaterally,
+  // and the user has now made that call explicitly (twice, with increasing
+  // specificity). See the draw-scale block below for how drawW/drawH/anchors
+  // were recomputed to match, and levelLoader.ts's door-carve height for the
   // corresponding aperture widening this required.
-  private readonly pw = 18;
-  private readonly ph = 32;
+  private readonly pw = 24;
+  private readonly ph = 44;
   private facing: 1 | -1 = 1;
   private onGround = false;
   private jumpsUsed = 0;
@@ -332,7 +335,7 @@ export class Game {
   private particles: Particle[] = [];
   // AST-015: rarity-tinted impact burst FX (hits + pickups), separate from
   // the generic dot/text Particle system since these are sprite-animated.
-  private rarityBursts: { x: number; y: number; rarity: Rarity; animT: number }[] = [];
+  private rarityBursts: { x: number; y: number; rarity: Rarity; animT: number; kind: "impact" | "flash" }[] = [];
   private equipFlashT = 0;
   private comboCount = 0;
   private comboT = 0;
@@ -415,8 +418,9 @@ export class Game {
       "bg_sky",
       "bg_mangrove",
       "bg_tissue",
-      LOOT_PICKUP_SPRITE.sheet,
+      LOOT_PICKUP_SPRITES.weapon.sheet,
       ...(["common", "uncommon", "rare", "epic"] as const).map(impactBurstSheet),
+      ...(["common", "uncommon", "rare", "epic"] as const).map(weaponFlashSheet),
     ];
     await Promise.all(
       sheetNames.map(
@@ -1060,7 +1064,7 @@ export class Game {
     // AST-015: hit FX reflects the equipped weapon's rarity - a heavier,
     // more dramatic burst for a rarer weapon reinforces its quality on
     // every swing, not just on the moment it was picked up.
-    this.spawnRarityBurst(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, this.weapon.rarity);
+    this.spawnRarityBurst(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, this.weapon.rarity, "flash");
     if (
       options.applyOnHitEffects !== false &&
       (this.weapon.effect === "lifesteal" || this.stat("lifeSteal") > 0)
@@ -1520,29 +1524,31 @@ export class Game {
   // scripts/prepare-assets.py (see its comment block for the colour-to-
   // rarity mapping rationale). Non-looping - one play-through then removed.
   private static readonly IMPACT_BURST_FPS = 14;
-  private spawnRarityBurst(x: number, y: number, rarity: Rarity) {
-    this.rarityBursts.push({ x, y, rarity, animT: 0 });
+  private spawnRarityBurst(x: number, y: number, rarity: Rarity, kind: "impact" | "flash" = "impact") {
+    this.rarityBursts.push({ x, y, rarity, animT: 0, kind });
   }
 
   private updateRarityBursts(dt: number) {
-    const BURST_FRAMES = 7;
-    const maxT = BURST_FRAMES / Game.IMPACT_BURST_FPS;
     this.rarityBursts = this.rarityBursts.filter((b) => {
       b.animT += dt;
-      return b.animT < maxT;
+      const frames = b.kind === "impact" ? 7 : 6;
+      return b.animT < frames / Game.IMPACT_BURST_FPS;
     });
   }
 
   private drawRarityBursts() {
     for (const b of this.rarityBursts) {
+      const impact = b.kind === "impact";
+      const drawW = impact ? 48 : 36;
+      const drawH = impact ? 48 : 53;
       this.drawSheetAnim(
-        impactBurstSheet(b.rarity),
-        "burst",
+        impact ? impactBurstSheet(b.rarity) : weaponFlashSheet(b.rarity),
+        impact ? "burst" : "flash",
         b.animT,
-        b.x - 24,
-        b.y - 24,
-        48,
-        48,
+        b.x - drawW / 2,
+        b.y - drawH / 2,
+        drawW,
+        drawH,
         false,
         Game.IMPACT_BURST_FPS,
       );
@@ -2465,17 +2471,17 @@ export class Game {
     // via ENEMY_DEFS[...].drawW/drawH) rather than reprocessing the sheet.
     //
     // Space Marine Overhaul on top of that: the hitbox grew non-uniformly
-    // (pw 14->18 = x1.2857, ph 26->32 = x1.2308) to a 2-tile-tall physical
-    // presence. The draw box is scaled by those SAME per-axis factors (not
-    // re-derived from scratch) so the sprite's proportions relative to the
-    // hitbox - and thus the overhang look established above - stay
-    // consistent: drawW = round(32 * 1.108 * 1.2857) = 46,
-    // drawH = round(34 * 1.108 * 1.2308) = 46.
+    // from its original 14x26 to 24x44 (x1.7143 / x1.6923 vs. original) for
+    // a genuinely heavy physical presence. The draw box is scaled by those
+    // SAME per-axis factors (not re-derived from scratch) so the sprite's
+    // proportions relative to the hitbox - and thus the overhang look
+    // established above - stay consistent: drawW = round(32 * 1.108 *
+    // 1.7143) = 61, drawH = round(34 * 1.108 * 1.6923) = 64.
     const HERO_SCALE = 1.108;
-    const HITBOX_SCALE_W = 18 / 14; // this.pw growth factor
-    const HITBOX_SCALE_H = 32 / 26; // this.ph growth factor
-    const drawW = Math.round(32 * HERO_SCALE * HITBOX_SCALE_W); // 46
-    const drawH = Math.round(34 * HERO_SCALE * HITBOX_SCALE_H); // 46
+    const HITBOX_SCALE_W = 24 / 14; // this.pw growth factor (from the original 14px)
+    const HITBOX_SCALE_H = 44 / 26; // this.ph growth factor (from the original 26px)
+    const drawW = Math.round(32 * HERO_SCALE * HITBOX_SCALE_W); // 61
+    const drawH = Math.round(34 * HERO_SCALE * HITBOX_SCALE_H); // 64
     const dx = this.px + this.pw / 2 - drawW / 2;
     const dy = this.py + this.ph - drawH;
     // ADR-020: char-sheet-alpha.png is single-facing (always faces right in
@@ -2625,9 +2631,12 @@ export class Game {
           // color-coding scheme (RARITY_SOUND, HUD chips) rather than
           // inventing a second, inconsistent rarity-to-hue mapping.
           const color = pickup.loot ? RARITIES[pickup.loot.rarity].color : "#fff";
+          const sprite = pickup.loot
+            ? LOOT_PICKUP_SPRITES[pickup.loot.itemType]
+            : LOOT_PICKUP_SPRITES.upgrade;
           this.drawSheetAnim(
-            LOOT_PICKUP_SPRITE.sheet,
-            LOOT_PICKUP_SPRITE.anim,
+            sprite.sheet,
+            sprite.anim,
             pickup.bobT,
             x,
             y,
