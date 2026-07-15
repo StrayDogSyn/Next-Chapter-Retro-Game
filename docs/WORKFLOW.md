@@ -149,7 +149,7 @@ For each bug:
 Update project documentation only. Do not modify code.
 1. Update README.md with current feature set and status
 2. Update ARCHITECTURE.md if technical changes were made
-3. Add session entry to README.md following the template
+3. Add session entry to docs/SESSION_LOG.md following the template
 4. Run `python scripts/project-status.py` and include verification
 ```
 

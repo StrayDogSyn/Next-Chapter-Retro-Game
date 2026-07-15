@@ -33,6 +33,7 @@
 | [AST-019](#ast-019-darksaber--wyrmwolf-boss-integration) | Bosses / Asset Pipeline | Darksaber werewolf pack and `wyrmwolf.png` aren't wired as distinct boss encounters beyond the existing single mid-boss crop | Medium | 🔴 Untracked |
 | [AST-020](#ast-020-purge-list-execution-thumbnails--wrong-projectionera-assets) | Asset Pipeline | 5 known thumbnail/wrong-projection/wrong-era assets (incl. the currently-wired `bat_sprite.png`) should be moved out of pipeline reach, not left where procgen could roll them | Low | 🔴 Untracked |
 | [DOC-021](#doc-021-stale-docsstatustxt-snapshot-duplicating-root-status) | Documentation Governance | `docs/STATUS.txt` contained a stale 2026-07-08 snapshot and risked being mistaken for current status | Low | ✅ Fixed (archived + redirected 2026-07-15) |
+| [DOC-022](#doc-022-prompt-library-v020-duplicate-section-drift) | Documentation Governance | v0.2.0 prompt templates existed in parallel section variants, creating duplicate active guidance and merge churn | Low | ✅ Fixed (canonicalized + archived 2026-07-15) |
 | [CR-001](#cr-findings-2026-07-14) | Code Review | Thirteen logic/resource/API/edge-case findings from main-branch review | High | 🟡 Partial — 10 of 13 verified fixed 2026-07-14 (CR-002/003/004/005/007/008/009/010/012/013); CR-001/006/011 remain open |
 
 ---
@@ -386,6 +387,23 @@ Sourced from the 2026-07-14 "Steam-Indie Program" asset audit and `docs/SPRITE_A
 - [x] Replaced `docs/STATUS.txt` with a redirect stub.
 - [x] Updated `docs/archive/historical/README.md` index.
 - [x] Governance rationale recorded in ADR-024.
+
+---
+
+### DOC-022: prompt-library v0.2.0 duplicate section drift
+**Issue Description:** Two differently titled v0.2.0 prompt-library sections were maintained in close sequence (`Overhaul & Polish` vs `Polish & Physics Overhaul`), which created parallel active guidance, duplicate search hits, and unnecessary merge-conflict risk during docs-only sprints.
+
+**Step-by-Step Improvement Recommendations:**
+1. Keep one canonical active heading for the v0.2.0 prompt set in `docs/PROMPT_LIBRARY.md`.
+2. Archive superseded section variants under `docs/archive/historical/legacy-imports/` (no deletes).
+3. Add a short canonicalization rule in `docs/PROMPT_LIBRARY.md` to prevent future parallel active copies.
+4. Log the governance decision in ADRs so future sessions can follow a stable policy.
+
+**Completion Checklist:**
+- [x] Canonical active section retained as `## v0.2.0 Overhaul & Polish Prompts`.
+- [x] Superseded duplicate variant archived as `docs/archive/historical/legacy-imports/prompt-library-v0.2.0-polish-duplicate-section-2026-07-15.md`.
+- [x] Canonicalization note added in `docs/PROMPT_LIBRARY.md`.
+- [x] Governance rationale recorded in ADR-030.
 
 ---
 

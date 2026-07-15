@@ -977,10 +977,20 @@ export class Game {
       this.stepT = 0;
     }
 
-    // spikes
-    const midCol = Math.floor((this.px + this.pw / 2) / TILE);
+    // spikes - sample left/center/right feet columns, not just center. A
+    // single-center sample was fine when pw=14 (mostly fit inside one 16px
+    // tile column), but the Space Marine Overhaul's pw=24 (1.5 tiles) means
+    // the feet routinely straddle a column boundary, so a spike under just
+    // the left or right edge of the foot could go undetected. Matches the
+    // multi-point sampling moveBody() already uses for wall/floor collision.
     const feetRow = Math.floor((this.py + this.ph) / TILE);
-    if (this.tileAt(midCol, feetRow) === T_SPIKE && this.iframes <= 0) {
+    const feetCols = [
+      Math.floor((this.px + 1) / TILE),
+      Math.floor((this.px + this.pw / 2) / TILE),
+      Math.floor((this.px + this.pw - 1) / TILE),
+    ];
+    const onSpike = feetCols.some((col) => this.tileAt(col, feetRow) === T_SPIKE);
+    if (onSpike && this.iframes <= 0) {
       this.damagePlayer(12);
       this.pvy = -260;
     }

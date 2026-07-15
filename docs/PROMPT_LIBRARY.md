@@ -25,6 +25,8 @@ Reusable, effective prompts from this project's agentic workflow, with notes on 
 
 ## v0.2.0 Overhaul & Polish Prompts
 
+**Canonicalization note (2026-07-15):** Keep exactly one active v0.2.0 prompt section under this heading. If a variant section is superseded during future governance passes, archive it under `docs/archive/historical/legacy-imports/` rather than keeping parallel active copies.
+
 ### Template 1: Full-Bleed Responsive Viewport
 
 ```markdown

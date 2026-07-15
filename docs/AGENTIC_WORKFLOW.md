@@ -2,7 +2,7 @@
 
 > **Purpose:** This is the working record of how this project was built in collaboration with an AI coding agent — what was asked, what came back, what was kept, changed, or thrown out, and why. It's updated after every pairing session, not written retroactively at submission time.
 >
-> **Last updated:** _2026-07-15_
+> **Last updated:** _2026-07-15 (documentation governance sync)_
 > **Maintainer:** StrayDogSyn
 
 ---
@@ -38,7 +38,7 @@
 
 | Area | State |
 |---|---|
-| Frontend game (24 rooms, combat, loot, 3 bosses) | ✅ playable; hero sprite swapped to char-sheet-alpha.png (ADR-020), code review findings logged CR-001..CR-013 |
+| Frontend game (24 rooms, combat, loot, 3 bosses) | ✅ playable; Space Marine jump/gating rounds and seeded room-order shuffle landed (ADR-027/ADR-028/ADR-029) |
 | Python service (loot + save endpoints) | 🟢 authoritative — verified on the wire 2026-07-13 |
 | Live deployment | 🟢 https://straydogsyn.github.io/Next-Chapter-Retro-Game/ (Pages → Render → Neon) |
 | Sprite/audio assets | 🟢 wired via scripts/prepare-assets.py + public/assets/manifest.json |
@@ -46,7 +46,7 @@
 | Level/world system | 🟢 24 single-screen rooms, 5 zones, validated exit graph |
 | Enemy AI | 🟢 4 regular kinds + 3 bosses with distinct patterns |
 | Weapon/loot system | 🟢 data-driven, Python-authoritative (280 combos; 6/6 prefix effects wired) |
-| Documentation | 🟢 living docs updated 2026-07-15; archive established at docs/archive/historical; visual timeline in docs/VISUAL_PROGRESSION.md |
+| Documentation | 🟢 living docs updated 2026-07-15; archive established at docs/archive/historical; v0.2.0 prompt section canonicalized |
 
 ## Session Log
 
@@ -55,6 +55,7 @@
 
 | Date | Tool | Task | Human Role | Agent Role | Outcome | Notes |
 |---|---|---|---|---|---|---|
+| 2026-07-15 | GitHub Copilot | Documentation governance sync: canonicalize v0.2.0 prompt section + archive duplicate variant note | Requested archive-first cleanup, living-doc refresh, and link validation | Archived duplicate prompt-section variant note under `docs/archive/historical/legacy-imports/`, updated workflow/session/prompt/bugs/beta/readme consistency | ✅ docs synchronized | See [SESSION_LOG.md](SESSION_LOG.md) |
 | 2026-07-15 | GitHub Copilot | Documentation governance sync: archive stale status doc + align living process docs | Requested archive-first docs maintenance and reusable prompt extraction | Archived superseded docs/STATUS snapshot into historical archive, refreshed living docs and README, and added `.github/prompts/documentation-governance-sync.prompt.md` | ✅ docs synchronized | See [SESSION_LOG.md](SESSION_LOG.md) |
 | 2026-07-14 | GitHub Copilot | Documentation governance follow-up (semantic screenshots + visual progression timeline) | Requested professional README visuals and preserved iteration history | Replaced README primary screenshots with semantically named captures; created docs/VISUAL_PROGRESSION.md to preserve legacy-to-current evolution | ✅ docs synchronized | See [SESSION_LOG.md](SESSION_LOG.md) |
 | 2026-07-14 | GitHub Copilot | Documentation governance sync (living docs + stale-claim cleanup + link validation) | Directed docs-only maintenance pass | Updated SESSION_LOG/AGENTIC_WORKFLOW/PROMPT_LIBRARY/BETA_TESTING; confirmed BUGS/README consistency with current CR status | ✅ docs synchronized | See [SESSION_LOG.md](SESSION_LOG.md) |
@@ -92,8 +93,9 @@ Architecture Decision Records (ADRs) — every time the agent's suggestion was a
 | ADR-014 | jumpPower cap to preserve double-jump gate identity | Yes | Accepted |
 | ADR-016 | Asset-utilization pass — event-to-stem mapping conventions | Yes | Accepted |
 | ADR-017 | Replayability architecture — run summary + daily seed | Yes | Accepted |
-| ADR-019 | Documentation archival policy — move, don't delete, old docs | Yes | Accepted |
-| ADR-024 | Canonical status snapshot location + docs-only link-check scope | Yes | Accepted |
+| ADR-028 | Ability-gating restored via explicit door tiles (decoupled from jump physics) | Yes | Accepted |
+| ADR-029 | Seeded room-order shuffle via graph relabeling (no procgen rewiring) | Yes | Accepted |
+| ADR-030 | Prompt-library canonicalization rule for v0.2.0 section | Yes | Accepted |
 
 </details>
 

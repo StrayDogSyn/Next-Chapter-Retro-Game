@@ -79,8 +79,9 @@ informational — replaying your daily seed is always allowed.
 
 ## Code review backlog (not blockers, but worth knowing)
 
-The 2026-07-14 senior-engineer pass originally reported 13 findings. Most were
-fixed and re-verified in follow-up passes; as of the latest docs sync (2026-07-15),
+The 2026-07-14 senior-engineer pass originally reported 13 findings, with a
+later deep-dive extending the tracked set to CR-023. Most were fixed and
+re-verified in follow-up passes; as of the latest docs sync (2026-07-15),
 the remaining open items are:
 
 - Base-path configuration coupling (`assetUrl()` depends on
@@ -88,6 +89,9 @@ the remaining open items are:
 - Legacy/duplicated HUD path (`HUD.tsx` alongside current HUD components) — CR-006.
 - `buildSaveData()` returns mutable nested references (`weapon`, `upgrades`,
   `visitedRooms`) instead of defensive copies — CR-011.
+- `GameCanvas` callback/input maintenance-risk items (CR-019, CR-022).
+- Time/day-boundary and save-write hygiene follow-ups (CR-020, CR-021).
+- Minor border-wall consistency artifacts in selected rooms from world audit (CR-023).
 
 Full details, severity ranking, and verification notes are tracked in
 [docs/BUGS_IMPROVEMENT_GUIDE.md](BUGS_IMPROVEMENT_GUIDE.md#cr-findings-2026-07-14).

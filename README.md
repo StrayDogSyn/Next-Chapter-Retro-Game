@@ -9,7 +9,7 @@ Bytefall: Segfault Summit is a retro-inspired full-stack showcase blending SNES-
 ![Tests](https://img.shields.io/badge/tests-vitest%204.1-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-**Last docs sync:** 2026-07-15
+**Last docs sync:** 2026-07-15 (governance pass: canonicalized v0.2.0 prompt section + archive index refresh)
 
 > Built for the **Next Chapter bootcamp** capstone submission.
 
@@ -48,6 +48,7 @@ The Python backend isn't decorative — it owns procedural loot and level genera
 - **Current version:** **v0.2.0** (start-screen footer now includes StrayDog Syndications stencil watermark).
 - **Gameplay status:** Playable 24-room build with 5 zones, 4 regular enemies, 3 bosses, seeded runs, run summary, and shrine-backed save flow.
 - **Service status:** Static frontend export on GitHub Pages with Python persistence/loot service designed for Render + Neon.
+- **Latest gameplay upgrades:** Space Marine movement overhaul and seeded room-order shuffle landed (ADR-027/ADR-028/ADR-029), with explicit ability-gate door tiles to preserve progression even after jump buffs.
 - **Quality status:** Vitest suite wired in-project (`npm test`), with active code-review backlog tracked in `docs/BUGS_IMPROVEMENT_GUIDE.md`.
 - **Documentation status:** Living AI-Augmentation docs are current and governed by archive-first policy (`docs/archive/historical/`).
 

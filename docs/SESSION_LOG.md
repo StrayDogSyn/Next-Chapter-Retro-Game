@@ -39,6 +39,17 @@ An incident entry never doubles as the fix record — the fix gets its own dated
 
 ## Entries
 
+### 2026-07-15 — Documentation governance sync: prompt-library canonicalization + archive index refresh
+
+- **Tool used:** GitHub Copilot (GPT-5.3-Codex)
+- **Goal:** Continue AI-Augmentation documentation governance with archive-first handling, living-doc synchronization, and internal link validation.
+- **Prompt summary:** Apply the 10-point docs-governance checklist: archive superseded/duplicate docs (no deletes), update session/workflow/prompt/bugs/beta/readme consistency, and verify internal links.
+- **What the agent produced:** Archived a superseded prompt-library duplicate-section note under `docs/archive/historical/legacy-imports/`; refreshed `AGENTIC_WORKFLOW.md`, `PROMPT_LIBRARY.md`, `WORKFLOW.md`, `BUGS_IMPROVEMENT_GUIDE.md`, `BETA_TESTING.md`, `DECISIONS.md`, and `README.md`; updated `docs/archive/historical/README.md` index.
+- **Human review/changes:** Confirmed archive-first policy was preserved and that first-party docs remain the canonical source for current process state.
+- **Outcome:** ✅ merged
+- **Time saved vs. hand-writing (rough estimate):** ~35-50 minutes
+- **Anything worth remembering:** Prompt-library sections drift easily during parallel documentation sessions; keeping one canonical section and archiving superseded variants prevents recurring merge noise and stale search hits.
+
 ### 2026-07-15 — Prompt library sync for v0.2.0 overhaul prompts
 
 - **Tool used:** GitHub Copilot (GPT-5.3-Codex)

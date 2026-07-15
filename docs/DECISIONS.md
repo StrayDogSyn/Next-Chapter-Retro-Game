@@ -455,4 +455,18 @@ _(Renumbered from a duplicate "ADR-003" during the 2026-07-08 merge-conflict cle
 
 ---
 
+## ADR-030: Prompt-library canonicalization for v0.2.0 templates (single active section + archive-first duplicates)
+
+- **Date:** 2026-07-15
+- **Status:** Accepted
+- **Originated from:** Documentation governance maintenance pass after parallel prompt-sync sessions created two near-duplicate active section variants for the same v0.2.0 template set.
+- **Context:** The prompt library gained both `## v0.2.0 Overhaul & Polish Prompts` and a near-equivalent `v0.2.0 Polish & Physics Overhaul` variant in close sequence. Even when content is nearly identical, keeping parallel active sections increases search noise, creates merge-conflict churn, and invites inconsistent future edits.
+- **Decision:** Keep exactly one canonical active heading for the v0.2.0 template set (`## v0.2.0 Overhaul & Polish Prompts`). Superseded variants are not deleted; they are archived under `docs/archive/historical/legacy-imports/` with a short rationale note. `docs/PROMPT_LIBRARY.md` now includes a canonicalization note so future sessions preserve one active source.
+- **Alternatives considered:**
+  - Keep both active variants and rely on convention — rejected; this caused the drift in the first place.
+  - Delete superseded variant traces — rejected; violates the archive-first documentation policy (ADR-019).
+- **Consequences:** Prompt reuse now has one unambiguous source for v0.2.0 templates, while historical traceability remains intact through archive entries. Future documentation-governance passes can enforce this rule mechanically (one canonical section + archive superseded variants).
+
+---
+
 _Add new ADRs as decisions are made — including ones where you overrode an agent's suggestion. Those are often the most interesting entries for a reviewer._
