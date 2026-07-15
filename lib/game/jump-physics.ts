@@ -6,17 +6,22 @@
  */
 
 export const GRAVITY = 900; // px/s^2
-// Space Marine Overhaul: buffed from an original 330 (through intermediate
-// 345/355 steps) to 380 px/s, chosen empirically via simulateJumpFlight()
-// (not guessed) to satisfy this mission's explicit requirement that the
-// base (0% jumpPower) apex clear "at least 4.5 to 5 tiles": simulated base
-// apex is 4.82 tiles (analytic 5.02). The capped-jumpPower apex rises to
-// 7.47 simulated tiles - a 0.53-tile margin below double-jump's ~9-tile
-// reach (levelLoader.ts's UPGRADED_JUMP_RISE_TILES), preserving the
-// ADR-014 invariant this constant exists to protect (checked by a test).
+// Space Marine Overhaul: buffed from an original 330 through 345/355/380 to
+// 465 px/s, this last step chosen empirically via simulateJumpFlight() to
+// land the simulated base apex at ~1.5x the previous (380px/s) round's
+// apex, per explicit user feedback ("almost there... about 1.5x higher"):
+// simulated base apex is 7.27 tiles (vs. the prior round's 4.82 - a
+// 1.51x increase), analytic 9.02 tiles. The capped-jumpPower apex rises to
+// 11.25 simulated tiles - a 2.75-tile margin below double-jump's now-buffed
+// ~14-tile reach (levelLoader.ts's UPGRADED_JUMP_RISE_TILES), preserving
+// the ADR-014 invariant this constant exists to protect (checked by a
+// test) - the relative margin is actually MORE comfortable at this
+// velocity than at 380, since JUMP_POWER_CAP_PCT's fixed +24% grows in
+// absolute px/s terms with the base velocity, but double-jump's second
+// impulse grows by that same base velocity too.
 //
 // A "dynamically derive this from the real level geometry" version was
-// tried and reverted (see ADR-025 / SESSION_LOG): it computed a
+// tried and reverted (see ADR-025/ADR-026 / SESSION_LOG): it computed a
 // `HIGHEST_FLOATING_PLATFORM_STEP_TILES` from world.ts by finding, for each
 // floating platform, the nearest OTHER support surface within 7 columns and
 // taking the world-wide max of those per-platform minimums. In room R22, a
@@ -31,12 +36,12 @@ export const GRAVITY = 900; // px/s^2
 // under both movement profiles) - a naive nearest-surface heuristic isn't
 // a safe substitute for it, so this stays a hand-verified constant,
 // cross-checked against simulation, same as before.
-export const JUMP_BASE_VELOCITY = 380; // px/s, upward (negated by callers)
+export const JUMP_BASE_VELOCITY = 465; // px/s, upward (negated by callers)
 export const COYOTE_SECONDS = 0.1;
 
-// See ADR-014 for the full derivation: capped so a maxed single jump (7.71
-// analytic / 7.47 simulated tiles) stays below double-jump's ~9-tile reach
-// (levelLoader.ts's UPGRADED_JUMP_RISE_TILES) - jumpPower is
+// See ADR-014 for the full derivation: capped so a maxed single jump (14.02
+// analytic / 11.25 simulated tiles) stays below double-jump's now-buffed
+// ~14-tile reach (levelLoader.ts's UPGRADED_JUMP_RISE_TILES) - jumpPower is
 // comfort/expression, never a progression key.
 export const JUMP_POWER_CAP_PCT = 24;
 

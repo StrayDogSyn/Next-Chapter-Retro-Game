@@ -44,21 +44,21 @@ describe("jumpVelocity", () => {
 });
 
 describe("ADR-014: capped single-jump apex stays below double-jump's reach", () => {
-  it("a maxed single jump (24% jumpPower) apexes below double-jump's now-buffed ~9-tile reach", () => {
+  it("a maxed single jump (24% jumpPower) apexes below double-jump's now-buffed ~14-tile reach", () => {
     const maxedApex = jumpApexPx(jumpVelocity(JUMP_POWER_CAP_PCT));
     const doubleJumpReachPx = UPGRADED_JUMP_RISE_TILES * 16; // levelLoader.ts
     expect(maxedApex).toBeLessThan(doubleJumpReachPx);
   });
 
-  it("base (unupgraded) jump apexes at ~5.01 tiles analytic ('Space Marine' Physical Overhaul: mathematically guaranteed 4.5-5 tiles simulated), still at/above levelLoader.ts's JUMP_RISE_TILES floor", () => {
+  it("base (unupgraded) jump apexes at ~7.51 tiles analytic (user feedback: 'about 1.5x higher' than the prior 380px/s round's 4.82 simulated tiles), still at/above levelLoader.ts's JUMP_RISE_TILES floor", () => {
     const baseApex = jumpApexPx(jumpVelocity(0));
-    expect(baseApex / 16).toBeCloseTo(5.01, 1);
+    expect(baseApex / 16).toBeCloseTo(7.51, 1);
     expect(baseApex / 16).toBeGreaterThanOrEqual(JUMP_RISE_TILES);
   });
 
   it("gravity/base-velocity constants match the physics levelLoader.ts's reachability math assumes", () => {
     expect(GRAVITY).toBe(900);
-    expect(JUMP_BASE_VELOCITY).toBe(380);
+    expect(JUMP_BASE_VELOCITY).toBe(465);
   });
 });
 
@@ -147,11 +147,13 @@ describe("jump envelope: simulated (game.ts's actual integration order) vs analy
     expect(sim.apexPx / TILE).toBeGreaterThanOrEqual(JUMP_RISE_TILES);
   });
 
-  it("'Space Marine' Physical Overhaul: simulated base apex is mathematically guaranteed to clear 4.5-5 tiles", () => {
+  it("'Space Marine' Physical Overhaul round 3: simulated base apex is ~1.5x the previous round's (4.82 -> ~7.2-7.3 tiles), per explicit user feedback", () => {
     const sim = simulateJumpFlight(jumpVelocity(0));
     const tiles = sim.apexPx / TILE;
-    expect(tiles).toBeGreaterThanOrEqual(4.5);
-    expect(tiles).toBeLessThanOrEqual(5);
+    const PREVIOUS_ROUND_APEX_TILES = 4.82; // 380px/s round (ADR-025/026)
+    expect(tiles / PREVIOUS_ROUND_APEX_TILES).toBeCloseTo(1.5, 1);
+    expect(tiles).toBeGreaterThanOrEqual(7);
+    expect(tiles).toBeLessThanOrEqual(7.5);
   });
 
   it("base jump: simulated full-flight horizontal gap is at or above levelLoader.ts's JUMP_GAP_TILES", () => {
