@@ -208,6 +208,9 @@ export const ROOMS: RoomDef[] = [
     exits: { left: "R04", right: "R06" },
     // Ability-gate restoration (ADR-028): gates the three coins the round-3
     // jump buff made trivially reachable (see ADR-027).
+    // Spike placement fix: moved the row-18 spikes down to row 19, flush
+    // with the real floor (row 20) - see R02's comment for the full
+    // reasoning (same issue in 6 rooms).
     map: [
       "########################################",
       "#......................................#",
@@ -227,8 +230,8 @@ export const ROOMS: RoomDef[] = [
       "#......................................#",
       "........................................",
       "........................................",
-      "....g......g........^^^......g......g...",
-      "........................................",
+      "....g......g.................g......g...",
+      "....................^^^.................",
       "########################################",
       "########################################",
     ],
@@ -311,6 +314,9 @@ export const ROOMS: RoomDef[] = [
     name: "Echoing Deep",
     zone: "caverns",
     exits: { up: "R07", right: "R09" },
+    // Spike placement fix (ADR-028): moved the row-18 spikes down to row
+    // 19, flush with the real floor (row 20) - see R02's comment for the
+    // full reasoning (same issue in 6 rooms).
     map: [
       "##################....##################",
       "#......................................#",
@@ -330,8 +336,8 @@ export const ROOMS: RoomDef[] = [
       "#......................................#",
       "........................................",
       "........................................",
-      "........i............^^........i........",
-      "........................................",
+      "........i......................i........",
+      ".....................^^.................",
       "########################################",
       "########################################",
     ],
@@ -375,6 +381,9 @@ export const ROOMS: RoomDef[] = [
     exits: { left: "R09", right: "R12" },
     // Ability-gate restoration (ADR-028): gates the two coins the round-3
     // jump buff made trivially reachable (see ADR-027).
+    // Spike placement fix: moved the row-18 spikes down to row 19, flush
+    // with the real floor (row 20) - see R02's comment for the full
+    // reasoning (same issue in 6 rooms).
     map: [
       "########################################",
       "#......................................#",
@@ -394,8 +403,8 @@ export const ROOMS: RoomDef[] = [
       "#........-------------------...........#",
       "........................................",
       "........................................",
-      "......^^......^^......^^......^^........",
       "........................................",
+      "......^^......^^......^^......^^........",
       "########################################",
       "########################################",
     ],
@@ -538,6 +547,9 @@ export const ROOMS: RoomDef[] = [
     exits: { left: "R14", right: "R16" },
     // Ability-gate restoration (ADR-028): gates the health pickup the
     // round-3 jump buff made trivially reachable (see ADR-027).
+    // Spike placement fix: moved the row-18 spikes down to row 19, flush
+    // with the real floor (row 20) - see R02's comment for the full
+    // reasoning (same issue in 6 rooms).
     map: [
       "########################################",
       "#......................................#",
@@ -557,8 +569,8 @@ export const ROOMS: RoomDef[] = [
       "#....----------........................#",
       "........................................",
       "........................................",
-      "....f.......f.......^^.......f......f...",
-      "........................................",
+      "....f.......f................f......f...",
+      "....................^^..................",
       "########################################",
       "########################################",
     ],
