@@ -8,57 +8,19 @@
 import { HIGHEST_FLOATING_PLATFORM_STEP_TILES, TILE } from "./world";
 
 export const GRAVITY = 900; // px/s^2
-// Space Marine Overhaul: buffed from an original 330 (through an
-// intermediate 345, then 355) to 380 px/s, chosen empirically via
-// simulateJumpFlight() (not guessed) to satisfy this mission's explicit,
-// tightened requirement that the base (0% jumpPower) apex clear "at least
-// 4.5 to 5 tiles": simulated base apex is 4.82 tiles (analytic 5.02). The
-// capped-jumpPower apex rises to 7.47 simulated tiles - a 0.53-tile margin
-// below double-jump's now-buffed ~8-9 tile reach (see
-// UPGRADED_JUMP_RISE_TILES below), preserving the ADR-014 invariant this
-// constant exists to protect (still checked by a test, not just asserted
-// here). levelLoader.ts's UPGRADED_* constants were raised again to match
-// (JUMP_RISE_TILES/JUMP_GAP_TILES stay at their prior floors - see that
-// file's comment for why) - double-jump uses this same base velocity for
-// its second impulse, so its reach grows in step with the base jump's,
-// keeping the relative gap between "base-reachable" and "ability-gated"
-// content roughly the same shape as before rather than collapsing it.
-export const JUMP_CLEARANCE_MARGIN_TILES = 0.75;
-export const REQUIRED_BASE_JUMP_RISE_PX =
-  (HIGHEST_FLOATING_PLATFORM_STEP_TILES + JUMP_CLEARANCE_MARGIN_TILES) * TILE;
 
-function deriveBaseJumpVelocity(): number {
-  for (let velocity = 1; velocity <= 2000; velocity++) {
-    if (simulateJumpFlight(velocity).apexPx >= REQUIRED_BASE_JUMP_RISE_PX) return velocity;
-  }
-  throw new Error("Unable to derive a safe base jump velocity for current level geometry");
-}
-
-export const JUMP_BASE_VELOCITY = deriveBaseJumpVelocity(); // px/s, upward (negated by callers)
-export const COYOTE_SECONDS = 0.1;
-
-// See ADR-014 for the full derivation: capped so a maxed single jump (7.71
-// analytic / 7.47 simulated tiles) stays below double-jump's now-buffed
-// ~9-tile reach (levelLoader.ts's UPGRADED_JUMP_RISE_TILES) - jumpPower is
-// comfort/expression, never a progression key.
-export const JUMP_POWER_CAP_PCT = 24;
-
-/** Upward jump speed (positive px/s; callers negate for their own sign convention). */
-export function jumpVelocity(jumpPowerPct: number): number {
-  const capped = Math.min(Math.max(jumpPowerPct, 0), JUMP_POWER_CAP_PCT);
-  return JUMP_BASE_VELOCITY * (1 + capped / 100);
-}
-
-/** Rise-to-apex height in px for a given upward launch speed (v^2 / 2g). */
-export function jumpApexPx(velocity: number): number {
-  return (velocity * velocity) / (2 * GRAVITY);
-}
-
-export function maxJumps(hasDoubleJump: boolean): number {
-  return hasDoubleJump ? 2 : 1;
-}
-
-/** Default frame step used by the simulation below; matches a 60fps loop. */
+/**
+ * Default frame step used by the simulation below; matches a 60fps loop.
+ * Declared here, ahead of everything that calls simulateJumpFlight() at
+ * module-init time (deriveBaseJumpVelocity() below), because that call
+ * relies on this as simulateJumpFlight()'s default `dt` parameter - a
+ * `const` referenced before its own declaration line has run throws
+ * (temporal dead zone), even though the *function* using it is hoisted.
+ * This was a real bug in an earlier version of this file: derivation ran
+ * eagerly at import time, before SIM_DT (previously declared much further
+ * down, next to simulateJumpFlight itself) had been initialized, crashing
+ * every module that imports from here (including levelLoader.ts).
+ */
 export const SIM_DT = 1 / 60;
 
 export type FlightSim = { apexPx: number; airtimeS: number };
@@ -122,6 +84,54 @@ export function simulateDoubleJumpFlight(launchVelocity: number, dt: number = SI
     if (t > 10) throw new Error("simulateDoubleJumpFlight: flight did not land within 10s - check inputs");
   }
   return { apexPx: -minY, airtimeS: t };
+}
+
+// Space Marine Overhaul: rather than hand-picking a velocity number (as an
+// earlier pass of this mission did - 330 -> 345 -> 355 -> 380, each one
+// guessed and manually verified against the level geometry), this mission's
+// own original framing asked to "dynamically calculate the required jump
+// velocity to clear the existing platforms rather than guessing a
+// hardcoded value." HIGHEST_FLOATING_PLATFORM_STEP_TILES (world.ts) scans
+// every room's actual authored platform geometry for the tallest rise a
+// player must clear between two floating-platform surfaces within jump-gap
+// horizontal range, and JUMP_BASE_VELOCITY is derived by searching for the
+// smallest integer velocity whose *simulated* (not analytic) apex clears
+// that height plus a fixed comfort margin. If the level geometry ever
+// changes, this constant recomputes itself instead of silently going stale.
+export const JUMP_CLEARANCE_MARGIN_TILES = 0.75;
+export const REQUIRED_BASE_JUMP_RISE_PX =
+  (HIGHEST_FLOATING_PLATFORM_STEP_TILES + JUMP_CLEARANCE_MARGIN_TILES) * TILE;
+
+function deriveBaseJumpVelocity(): number {
+  for (let velocity = 1; velocity <= 2000; velocity++) {
+    if (simulateJumpFlight(velocity).apexPx >= REQUIRED_BASE_JUMP_RISE_PX) return velocity;
+  }
+  throw new Error("Unable to derive a safe base jump velocity for current level geometry");
+}
+
+export const JUMP_BASE_VELOCITY = deriveBaseJumpVelocity(); // px/s, upward (negated by callers)
+export const COYOTE_SECONDS = 0.1;
+
+// See ADR-014 for the full derivation: this cap must keep a maxed single
+// jump's apex below double-jump's reach (levelLoader.ts's
+// UPGRADED_JUMP_RISE_TILES, itself derived from this same JUMP_BASE_VELOCITY
+// below) - checked by a test, not just asserted here - since jumpPower is
+// meant to be comfort/expression, never a progression key.
+export const JUMP_POWER_CAP_PCT = 24;
+
+/** Upward jump speed (positive px/s; callers negate for their own sign convention). */
+export function jumpVelocity(jumpPowerPct: number): number {
+  const capped = Math.min(Math.max(jumpPowerPct, 0), JUMP_POWER_CAP_PCT);
+  return JUMP_BASE_VELOCITY * (1 + capped / 100);
+}
+
+/** Rise-to-apex height in px for a given upward launch speed (v^2 / 2g). */
+export function jumpApexPx(velocity: number): number {
+  return (velocity * velocity) / (2 * GRAVITY);
+}
+
+export function maxJumps(hasDoubleJump: boolean): number {
+  return hasDoubleJump ? 2 : 1;
 }
 
 const BASE_FLIGHT = simulateJumpFlight(JUMP_BASE_VELOCITY);
