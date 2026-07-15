@@ -28,7 +28,7 @@ This document preserves older screenshot captures while showing how the game's p
 
 | Focus | Screenshot |
 | --- | --- |
-| Current start-screen branding | ![Starting screen](../assets/img/screenshots/starting-screen.png) |
+| Historical pre-RetroVania start-screen branding | ![Starting screen](../assets/img/screenshots/starting-screen.png) |
 | Updated loading-state presentation | ![Updated loading screen](../assets/img/screenshots/updated-loading-screen.png) |
 | Current gameplay framing and HUD polish | ![Updated working model](../assets/img/screenshots/updated-working-model.png) |
 | Controls UX and interaction layer | ![Control menu](../assets/img/screenshots/control-menu.png) |

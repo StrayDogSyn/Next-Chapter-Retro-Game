@@ -428,9 +428,9 @@ Observable evidence: taking damage in-game **updates the HUD health number** whi
 
 ### PHASE 8 — Responsive Canvas & Polish
 
-**Objective:** Responsive integer-scaled canvas, audio, fonts, fullscreen, final tuning.
+**Objective:** Responsive full-bleed canvas, audio, fonts, fullscreen, final tuning.
 
-**Responsive canvas pattern:** keep the 480×270 internal buffer; on `ResizeObserver` fire, compute the largest integer scale that fits the viewport, letterbox/pillarbox the remainder (`object-fit: contain` behavior or explicit black bars), and set `canvas.width = GAME_W * dpr; ctx.setTransform(dpr,0,0,dpr,0,0); ctx.imageSmoothingEnabled=false`. Use `devicePixelContentBoxSize` where available (Chrome/Edge), fall back to `contentBoxSize * devicePixelRatio` (Safari). Transform mouse/touch coords back into internal-resolution space. Support the Fullscreen API and touch controls for mobile.
+**Responsive canvas pattern (superseded by ADR-031):** retain a fixed logical drawing coordinate system while the stage and canvas fill the available container with `position: absolute; inset: 0; width: 100%; height: 100%`. Resize the backing buffer from measured CSS bounds and device pixel ratio, keep `imageSmoothingEnabled=false`, and transform mouse/touch coordinates back into logical space. The current design intentionally does not letterbox/pillarbox; support the Fullscreen API and touch controls for mobile.
 
 **Fonts (CDN vs bundle decision):** use **`next/font/google`** for **Press Start 2P** — Next.js downloads and **self-hosts** it at build time (no runtime request to Google, zero layout shift, served from your domain with `Cache-Control: public, max-age=31536000, immutable`). This is strictly better than a `<link>` to Google's CDN. Set `display:'swap'` and expose as a CSS variable.
 

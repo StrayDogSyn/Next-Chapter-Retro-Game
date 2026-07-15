@@ -16,5 +16,6 @@ This folder stores deprecated or superseded documentation retained for traceabil
 - `legacy-imports/prompt-library-v0.2.0-polish-duplicate-section-2026-07-15.md` (superseded duplicate v0.2.0 prompt-section variant; canonical section remains in `docs/PROMPT_LIBRARY.md`)
 - `legacy-imports/asset-sources-from-sibling-branch.md`
 - `legacy-imports/bugs-improvement-guide-from-sibling-branch.md`
+- `legacy-imports/test-regression-contracts-from-sibling-branch.py` (preserved regression-contract helper imported from a retired sibling branch)
 
 Use active docs in `docs/` for current architecture/workflow decisions.

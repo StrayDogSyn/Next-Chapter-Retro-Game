@@ -2,7 +2,7 @@
 
 RetroVania is a retro-inspired full-stack rogue-like platformer blending SNES-style 2D sprite art, open-source chiptune SFX, deterministic seeded runs, and Python-backed loot/persistence inside a TypeScript/Next.js app. It was built in collaboration with AI coding agents to demonstrate agentic development workflows alongside core software engineering fundamentals.
 
-![Start screen](assets/img/screenshots/starting-screen.png)
+![Current gameplay](assets/img/screenshots/updated-working-model.png)
 
 ![Status](https://img.shields.io/badge/status-in--progress-yellow)
 ![Stack](https://img.shields.io/badge/stack-Next.js%2014%20%2B%20React%2018%20%2B%20TypeScript%205.9%20%2B%20FastAPI-blue)
@@ -99,7 +99,7 @@ The Next.js app owns rendering, input, and UI. The Python service owns logic tha
 - 24 single-screen rooms across 5 zones, validated at load by `lib/game/levelLoader.ts`
 - Sprite animation state machine (idle / walk / jump / attack); hero swapped to swm `char-sheet-alpha.png` + 8 palette variants (ADR-020), with a `24×44` collision body and `61×64` feet-centered render box for the Space Marine overhaul
 - Full-bleed responsive start screen with the canonical RetroVania title and StrayDog v0.2.0 watermark
-- Unified keyboard + Xbox gamepad + touch input handler; virtual gamepad and tactical tap modes (ADR-021)
+- Unified keyboard + Xbox gamepad + touch input handler with persisted auto/on/off touch policy (ADR-021)
 - React HUD header and footer layered outside the canvas (HP, XP, coins, weapon, minimap, loot/save source, control hints)
 - 4 regular enemy types + 3 bosses with distinct AI patterns
 - Deterministic seeded RNG with forked loot/combat/shop streams; Daily Seed and Enter Seed modes
@@ -142,10 +142,10 @@ The browser fetches the Python service directly at `NEXT_PUBLIC_PYTHON_SERVICE_U
 ## Project Structure
 
 ```
-├── app/                # Next.js routes and API routes
+├── app/                # Next.js App Router pages, layout, and global styles
 ├── components/         # Canvas renderer, header/footer HUD, menu components, touch overlay
 ├── lib/                # Game loop, input, world, items, audio manager, save/loot clients
-├── python-service/     # FastAPI app for loot rolling, persistence, and procedural generation
+├── python-service/     # FastAPI app for authoritative loot/persistence; legacy level-demo endpoint retained
 ├── public/
 │   ├── assets/          # Extracted asset packs + manifest.json
 │   ├── sprites/         # Packed spritesheets + spritemeta.json
@@ -159,9 +159,11 @@ The browser fetches the Python service directly at `NEXT_PUBLIC_PYTHON_SERVICE_U
 
 ## Screenshots
 
-| Start Screen | Loading Sequence |
+| Historical Start Screen | Loading Sequence |
 | --- | --- |
-| ![Start screen](assets/img/screenshots/starting-screen.png) | ![Updated loading screen](assets/img/screenshots/updated-loading-screen.png) |
+| ![Pre-repair start screen retained for visual history](assets/img/screenshots/starting-screen.png) | ![Updated loading screen](assets/img/screenshots/updated-loading-screen.png) |
+
+> The start-screen capture predates the current RetroVania title/full-bleed repair. A fresh current-state capture is tracked in the roadmap; older evidence remains available through [docs/VISUAL_PROGRESSION.md](docs/VISUAL_PROGRESSION.md).
 
 | Gameplay Loop | Controls Menu |
 | --- | --- |

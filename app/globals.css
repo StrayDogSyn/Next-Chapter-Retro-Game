@@ -260,8 +260,20 @@ body {
 }
 
 #game-stage-viewport {
-  width: 100vw;
-  height: 100dvh;
+  /* Fill the flex-allocated space inside .game-canvas-shell, not the raw
+     viewport. This element is a flex child of a container that has its own
+     2px border and sits inside the page's own layout padding - 100vw/100dvh
+     ignore all of that and size against the full browser window instead,
+     which can overflow the shell (the classic "100vw is wider than the
+     actual visible content area" pitfall) and clip/shift the game canvas.
+     The Tailwind `w-full` class already on this element expresses the
+     correct intent (100% of parent); this ID rule was overriding it with
+     the wrong unit due to higher CSS specificity. .game-canvas-shell's own
+     `flex: 1` already makes it grow to fill the page's available height, so
+     100% here achieves the same "fill the screen" result without the
+     viewport-unit overflow risk.  */
+  width: 100%;
+  height: 100%;
   margin: 0;
   padding: 0;
   position: relative;

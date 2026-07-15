@@ -469,4 +469,16 @@ _(Renumbered from a duplicate "ADR-003" during the 2026-07-08 merge-conflict cle
 
 ---
 
+## ADR-031: Full-container start-screen sizing and canonical RetroVania branding truth sources
+
+- **Date:** 2026-07-15
+- **Status:** Accepted; fresh visual verification pending
+- **Originated from:** Human screenshot report that the start screen still did not fit its container, displayed the retired game title, and omitted the StrayDog watermark.
+- **Context:** The start canvas used CSS `width: 100%; height: 100%` but remained a positioned flex item. As a replaced element with an intrinsic canvas ratio, it centered inside the taller glass-panel container and left unused horizontal bands. The visible title and browser metadata were independent hardcoded strings, and the square stencil was drawn into a shallow rectangle.
+- **Decision:** The start panel owns the full dynamic viewport height, `.start-screen-wrap` owns all available inner space, and `.start-screen-canvas` is absolutely anchored with `inset: 0`. The existing logical `800×520` coordinate system and client-to-logical pointer mapping remain authoritative; this is a presentation sizing change, not a parallel render system. `RetroVania | Rogue-like Platformer` is the canonical current product title in `components/StartMenu.tsx`, `app/layout.tsx`, root README, beta guidance, and other living project docs. Historical session records and archived specifications retain period-accurate wording except where a document remains an active current-state authority. The square StrayDog asset is drawn square beside `v0.2.0` at reduced opacity.
+- **Alternatives considered:** Preserve aspect-ratio letterboxing — rejected because the requested design is full-bleed. Rewrite all canvas coordinates responsively — rejected because the existing logical coordinate and hit-test mapping already work and a second coordinate system would create drift. Stretch the stencil into the available footer strip — rejected because it destroys the source mark's proportions and made it effectively disappear.
+- **Consequences:** Start-screen presentation now fills its container and branding has explicit synchronized truth sources. Full-bleed scaling may intentionally distort the logical scene at extreme aspect ratios; that tradeoff is accepted for this design. A fresh deployed screenshot and command verification remain required before UI-023 can move from source-fixed to fully verified.
+
+---
+
 _Add new ADRs as decisions are made — including ones where you overrode an agent's suggestion. Those are often the most interesting entries for a reviewer._
