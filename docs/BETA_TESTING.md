@@ -2,7 +2,7 @@
 
 **Live now (latest documented target):** **https://straydogsyn.github.io/Next-Chapter-Retro-Game/**
 
-**Current milestone build:** **v0.2.0** (includes the StrayDog Syndications stencil watermark on the start-screen footer).
+**Current milestone build:** **v0.2.0**, titled **RetroVania | Rogue-like Platformer** in browser metadata and on the canvas start screen. The footer loads the square StrayDog Syndications stencil watermark beside the version.
 
 The intended production path is Python backend (Render) + Neon persistence,
 with loot and saves routed through the service when reachable (ADR-009).
@@ -29,6 +29,7 @@ glance; hover it for the raw `lootSource`/`saveSource` values.
 
 ## Known limitations
 
+- **Start-screen visual verification is pending a fresh deployed capture.** Source now uses a full-bleed container, one-line fitted RetroVania title, and square watermark, but testers should report any remaining top/bottom bands, clipped title text, or missing branding at their viewport size.
 - **Touch controls are beta-quality.** Mobile now uses Pointer Events with a
   persisted touch-controls mode toggle (`auto`/`on`/`off`). `auto` reveals on
   first touch and may suppress while physical inputs are active. Report

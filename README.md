@@ -1,6 +1,6 @@
-# Bytefall: Segfault Summit
+# RetroVania | Rogue-like Platformer
 
-Bytefall: Segfault Summit is a retro-inspired full-stack showcase blending SNES-style 2D sprite art, open-source chiptune SFX, and Python-powered game logic inside a TypeScript/Next.js app — built in collaboration with AI coding agents to demonstrate agentic development workflows alongside core software engineering fundamentals.
+RetroVania is a retro-inspired full-stack rogue-like platformer blending SNES-style 2D sprite art, open-source chiptune SFX, deterministic seeded runs, and Python-backed loot/persistence inside a TypeScript/Next.js app. It was built in collaboration with AI coding agents to demonstrate agentic development workflows alongside core software engineering fundamentals.
 
 ![Start screen](assets/img/screenshots/starting-screen.png)
 
@@ -9,7 +9,7 @@ Bytefall: Segfault Summit is a retro-inspired full-stack showcase blending SNES-
 ![Tests](https://img.shields.io/badge/tests-vitest%204.1-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-**Last docs sync:** 2026-07-15 (governance pass: canonicalized v0.2.0 prompt section + archive index refresh)
+**Last docs sync:** 2026-07-15 (RetroVania title, full-bleed start screen, watermark repair, and living-document truth sync)
 
 > Built for the **Next Chapter bootcamp** capstone submission.
 
@@ -40,13 +40,14 @@ This project is two things at once, on purpose:
 1. **A playable retro game** — SNES-era pixel aesthetics, hand-rolled canvas rendering, chiptune SFX, and a 24-room Metroidvania-style world with three bosses.
 2. **A demonstration of agentic pairing** — every major build phase was worked through with an AI coding agent, and that process is documented as a first-class part of the submission, not an afterthought.
 
-The Python backend isn't decorative — it owns procedural loot and level generation, while the Next.js frontend owns rendering, input, and UI. See [Architecture](#architecture) for the full rationale.
+The Python backend isn't decorative — it owns authoritative loot rolls and hosted persistence, while the Next.js frontend owns rendering, input, UI, and deterministic relabeling of the hand-authored room graph. The legacy `/generate-level` scaffold endpoint is not used by the game client. See [Architecture](#architecture) for the full rationale.
 
 ## Current Project State
 
 - **Live URL:** [straydogsyn.github.io/Next-Chapter-Retro-Game](https://straydogsyn.github.io/Next-Chapter-Retro-Game/)
-- **Current version:** **v0.2.0** (start-screen footer now includes StrayDog Syndications stencil watermark).
-- **Gameplay status:** Playable 24-room build with 5 zones, 4 regular enemies, 3 bosses, seeded runs, run summary, and shrine-backed save flow.
+- **Current version:** **v0.2.0**, branded as **RetroVania | Rogue-like Platformer** in browser metadata and the canvas start screen.
+- **Start screen:** Full-bleed responsive canvas, one-line fitted title, and a square StrayDog Syndications stencil watermark beside the version footer; fresh live-capture verification remains part of the polish checklist.
+- **Gameplay status:** Playable 24-room build with 5 zones, 4 regular enemies, 3 bosses, seeded room-order shuffling, run summary, and shrine-backed save flow.
 - **Service status:** Static frontend export on GitHub Pages with Python persistence/loot service designed for Render + Neon.
 - **Latest gameplay upgrades:** Space Marine movement overhaul and seeded room-order shuffle landed (ADR-027/ADR-028/ADR-029), with explicit ability-gate door tiles to preserve progression even after jump buffs.
 - **Quality status:** Vitest suite wired in-project (`npm test`), with active code-review backlog tracked in `docs/BUGS_IMPROVEMENT_GUIDE.md`.
@@ -58,11 +59,14 @@ The Python backend isn't decorative — it owns procedural loot and level genera
 
 | Layer | Tech | Why |
 |---|---|---|
-| Frontend | Next.js 14 (App Router) + TypeScript | Type-safe, modern React conventions, SSR-capable |
-| Rendering | HTML5 Canvas (no game engine) | Demonstrates fundamentals — render loop, delta time, sprite state machines — rather than hiding them behind a library |
-| Backend | Python (FastAPI) | Isolated service for logic that's a better fit in Python — see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
-| Audio | Web Audio API | Native browser audio, no dependency needed for simple SFX playback |
-| Sprites | Hand-authored/CC0 spritesheets | 16x16 / 32x32 grid, SNES-style palette constraints |
+| Frontend | Next.js 14, React 18, TypeScript 5.9, Tailwind CSS 3.4 | Type-safe App Router UI and responsive presentation |
+| Rendering | HTML5 Canvas (no game engine) | Demonstrates fundamentals — render loop, delta time, collision, and sprite state machines — rather than hiding them behind a library |
+| Backend | Python + FastAPI | Authoritative loot and persistence service — see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| Persistence | Neon PostgreSQL + `localStorage` fallback | Hosted continuity with offline/degraded-mode resilience |
+| Testing | Vitest 4.1 + TypeScript compiler | Pure-logic regression coverage and strict type validation |
+| Deployment | GitHub Pages + Render + Neon | Static frontend with independently deployable service and database |
+| Audio | Web Audio API | Native browser audio with no runtime audio framework |
+| Sprites | Script-processed open-source spritesheets | Deterministic metadata-driven clips and pixel-art rendering |
 
 ## Architecture
 
@@ -93,7 +97,8 @@ The Next.js app owns rendering, input, and UI. The Python service owns logic tha
 
 - `requestAnimationFrame`-based game loop with delta-time movement
 - 24 single-screen rooms across 5 zones, validated at load by `lib/game/levelLoader.ts`
-- Sprite animation state machine (idle / walk / jump / attack); hero swapped to swm `char-sheet-alpha.png` + 8 palette variants (ADR-020), aliased clip map (run+aim-sweep sheet with no distinct idle/jump/crouch/hurt/death authored poses — logged as asset debt)
+- Sprite animation state machine (idle / walk / jump / attack); hero swapped to swm `char-sheet-alpha.png` + 8 palette variants (ADR-020), with a `24×44` collision body and `61×64` feet-centered render box for the Space Marine overhaul
+- Full-bleed responsive start screen with the canonical RetroVania title and StrayDog v0.2.0 watermark
 - Unified keyboard + Xbox gamepad + touch input handler; virtual gamepad and tactical tap modes (ADR-021)
 - React HUD header and footer layered outside the canvas (HP, XP, coins, weapon, minimap, loot/save source, control hints)
 - 4 regular enemy types + 3 bosses with distinct AI patterns
@@ -172,7 +177,7 @@ The browser fetches the Python service directly at `NEXT_PUBLIC_PYTHON_SERVICE_U
 
 ### Responsive canvas scaling
 
-The canvas keeps its internal 640×352 resolution but scales to fit the viewport while preserving aspect ratio and crisp pixel art.
+The runtime and start-screen canvases fill their available containers. Each retains a fixed logical drawing coordinate system while CSS and device-pixel-ratio-aware backing buffers scale the presentation to the viewport; the current full-bleed design intentionally does not enforce letterboxing.
 
 ### Playtest
 
@@ -207,7 +212,8 @@ All third-party assets are CC0 or explicitly licensed for reuse. The runtime ass
 - [x] Python service wired to loot generation and persistence
 - [x] Real sprite/audio assets swapped in via the asset pipeline
 - [x] Living documentation structure and ADRs
-- [x] Responsive canvas + header/footer HUD refactor
+- [x] Full-bleed responsive canvas + header/footer HUD refactor
+- [x] RetroVania title synchronized across start-screen canvas and browser metadata; StrayDog v0.2.0 watermark wired
 - [x] Level progression save state and inventory persistence (shrines + server + localStorage fallback, ADR-010)
 - [x] Daily/Enter Seed modes and run-summary screen (ADR-017)
 - [x] Touch controls — Pointer Events, auto/on/off policy (ADR-021)
@@ -216,8 +222,9 @@ All third-party assets are CC0 or explicitly licensed for reuse. The runtime ass
 - [x] Senior-engineer code review of main branch; CR-001..CR-013 findings logged
 
 ### In progress / next
-- [ ] Code-review fix backlog (10/13 findings fixed; open: CR-001, CR-006, CR-011 — see [docs/BUGS_IMPROVEMENT_GUIDE.md](docs/BUGS_IMPROVEMENT_GUIDE.md#cr-findings-2026-07-14))
-- [ ] Sprite asset utilization pass (AST-014..AST-020: powerups, impacts/weaponflash rarity FX, swm biome, tile-variation pools, zone backdrops, darksaber+wyrmwolf bosses, purge-list execution)
+- [ ] Code-review follow-ups across CR-001..CR-023 (open: CR-001, CR-006, CR-011, CR-019..CR-023 — see [docs/BUGS_IMPROVEMENT_GUIDE.md](docs/BUGS_IMPROVEMENT_GUIDE.md#cr-findings-2026-07-14))
+- [ ] Capture and publish a fresh start-screen screenshot verifying full-bleed placement, exact RetroVania title, and visible square watermark
+- [ ] Continue sprite asset utilization (AST-014 shipped; AST-015 partial; AST-016..AST-020 remain: coherent swm biome, tile-variation pools, zone backdrops, boss integration, and purge-list execution)
 - [ ] Zone-specific ambient/music
 - [ ] Deployment hardening follow-through (credential-rotation gate + production backend verification evidence)
 - [ ] Bootcamp submission polish pass

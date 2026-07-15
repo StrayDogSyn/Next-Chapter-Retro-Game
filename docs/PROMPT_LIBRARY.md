@@ -84,6 +84,24 @@ Reusable, effective prompts from this project's agentic workflow, with notes on 
 4. Update `package.json`, `BETA_TESTING.md`, and `README.md` to `0.2.0`.
 ```
 
+### Template 6: Canvas Start-Screen Truth Sync
+
+```markdown
+**Objective:** Repair a canvas start screen that does not fill its container and synchronize its visible title and release branding across every authoritative source.
+
+**Instructions:**
+1. Inspect the parent flex/grid sizing and the canvas's replaced-element behavior before changing draw coordinates. Give the parent an explicit available height and use `position: absolute; inset: 0; width: 100%; height: 100%;` when the canvas must fill it without preserving its intrinsic ratio.
+2. Keep one logical canvas coordinate system and resize only the backing buffer/CSS presentation; verify pointer hit-testing still maps client coordinates into logical coordinates.
+3. Update the visible canvas title and `app/layout.tsx` metadata title together. Fit long one-line titles to the available region rather than clipping or silently splitting them.
+4. Verify branding assets exist under `public/`, preserve their source aspect ratio when drawing, and place the watermark beside—not underneath—the version label.
+5. Truth-sync `README.md`, `docs/BETA_TESTING.md`, `docs/AGENTIC_WORKFLOW.md`, and the session log. Do not claim the visual repair is complete until a fresh viewport screenshot and type/build checks pass.
+```
+
+**Why it worked:**
+- It separates CSS/container diagnosis from canvas drawing changes, avoiding coordinate-system rewrites for a layout bug.
+- It treats title, metadata, watermark, and docs as one branding contract instead of four independent strings/assets that can drift.
+- It explicitly preserves honest verification status when source changes are complete but a fresh browser capture is still pending.
+
 ### Documentation governance sync prompt (2026-07-15)
 
 **Used for:** Repeatable docs-maintenance passes (archive superseded docs, refresh living process docs, update README state, and validate internal links)

@@ -2,7 +2,7 @@
 
 > **Purpose:** This is the working record of how this project was built in collaboration with an AI coding agent — what was asked, what came back, what was kept, changed, or thrown out, and why. It's updated after every pairing session, not written retroactively at submission time.
 >
-> **Last updated:** _2026-07-15 (documentation governance sync)_
+> **Last updated:** _2026-07-15 (RetroVania start-screen repair and documentation truth sync)_
 > **Maintainer:** StrayDogSyn
 
 ---
@@ -46,7 +46,8 @@
 | Level/world system | 🟢 24 single-screen rooms, 5 zones, validated exit graph |
 | Enemy AI | 🟢 4 regular kinds + 3 bosses with distinct patterns |
 | Weapon/loot system | 🟢 data-driven, Python-authoritative (280 combos; 6/6 prefix effects wired) |
-| Documentation | 🟢 living docs updated 2026-07-15; archive established at docs/archive/historical; v0.2.0 prompt section canonicalized |
+| Start screen / branding | 🟡 source repaired: full-container canvas, canonical RetroVania title, square StrayDog v0.2.0 watermark; fresh deployed capture pending |
+| Documentation | 🟢 living docs updated 2026-07-15; archive established at docs/archive/historical; title/features/roadmap truth-synced |
 
 ## Session Log
 
@@ -55,12 +56,11 @@
 
 | Date | Tool | Task | Human Role | Agent Role | Outcome | Notes |
 |---|---|---|---|---|---|---|
+| 2026-07-15 | Windsurf Cascade | RetroVania start-screen repair + comprehensive documentation truth sync | Supplied visual regression evidence and requested archive-first repository documentation refresh | Fixed full-container canvas placement/title/watermark sources; synchronized living docs, README, beta guidance, QA finding, prompt pattern, and ADR | 🟡 edits complete; fresh visual/command verification pending | See [SESSION_LOG.md](SESSION_LOG.md) |
 | 2026-07-15 | GitHub Copilot | Documentation governance sync: canonicalize v0.2.0 prompt section + archive duplicate variant note | Requested archive-first cleanup, living-doc refresh, and link validation | Archived duplicate prompt-section variant note under `docs/archive/historical/legacy-imports/`, updated workflow/session/prompt/bugs/beta/readme consistency | ✅ docs synchronized | See [SESSION_LOG.md](SESSION_LOG.md) |
 | 2026-07-15 | GitHub Copilot | Documentation governance sync: archive stale status doc + align living process docs | Requested archive-first docs maintenance and reusable prompt extraction | Archived superseded docs/STATUS snapshot into historical archive, refreshed living docs and README, and added `.github/prompts/documentation-governance-sync.prompt.md` | ✅ docs synchronized | See [SESSION_LOG.md](SESSION_LOG.md) |
 | 2026-07-14 | GitHub Copilot | Documentation governance follow-up (semantic screenshots + visual progression timeline) | Requested professional README visuals and preserved iteration history | Replaced README primary screenshots with semantically named captures; created docs/VISUAL_PROGRESSION.md to preserve legacy-to-current evolution | ✅ docs synchronized | See [SESSION_LOG.md](SESSION_LOG.md) |
 | 2026-07-14 | GitHub Copilot | Documentation governance sync (living docs + stale-claim cleanup + link validation) | Directed docs-only maintenance pass | Updated SESSION_LOG/AGENTIC_WORKFLOW/PROMPT_LIBRARY/BETA_TESTING; confirmed BUGS/README consistency with current CR status | ✅ docs synchronized | See [SESSION_LOG.md](SESSION_LOG.md) |
-| 2026-07-14 | Claude Code | Documentation refresh: archive superseded docs, refresh living docs, verify links | Directed documentation updates | Archived PHASE2_OVERHAUL.md; refreshed SESSION_LOG, AGENTIC_WORKFLOW, PROMPT_LIBRARY, BETA_TESTING, BUGS_IMPROVEMENT_GUIDE; verified all internal links | ✅ all docs current, archive updated | See [SESSION_LOG.md](SESSION_LOG.md) |
-| 2026-07-14 | Windsurf Cascade | Code-review findings logged + AI-Augmentation documentation refresh | Scoped review + docs update; verified test pass | Reviewed main branch for logic/resource/API issues; updated all docs + README; archived duplicate brief | 🟡 docs complete, fixes pending | See [SESSION_LOG.md](SESSION_LOG.md) |
 
 Full history: [docs/SESSION_LOG.md](SESSION_LOG.md) — keep this table above to the 3-5 most recent sessions, archive the rest there.
 
@@ -76,7 +76,7 @@ A running collection of prompts that worked (and a few that didn't) — full det
 - **Scaffold prompt** — structured, file-by-file spec → clean PR, minimal rework
 - **Code review prompt (branch vs main)** — scoping to a branch diff with explicit focus criteria cuts noise significantly
 - **Documentation update prompt** — README + ARCHITECTURE refresh, session entry, link validation
-- _(add more as sessions accumulate)_
+- **Canvas start-screen truth-sync prompt** — diagnose CSS replaced-element sizing, then synchronize canvas title, metadata, watermark, README, and beta guidance
 
 </details>
 
@@ -96,6 +96,7 @@ Architecture Decision Records (ADRs) — every time the agent's suggestion was a
 | ADR-028 | Ability-gating restored via explicit door tiles (decoupled from jump physics) | Yes | Accepted |
 | ADR-029 | Seeded room-order shuffle via graph relabeling (no procgen rewiring) | Yes | Accepted |
 | ADR-030 | Prompt-library canonicalization rule for v0.2.0 section | Yes | Accepted |
+| ADR-031 | Full-container start-screen sizing + canonical RetroVania branding truth sources | Yes | Accepted |
 
 </details>
 
@@ -116,7 +117,8 @@ This is the honesty section. Bootcamp reviewers care about this more than the co
 | Boss AI system | Agent (current) | 100% agent-authored; includes multi-phase behavior, attack patterns |
 | Weapon/loot system | Agent (current) | 100% agent-authored; data-driven JSON stat model |
 | Input system (keyboard + gamepad) | Agent (current) | Extended from keyboard-only to unified InputState interface; gamepad polling in render loop |
-| This documentation system | Human (prompted structure to Claude in prior session) | Agent updated status tables, session log, README, and archive index 2026-07-14 |
+| Start-screen responsive layout and branding repair | Agent (Windsurf Cascade) | Human supplied screenshot evidence and requested exact title/watermark correction |
+| This documentation system | Human (prompted structure to Claude in prior session) | Agents maintain status tables, session log, README, prompt library, ADRs, QA guide, and archive index |
 
 **Guiding rule:** if a component is >70% agent-generated, say so plainly here rather than letting the README imply otherwise.
 

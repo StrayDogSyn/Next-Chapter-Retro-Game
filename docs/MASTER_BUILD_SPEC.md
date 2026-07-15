@@ -1,4 +1,4 @@
-# Bytefall: Segfault Summit — Master Build Specification
+# RetroVania | Rogue-like Platformer — Master Build Specification
 ### An Agent-Executable Overhaul Spec with Ground-Truth Verification Discipline
 
 ---

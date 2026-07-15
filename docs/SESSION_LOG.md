@@ -39,6 +39,17 @@ An incident entry never doubles as the fix record — the fix gets its own dated
 
 ## Entries
 
+### 2026-07-15 — RetroVania start-screen repair + comprehensive documentation truth sync
+
+- **Tool used:** Windsurf Cascade
+- **Goal:** Repair the start screen's container placement, canonical title, and missing watermark, then synchronize all living AI-Augmentation and project-facing documentation without deleting historical records.
+- **Prompt summary:** Diagnose the screenshot against current CSS/canvas code, fix full-bleed sizing and branding at the authoritative sources, then apply the archive-first 10-point documentation-governance checklist and validate internal links.
+- **What the agent produced:** Changed the start panel/canvas from intrinsic-ratio flex sizing to full-container absolute sizing; synchronized `RetroVania | Rogue-like Platformer` between canvas and browser metadata; restored the square StrayDog stencil beside `v0.2.0`; refreshed README, workflow/status docs, beta guidance, prompt notes, QA findings, and ADR history. The archive audit found no new full-content duplicate requiring a move; existing archive-backed redirect stubs were preserved.
+- **Human review/changes:** User supplied the failing start-screen screenshot and requested the subsequent repository-wide documentation sync. Fresh deployed screenshot review remains pending.
+- **Outcome:** 🟡 partial — implementation and documentation edits complete; command/link verification must pass before closeout.
+- **Time saved vs. hand-writing (rough estimate):** ~60-90 minutes
+- **Anything worth remembering:** A canvas with CSS `width/height: 100%` can still preserve its intrinsic replaced-element ratio when it participates in flex layout. For a genuinely full-container canvas, give the parent an explicit size and anchor the canvas with `position: absolute; inset: 0`; verify title and branding across canvas, metadata, README, and beta docs as one truth-sync unit.
+
 ### 2026-07-15 — Documentation governance sync: prompt-library canonicalization + archive index refresh
 
 - **Tool used:** GitHub Copilot (GPT-5.3-Codex)

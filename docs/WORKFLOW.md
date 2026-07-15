@@ -46,7 +46,8 @@ deleted so the AI-Augmentation trail stays traceable.
 1. **Documentation Updates:** Only update files listed in "Core Documentation Files" above
 2. **No Parallel Systems:** Extend existing files, don't create duplicate documentation paths
 3. **Ground Truth Verification:** Always run `python scripts/project-status.py` before claiming completion
-4. **Status Reporting:** Update the status table in `README.md`, not deprecated workflow files
+4. **Status Reporting:** Update the current-state section in `README.md`, not deprecated workflow files
+5. **Branding Truth Sync:** When the product title or release branding changes, verify `app/layout.tsx`, `components/StartMenu.tsx`, `README.md`, and `docs/BETA_TESTING.md` together; do not update historical session records retroactively
 
 ### Session Documentation Template
 
@@ -73,7 +74,7 @@ Optional accelerator:
 ### ADR-002: No Game Engine Libraries
 - **Decision:** Raw HTML5 Canvas + requestAnimationFrame, no Phaser/PixiJS
 - **Reasoning:** Demonstrates fundamental understanding rather than configuration
-- **Implementation:** Custom render loop in `components/GameCanvas.tsx`
+- **Implementation:** Canvas lifecycle in `components/GameCanvas.tsx`; authoritative game render/update loop in `lib/game/game.ts`
 
 ### ADR-003: Client-Side Loot Fallback
 - **Decision:** Python service is authoritative, client has minimal fallback

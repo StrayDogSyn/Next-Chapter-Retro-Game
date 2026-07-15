@@ -2,7 +2,7 @@
 
 > **Purpose:** This document tracks usability issues, gameplay bugs, and feature enhancements identified during human playtesting and QA audits. Each item provides root-cause analysis, actionable step-by-step remediation aligned with the project architecture, and a strict verification checklist.
 >
-> **Last updated:** 2026-07-15 (documentation governance sync — stale `docs/STATUS.txt` snapshot archived; process references normalized)
+> **Last updated:** 2026-07-15 (RetroVania start-screen sizing/title/watermark repair + documentation truth sync)
 > **Maintainer:** StrayDogSyn / QA & Engineering Team  
 > **Rule of Thumb:** All changes must respect existing architectural boundaries (no parallel canvas systems, unified `Game` class logic in `lib/game/game.ts`, asset ingestion strictly via `scripts/prepare-assets.py`).
 
@@ -34,6 +34,7 @@
 | [AST-020](#ast-020-purge-list-execution-thumbnails--wrong-projectionera-assets) | Asset Pipeline | 5 known thumbnail/wrong-projection/wrong-era assets (incl. the currently-wired `bat_sprite.png`) should be moved out of pipeline reach, not left where procgen could roll them | Low | 🔴 Untracked |
 | [DOC-021](#doc-021-stale-docsstatustxt-snapshot-duplicating-root-status) | Documentation Governance | `docs/STATUS.txt` contained a stale 2026-07-08 snapshot and risked being mistaken for current status | Low | ✅ Fixed (archived + redirected 2026-07-15) |
 | [DOC-022](#doc-022-prompt-library-v020-duplicate-section-drift) | Documentation Governance | v0.2.0 prompt templates existed in parallel section variants, creating duplicate active guidance and merge churn | Low | ✅ Fixed (canonicalized + archived 2026-07-15) |
+| [UI-023](#ui-023-start-screen-container-title--watermark-regression) | UI / Branding | Start canvas preserved its intrinsic ratio inside flex layout; old title and crushed/missing watermark remained visible | High | 🟡 Source fixed 2026-07-15; fresh browser capture pending |
 | [CR-001](#cr-findings-2026-07-14) | Code Review | Thirteen logic/resource/API/edge-case findings from main-branch review | High | 🟡 Partial — 10 of 13 verified fixed 2026-07-14 (CR-002/003/004/005/007/008/009/010/012/013); CR-001/006/011 remain open |
 
 ---
@@ -370,6 +371,28 @@ Sourced from the 2026-07-14 "Steam-Indie Program" asset audit and `docs/SPRITE_A
 **Effort note:** `Low` effort to move the never-wired files; the `bat_sprite.png` replacement is the one item here with real gameplay risk (removing it without a replacement breaks the bat enemy).
 
 **Verification evidence required to close:** **do not delete anything without explicit user approval** (per this project's standing git-safety discipline — these are irreversible-if-wrong operations on asset files, not code). Confirm via `git status`/`ls` that flagged files were moved (not deleted) and that `bat_sprite.png`'s replacement (if done in the same pass) still renders the bat enemy correctly in a live screenshot.
+
+---
+
+### UI-023: Start-Screen Container, Title & Watermark Regression
+**Issue Description:** Human screenshot evidence showed the start canvas centered between unused top/bottom bands instead of filling its glass-panel container. The canvas still rendered the retired `BYTEFALL / SEGFAULT SUMMIT / RETRO PLATFORMER` title while browser metadata also used the old name. The StrayDog stencil was absent because its square source was drawn into a very shallow rectangular destination, making the mark effectively unreadable.
+
+**Root Cause:** `.start-screen-canvas` remained a positioned flex item with `width: 100%; height: 100%`; as a replaced element it retained its intrinsic canvas ratio while the parent centered it. Product naming existed as independent hardcoded strings in `components/StartMenu.tsx` and `app/layout.tsx`. The `512×512` stencil source was forced into a non-square destination rectangle.
+
+**Remediation:**
+1. Give `.game-panel` and `.start-screen-wrap` explicit full-viewport/full-container sizing.
+2. Remove the start canvas from flex sizing with `position: absolute; inset: 0` while retaining its existing logical `800×520` draw system and pointer-coordinate mapping.
+3. Render `RetroVania | Rogue-like Platformer` as one fitted line and synchronize `app/layout.tsx` metadata.
+4. Draw the stencil into a square destination beside `v0.2.0` at `0.5` alpha.
+5. Synchronize README, beta guidance, workflow status, prompt notes, and ADR history.
+
+**Completion Checklist:**
+- [x] Source-level CSS sizing repair applied.
+- [x] Canvas and browser metadata titles match exactly.
+- [x] Public stencil asset exists and square destination geometry is restored.
+- [x] Living documentation truth-synced without rewriting historical session records.
+- [ ] Fresh browser screenshot confirms no unused bands, no title clipping, and a visible watermark.
+- [ ] TypeScript/build verification output captured after the repair.
 
 ---
 
