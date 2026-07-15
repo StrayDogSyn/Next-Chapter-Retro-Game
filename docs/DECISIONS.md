@@ -338,4 +338,21 @@ _(Renumbered from a duplicate "ADR-003" during the 2026-07-08 merge-conflict cle
 
 ---
 
+## ADR-024: Canonical status snapshot location + first-party docs link-check scope
+
+- **Date:** 2026-07-15
+- **Status:** Accepted
+- **Originated from:** Agent proposal during docs-governance maintenance
+- **Context:** A stale point-in-time dump lived at `docs/STATUS.txt` and could be mistaken for current truth, while canonical machine-generated status snapshots are written to repo-root `STATUS.txt` by `scripts/project-status.py`. In the same session, markdown link validation produced noise from vendored runtime markdown under `node-portable/`, which is not part of first-party project documentation.
+- **Decision:**
+  - Archive the stale `docs/STATUS.txt` snapshot into `docs/archive/historical/legacy-imports/` and keep `docs/STATUS.txt` only as a redirect stub.
+  - Treat repo-root `STATUS.txt` as the only canonical status snapshot source.
+  - Scope documentation link validation to first-party docs (`docs/` and root `README.md`) and exclude vendored/runtime markdown trees from governance gates.
+- **Alternatives considered:**
+  - Keep both status files as potentially authoritative — rejected; invites drift and conflicting evidence.
+  - Run link checks against every markdown file in the repository — rejected; third-party/vendored docs create false positives unrelated to project-maintained documentation quality.
+- **Consequences:** Status evidence is now unambiguous, and docs-quality gates focus on files the project actually owns and maintains.
+
+---
+
 _Add new ADRs as decisions are made — including ones where you overrode an agent's suggestion. Those are often the most interesting entries for a reviewer._

@@ -2,7 +2,7 @@
 
 > **Purpose:** This document tracks usability issues, gameplay bugs, and feature enhancements identified during human playtesting and QA audits. Each item provides root-cause analysis, actionable step-by-step remediation aligned with the project architecture, and a strict verification checklist.
 >
-> **Last updated:** 2026-07-14 (Stability & Security Pass round 2 — CR-004/007/009/013 verified/fixed, bringing CR-001's total to 10 of 13; see `docs/SESSION_LOG.md`)
+> **Last updated:** 2026-07-15 (documentation governance sync — stale `docs/STATUS.txt` snapshot archived; process references normalized)
 > **Maintainer:** StrayDogSyn / QA & Engineering Team  
 > **Rule of Thumb:** All changes must respect existing architectural boundaries (no parallel canvas systems, unified `Game` class logic in `lib/game/game.ts`, asset ingestion strictly via `scripts/prepare-assets.py`).
 
@@ -32,6 +32,7 @@
 | [AST-018](#ast-018-forestmesadepths-backdrops-for-zone-variety) | Asset Pipeline | `forest.png`/`mesa.png`/`depths_of_terra.png` backdrops are unused; every zone currently shares one background family | Medium | 🔴 Untracked |
 | [AST-019](#ast-019-darksaber--wyrmwolf-boss-integration) | Bosses / Asset Pipeline | Darksaber werewolf pack and `wyrmwolf.png` aren't wired as distinct boss encounters beyond the existing single mid-boss crop | Medium | 🔴 Untracked |
 | [AST-020](#ast-020-purge-list-execution-thumbnails--wrong-projectionera-assets) | Asset Pipeline | 5 known thumbnail/wrong-projection/wrong-era assets (incl. the currently-wired `bat_sprite.png`) should be moved out of pipeline reach, not left where procgen could roll them | Low | 🔴 Untracked |
+| [DOC-021](#doc-021-stale-docsstatustxt-snapshot-duplicating-root-status) | Documentation Governance | `docs/STATUS.txt` contained a stale 2026-07-08 snapshot and risked being mistaken for current status | Low | ✅ Fixed (archived + redirected 2026-07-15) |
 | [CR-001](#cr-findings-2026-07-14) | Code Review | Thirteen logic/resource/API/edge-case findings from main-branch review | High | 🟡 Partial — 10 of 13 verified fixed 2026-07-14 (CR-002/003/004/005/007/008/009/010/012/013); CR-001/006/011 remain open |
 
 ---
@@ -361,6 +362,23 @@ Sourced from the 2026-07-14 "Steam-Indie Program" asset audit and `docs/SPRITE_A
 **Effort note:** `Low` effort to move the never-wired files; the `bat_sprite.png` replacement is the one item here with real gameplay risk (removing it without a replacement breaks the bat enemy).
 
 **Verification evidence required to close:** **do not delete anything without explicit user approval** (per this project's standing git-safety discipline — these are irreversible-if-wrong operations on asset files, not code). Confirm via `git status`/`ls` that flagged files were moved (not deleted) and that `bat_sprite.png`'s replacement (if done in the same pass) still renders the bat enemy correctly in a live screenshot.
+
+---
+
+### DOC-021: stale `docs/STATUS.txt` snapshot duplicating root status
+**Issue Description:** `docs/STATUS.txt` was a point-in-time 2026-07-08 dump from a previous environment. Its location made it look canonical even though the current, machine-generated status authority is repo-root `STATUS.txt`.
+
+**Step-by-Step Improvement Recommendations:**
+1. Move the stale dump into `docs/archive/historical/legacy-imports/` with a date-stamped filename.
+2. Replace `docs/STATUS.txt` with a redirect stub explaining where the archive copy lives and where current snapshots belong.
+3. Update `docs/archive/historical/README.md` so the archive index remains accurate.
+4. Record the policy in ADRs so future sessions do not reintroduce duplicate status authorities.
+
+**Completion Checklist:**
+- [x] Archived at `docs/archive/historical/legacy-imports/docs-status-snapshot-2026-07-08.txt`.
+- [x] Replaced `docs/STATUS.txt` with a redirect stub.
+- [x] Updated `docs/archive/historical/README.md` index.
+- [x] Governance rationale recorded in ADR-024.
 
 ---
 

@@ -23,6 +23,39 @@ Reusable, effective prompts from this project's agentic workflow, with notes on 
 
 ## Entries
 
+### Documentation governance sync prompt (2026-07-15)
+
+**Used for:** Repeatable docs-maintenance passes (archive superseded docs, refresh living process docs, update README state, and validate internal links)
+
+**Tool:** GitHub Copilot (GPT-5.3-Codex)
+
+**Effectiveness:** ⭐⭐⭐⭐⭐
+
+**Prompt:**
+> Update all documentation to continue the logging of the AI-Augmentation process and development of this game application. Do not delete old documentation; move it to `<repo>/docs/archive`. Ensure links are valid, and enhance the root README.md with the current state of the project.
+>
+> Specifically:
+> 1) Identify documentation files that are superseded or duplicated and move them to `docs/archive/historical/`.
+> 2) Add a new dated entry to `docs/SESSION_LOG.md` describing the latest work.
+> 3) Update `docs/AGENTIC_WORKFLOW.md` status and session tables.
+> 4) Update `docs/PROMPT_LIBRARY.md` with any reusable prompts from this session.
+> 5) Update `docs/BUGS_IMPROVEMENT_GUIDE.md` with any new bugs or findings.
+> 6) Correct stale claims in `docs/BETA_TESTING.md`.
+> 7) Refresh `docs/WORKFLOW.md` if its guidance conflicts with living docs.
+> 8) Add an ADR in `docs/DECISIONS.md` if any architectural decision was made.
+> 9) Enhance `README.md` with current features, tech stack, live URL, and roadmap.
+> 10) Verify all internal documentation links resolve.
+
+**Why it worked / didn't:**
+- Forces an archive-first policy explicitly, which prevents accidental loss of historical process artifacts.
+- Bundles process docs + product README sync into one pass, reducing drift between engineering reality and project narrative.
+- The numbered checklist makes validation deterministic and review-friendly.
+- Best results come from scoping link checks to first-party docs (`docs/` + root `README.md`) so vendored runtime markdown does not create false-positive failures.
+
+**Workspace prompt file:** `.github/prompts/documentation-governance-sync.prompt.md`
+
+---
+
 ### Scaffold prompt
 <a name="scaffold-prompt"></a>
 **Used for:** Initial repo scaffold (Next.js + FastAPI structure, canvas render loop, sprite state machine)

@@ -12,6 +12,7 @@ This folder stores deprecated or superseded documentation retained for traceabil
 - `session-briefs/ui-refactor-brief-2026-07-08.md` (original handoff brief)
 - `session-briefs/ui-refactor-brief-root.md` (root `docs/UI_REFACTOR_BRIEF.md` archived here)
 - `session-briefs/phase2-overhaul-2026-07-08.md` (root `docs/PHASE2_OVERHAUL.md` archived here — orchestrator prompt superseded by workflow consolidation into `docs/WORKFLOW.md` and `docs/PROMPT_LIBRARY.md`)
+- `legacy-imports/docs-status-snapshot-2026-07-08.txt` (superseded point-in-time status dump formerly at `docs/STATUS.txt`; canonical status snapshots live at repo root `STATUS.txt`)
 - `legacy-imports/asset-sources-from-sibling-branch.md`
 - `legacy-imports/bugs-improvement-guide-from-sibling-branch.md`
 

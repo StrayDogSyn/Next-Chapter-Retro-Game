@@ -2,7 +2,7 @@
 
 > **Purpose:** This is the working record of how this project was built in collaboration with an AI coding agent — what was asked, what came back, what was kept, changed, or thrown out, and why. It's updated after every pairing session, not written retroactively at submission time.
 >
-> **Last updated:** _2026-07-14_
+> **Last updated:** _2026-07-15_
 > **Maintainer:** StrayDogSyn
 
 ---
@@ -46,7 +46,7 @@
 | Level/world system | 🟢 24 single-screen rooms, 5 zones, validated exit graph |
 | Enemy AI | 🟢 4 regular kinds + 3 bosses with distinct patterns |
 | Weapon/loot system | 🟢 data-driven, Python-authoritative (280 combos; 6/6 prefix effects wired) |
-| Documentation | 🟢 living docs updated 2026-07-14; archive established at docs/archive/historical; visual timeline in docs/VISUAL_PROGRESSION.md |
+| Documentation | 🟢 living docs updated 2026-07-15; archive established at docs/archive/historical; visual timeline in docs/VISUAL_PROGRESSION.md |
 
 ## Session Log
 
@@ -55,14 +55,11 @@
 
 | Date | Tool | Task | Human Role | Agent Role | Outcome | Notes |
 |---|---|---|---|---|---|---|
+| 2026-07-15 | GitHub Copilot | Documentation governance sync: archive stale status doc + align living process docs | Requested archive-first docs maintenance and reusable prompt extraction | Archived superseded docs/STATUS snapshot into historical archive, refreshed living docs and README, and added `.github/prompts/documentation-governance-sync.prompt.md` | ✅ docs synchronized | See [SESSION_LOG.md](SESSION_LOG.md) |
 | 2026-07-14 | GitHub Copilot | Documentation governance follow-up (semantic screenshots + visual progression timeline) | Requested professional README visuals and preserved iteration history | Replaced README primary screenshots with semantically named captures; created docs/VISUAL_PROGRESSION.md to preserve legacy-to-current evolution | ✅ docs synchronized | See [SESSION_LOG.md](SESSION_LOG.md) |
 | 2026-07-14 | GitHub Copilot | Documentation governance sync (living docs + stale-claim cleanup + link validation) | Directed docs-only maintenance pass | Updated SESSION_LOG/AGENTIC_WORKFLOW/PROMPT_LIBRARY/BETA_TESTING; confirmed BUGS/README consistency with current CR status | ✅ docs synchronized | See [SESSION_LOG.md](SESSION_LOG.md) |
 | 2026-07-14 | Claude Code | Documentation refresh: archive superseded docs, refresh living docs, verify links | Directed documentation updates | Archived PHASE2_OVERHAUL.md; refreshed SESSION_LOG, AGENTIC_WORKFLOW, PROMPT_LIBRARY, BETA_TESTING, BUGS_IMPROVEMENT_GUIDE; verified all internal links | ✅ all docs current, archive updated | See [SESSION_LOG.md](SESSION_LOG.md) |
 | 2026-07-14 | Windsurf Cascade | Code-review findings logged + AI-Augmentation documentation refresh | Scoped review + docs update; verified test pass | Reviewed main branch for logic/resource/API issues; updated all docs + README; archived duplicate brief | 🟡 docs complete, fixes pending | See [SESSION_LOG.md](SESSION_LOG.md) |
-| 2026-07-14 | Claude Code | M1: swm kit provenance recovery | Directed hero-asset investigation | Recovered exact OGA pages for swm hero/enemy subsets; updated CREDITS.md + ASSET_SOURCES.md | ✅ M1 complete, 15 files still unverified | See [SESSION_LOG.md](SESSION_LOG.md) |
-| 2026-07-14 | GitHub Copilot | Sprite inventory correction | Asked for repo-grounded asset audit | Added docs/SPRITE_ART_INVENTORY.md; corrected space_merc vs char-sheet-alpha relationship | ✅ documentation corrected | See [SESSION_LOG.md](SESSION_LOG.md) |
-| 2026-07-13 | Claude Code | First successful public deploy | Enabled GitHub Pages in repo settings | Retriggered deploy.yml; verified Pages → Render → Neon round-trip | ✅ live site verified | See [SESSION_LOG.md](SESSION_LOG.md) |
-| 2026-07-13 | Claude Code | F3: run summary + daily seed mode | Scoped to two high-value pieces | Added drawRunSummary, seedOverride, Daily/Enter Seed UI | ✅ merged, death-summary rendering gap noted | See [SESSION_LOG.md](SESSION_LOG.md) |
 
 Full history: [docs/SESSION_LOG.md](SESSION_LOG.md) — keep this table above to the 3-5 most recent sessions, archive the rest there.
 
@@ -96,6 +93,7 @@ Architecture Decision Records (ADRs) — every time the agent's suggestion was a
 | ADR-016 | Asset-utilization pass — event-to-stem mapping conventions | Yes | Accepted |
 | ADR-017 | Replayability architecture — run summary + daily seed | Yes | Accepted |
 | ADR-019 | Documentation archival policy — move, don't delete, old docs | Yes | Accepted |
+| ADR-024 | Canonical status snapshot location + docs-only link-check scope | Yes | Accepted |
 
 </details>
 

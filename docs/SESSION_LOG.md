@@ -39,6 +39,17 @@ An incident entry never doubles as the fix record — the fix gets its own dated
 
 ## Entries
 
+### 2026-07-15 — Documentation governance sync: archive stale status doc, align workflow guidance, and add reusable maintenance prompt
+
+- **Tool used:** GitHub Copilot (GPT-5.3-Codex)
+- **Goal:** Continue AI-Augmentation documentation governance by archiving superseded docs safely, updating all living process docs, and validating internal links.
+- **Prompt summary:** Execute the 10-point documentation-maintenance checklist (archive duplicates, update session/workflow/prompt/bugs/beta/decisions/readme, verify links) and also package the workflow as a reusable `.prompt.md`.
+- **What the agent produced:** Archived stale `docs/STATUS.txt` snapshot to `docs/archive/historical/legacy-imports/docs-status-snapshot-2026-07-08.txt` with a root-doc redirect stub; refreshed `AGENTIC_WORKFLOW.md`, `PROMPT_LIBRARY.md`, `BUGS_IMPROVEMENT_GUIDE.md`, `BETA_TESTING.md`, `WORKFLOW.md`, `DECISIONS.md`, and `README.md`; added workspace prompt `/.github/prompts/documentation-governance-sync.prompt.md`.
+- **Human review/changes:** Confirmed archive-first policy was preserved (no historical content deleted) and link validation was scoped to first-party docs (`docs/` + root `README.md`) to avoid false positives from vendored runtime docs.
+- **Outcome:** ✅ merged
+- **Time saved vs. hand-writing (rough estimate):** ~45-60 minutes
+- **Anything worth remembering:** Documentation maintenance should treat stale process artifacts like stale code: archive with redirect, update canonical references, and validate links against ownership boundaries.
+
 ### 2026-07-14 — Documentation governance sync follow-up: semantic screenshot refresh + visual progression archive
 
 - **Tool used:** GitHub Copilot (GPT-5.3-Codex)

@@ -9,6 +9,8 @@ Bytefall: Segfault Summit is a retro-inspired full-stack showcase blending SNES-
 ![Tests](https://img.shields.io/badge/tests-vitest%204.1-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+**Last docs sync:** 2026-07-15
+
 > Built for the **Next Chapter bootcamp** capstone submission.
 
 **🎮 Play the beta live: [straydogsyn.github.io/Next-Chapter-Retro-Game](https://straydogsyn.github.io/Next-Chapter-Retro-Game/)** — see [docs/BETA_TESTING.md](docs/BETA_TESTING.md) for what's being tested, known limitations, and how to file bugs.
@@ -39,6 +41,14 @@ This project is two things at once, on purpose:
 2. **A demonstration of agentic pairing** — every major build phase was worked through with an AI coding agent, and that process is documented as a first-class part of the submission, not an afterthought.
 
 The Python backend isn't decorative — it owns procedural loot and level generation, while the Next.js frontend owns rendering, input, and UI. See [Architecture](#architecture) for the full rationale.
+
+## Current Project State
+
+- **Live URL:** [straydogsyn.github.io/Next-Chapter-Retro-Game](https://straydogsyn.github.io/Next-Chapter-Retro-Game/)
+- **Gameplay status:** Playable 24-room build with 5 zones, 4 regular enemies, 3 bosses, seeded runs, run summary, and shrine-backed save flow.
+- **Service status:** Static frontend export on GitHub Pages with Python persistence/loot service designed for Render + Neon.
+- **Quality status:** Vitest suite wired in-project (`npm test`), with active code-review backlog tracked in `docs/BUGS_IMPROVEMENT_GUIDE.md`.
+- **Documentation status:** Living AI-Augmentation docs are current and governed by archive-first policy (`docs/archive/historical/`).
 
 ![Updated gameplay model](assets/img/screenshots/updated-working-model.png)
 
@@ -207,6 +217,7 @@ All third-party assets are CC0 or explicitly licensed for reuse. The runtime ass
 - [ ] Code-review fix backlog (10/13 findings fixed; open: CR-001, CR-006, CR-011 — see [docs/BUGS_IMPROVEMENT_GUIDE.md](docs/BUGS_IMPROVEMENT_GUIDE.md#cr-findings-2026-07-14))
 - [ ] Sprite asset utilization pass (AST-014..AST-020: powerups, impacts/weaponflash rarity FX, swm biome, tile-variation pools, zone backdrops, darksaber+wyrmwolf bosses, purge-list execution)
 - [ ] Zone-specific ambient/music
+- [ ] Deployment hardening follow-through (credential-rotation gate + production backend verification evidence)
 - [ ] Bootcamp submission polish pass
 
 ## License

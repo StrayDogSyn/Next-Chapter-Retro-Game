@@ -1,15 +1,12 @@
 # Beta Testing
 
-**Live now:** **https://straydogsyn.github.io/Next-Chapter-Retro-Game/**
+**Live now (latest documented target):** **https://straydogsyn.github.io/Next-Chapter-Retro-Game/**
 
-The Python backend (loot rolling, save persistence) is hosted on Render
-and connected. Loot rolls come from the live service and runs persist to
-Neon across sessions/devices via an anonymous per-browser identity (no
-account needed) - see ADR-009. If the backend is ever briefly unreachable
-(e.g. a cold start after idle - Render's free tier sleeps after ~15
-minutes idle, so the very first request after a quiet period can take
-30-60 seconds), the game runs in **degraded mode**: client-side loot rolls
-and browser-local saves only, by design (ADR-003/ADR-009) - not a bug. The
+The intended production path is Python backend (Render) + Neon persistence,
+with loot and saves routed through the service when reachable (ADR-009).
+If the backend is briefly unreachable (for example a cold start after idle),
+the game runs in **degraded mode**: client-side loot rolls and browser-local
+saves only, by design (ADR-003/ADR-009) - not a bug. The
 HUD's status chip (top-right, next to the seed/menu buttons) shows
 "online" vs "offline mode" so you can tell which mode you're in at a
 glance; hover it for the raw `lootSource`/`saveSource` values.
@@ -80,8 +77,9 @@ informational — replaying your daily seed is always allowed.
 
 ## Code review backlog (not blockers, but worth knowing)
 
-The 2026-07-14 senior-engineer pass originally reported 13 findings. Most have
-now been fixed and re-verified. The remaining open items are:
+The 2026-07-14 senior-engineer pass originally reported 13 findings. Most were
+fixed and re-verified in follow-up passes; as of the latest docs sync (2026-07-15),
+the remaining open items are:
 
 - Base-path configuration coupling (`assetUrl()` depends on
   `NEXT_PUBLIC_BASE_PATH` injection) — CR-001.

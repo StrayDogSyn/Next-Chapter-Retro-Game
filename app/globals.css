@@ -259,10 +259,10 @@ body {
 }
 
 #game-stage-viewport {
-  width: 100%;
-  max-width: calc((100dvh - 2rem) * (20 / 11));
-  aspect-ratio: 20 / 11;
-  margin: auto;
+  width: 100vw;
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
   position: relative;
   overflow: hidden;
   touch-action: none;
