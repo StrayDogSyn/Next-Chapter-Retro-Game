@@ -195,28 +195,32 @@ function hasOpening(room: LoadedRoom, edge: "left" | "right" | "up" | "down"): b
 // ─────────────────────── reachability validation (BUG-003) ───────────────────────
 //
 // Jump metrics, derived from the real player physics in game.ts (not guessed):
-//   jumpVelocity() = -345 px/s (base, no upgrades; buffed from 330 under the
+//   jumpVelocity() = -355 px/s (base, no upgrades; buffed from 330 under the
 //   Space Marine Overhaul - see jump-physics.ts's JUMP_BASE_VELOCITY
 //   comment), gravity = 900 px/s^2.
-//   Rise to apex = v^2 / (2*g) = 345^2 / 1800 = 66.1px = 4.13 tiles (16px tiles).
-// JUMP_RISE_TILES is rounded DOWN to 3 tiles (unchanged since the velocity
-// buff, on purpose): validation must hold for a player who has not yet found
-// the double-jump upgrade, and this floor is also the classification
-// threshold the world's ability-gating relies on (ADR-004/ADR-023) - raising
-// it to track the real 4.13-tile capability would silently reclassify some
-// double-jump-gated bonus content as base-reachable. The velocity buff only
-// spends its extra height as comfort margin over this floor, not as new
-// reach. 3 also still leaves a safety margin for the horizontal-motion-eats-
-// into-vertical-reach tradeoff a real parabola has.
+//   Rise to apex = v^2 / (2*g) = 355^2 / 1800 = 70.0px = 4.38 tiles analytic,
+//   4.19 tiles per simulateJumpFlight() (16px tiles).
+// JUMP_RISE_TILES is rounded DOWN to 4 tiles (raised from 3 under the "Space
+// Marine" Physical Overhaul mission's explicit instruction to update this
+// constant to match the buffed trajectory - see SESSION_LOG for the earlier
+// "buff velocity but leave this floor alone" version of this decision that
+// this supersedes). This floor is also the classification threshold the
+// world's ability-gating relies on (ADR-004/ADR-023): raising it DOES
+// reclassify some previously double-jump-gated content (rise 3-4 tiles) as
+// base-reachable - a real, deliberate consequence, not an oversight. See
+// UPGRADED_JUMP_RISE_TILES below: it was raised by the same proportion
+// (double-jump reuses this base velocity for its second impulse), so the
+// relative gap between "base-reachable" and "ability-gated" content is
+// preserved rather than collapsed, even though the absolute floor moved.
 // Exported so jump-physics.test.ts can cross-check these hand-derived
 // constants against a real frame-stepped simulation (Fix Pack mission,
 // Increment 2.1) without duplicating the numbers.
-export const JUMP_RISE_TILES = 3;
-// Full up-and-down airtime at base jump velocity = 2 * (345/900) = 0.767s.
-// At base move speed (150px/s) that's 115px = ~7.2 tiles of horizontal travel
-// across a dead-air gap; rounded down to 6 tiles, unchanged, for the same
-// floor-is-a-gating-threshold reason as JUMP_RISE_TILES above.
-export const JUMP_GAP_TILES = 6;
+export const JUMP_RISE_TILES = 4;
+// Full up-and-down airtime at base jump velocity = 2 * (355/900) = 0.789s
+// analytic (0.783s simulated). At base move speed (150px/s) that's ~7.3-7.4
+// tiles of horizontal travel across a dead-air gap; rounded down to 7 tiles
+// (raised from 6), for the same reason as JUMP_RISE_TILES above.
+export const JUMP_GAP_TILES = 7;
 // Falling (no ascent needed) gets extra horizontal drift credit per tile of
 // drop, since airtime -- and therefore horizontal travel while falling -- keeps
 // growing the longer the drop. Capped so the estimate doesn't run away on deep
@@ -225,14 +229,19 @@ const FALL_DRIFT_BONUS_PER_TILE = 1;
 const FALL_DRIFT_BONUS_CAP = 6;
 
 // "Upgraded" profile: a player who found Aether Wings (double jump) and the
-// Phase Dash Module. A second jump at any point in the arc roughly doubles
-// achievable rise (2 * 3.78 tiles, rounded down for margin); the 0.22s dash
-// burst at 2.6x move speed adds ~5.3 tiles of horizontal reach on top of the
-// base jump gap. This profile exists so the auditor doesn't flag intentional
-// ability-gated bonus content (ADR-004) as broken — only report an item as a
-// genuine dead-end if it's unreachable even with the full movement kit.
-export const UPGRADED_JUMP_RISE_TILES = 7;
-export const UPGRADED_JUMP_GAP_TILES = 11;
+// Phase Dash Module. A second jump applied at the first jump's exact apex
+// (the worst case) simulates to 8.38 tiles of total rise at the Space Marine
+// Overhaul's buffed 355px/s base velocity (raised from ~7.56 analytic / 7
+// floor at the old 330px/s), floored to 8; the 0.22s dash burst at 2.6x move
+// speed adds horizontal reach on top of the base jump gap, simulating to
+// ~12.5 tiles, floored to 12 (raised from 11). Both raised in step with
+// JUMP_RISE_TILES/JUMP_GAP_TILES above since double-jump reuses the same
+// base velocity for its second impulse - this profile exists so the auditor
+// doesn't flag intentional ability-gated bonus content (ADR-004) as broken —
+// only report an item as a genuine dead-end if it's unreachable even with
+// the full movement kit.
+export const UPGRADED_JUMP_RISE_TILES = 8;
+export const UPGRADED_JUMP_GAP_TILES = 12;
 
 type Cell = { c: number; r: number };
 type ReachProfile = { riseTiles: number; gapTiles: number };

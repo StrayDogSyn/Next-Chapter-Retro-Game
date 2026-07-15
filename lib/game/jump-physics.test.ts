@@ -44,21 +44,22 @@ describe("jumpVelocity", () => {
 });
 
 describe("ADR-014: capped single-jump apex stays below double-jump's reach", () => {
-  it("a maxed single jump (24% jumpPower) apexes below double-jump's ~7-tile reach", () => {
+  it("a maxed single jump (24% jumpPower) apexes below double-jump's now-buffed ~8-tile reach", () => {
     const maxedApex = jumpApexPx(jumpVelocity(JUMP_POWER_CAP_PCT));
-    const doubleJumpReachPx = 7 * 16; // levelLoader.ts's UPGRADED_JUMP_RISE_TILES
+    const doubleJumpReachPx = UPGRADED_JUMP_RISE_TILES * 16; // levelLoader.ts
     expect(maxedApex).toBeLessThan(doubleJumpReachPx);
   });
 
-  it("base (unupgraded) jump apexes at ~4.13 tiles (Space Marine Overhaul buff), still above levelLoader.ts's JUMP_RISE_TILES floor", () => {
+  it("base (unupgraded) jump apexes at ~4.38 tiles analytic ('Space Marine' Physical Overhaul: mathematically guaranteed >=4 tiles), still at/above levelLoader.ts's JUMP_RISE_TILES floor", () => {
     const baseApex = jumpApexPx(jumpVelocity(0));
-    expect(baseApex / 16).toBeCloseTo(4.13, 1);
-    expect(baseApex / 16).toBeGreaterThan(JUMP_RISE_TILES);
+    expect(baseApex / 16).toBeCloseTo(4.38, 1);
+    expect(baseApex / 16).toBeGreaterThanOrEqual(JUMP_RISE_TILES);
+    expect(baseApex / 16).toBeGreaterThanOrEqual(4);
   });
 
   it("gravity/base-velocity constants match the physics levelLoader.ts's reachability math assumes", () => {
     expect(GRAVITY).toBe(900);
-    expect(JUMP_BASE_VELOCITY).toBe(345);
+    expect(JUMP_BASE_VELOCITY).toBe(355);
   });
 });
 
@@ -145,6 +146,13 @@ describe("jump envelope: simulated (game.ts's actual integration order) vs analy
   it("base jump: simulated apex is at or above levelLoader.ts's JUMP_RISE_TILES (the constant stays a safe floor, not an overclaim)", () => {
     const sim = simulateJumpFlight(jumpVelocity(0));
     expect(sim.apexPx / TILE).toBeGreaterThanOrEqual(JUMP_RISE_TILES);
+  });
+
+  it("'Space Marine' Physical Overhaul: simulated base apex is mathematically guaranteed to clear 4-5 tiles", () => {
+    const sim = simulateJumpFlight(jumpVelocity(0));
+    const tiles = sim.apexPx / TILE;
+    expect(tiles).toBeGreaterThanOrEqual(4);
+    expect(tiles).toBeLessThanOrEqual(5);
   });
 
   it("base jump: simulated full-flight horizontal gap is at or above levelLoader.ts's JUMP_GAP_TILES", () => {
