@@ -418,45 +418,34 @@ export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }
       ctx.textAlign = "left";
 
       // ── 5. Stylized title block ───────────────────────────────────────────
-      const titleX = W / 2 - 220;
-      const titleCX = W / 2;
-      // Float animation
-      const titleY = 40 + Math.sin(t * 0.9) * 3.5;
+      const gameTitle = "RetroVania | Rogue-like Platformer";
+      const titleCX = panelX / 2;
+      const titleY = 58 + Math.sin(t * 0.9) * 3.5;
+      const titleMaxW = panelX - 32;
+      ctx.font = pixelFont(28);
+      const titleFontSize = Math.min(28, 28 * titleMaxW / ctx.measureText(gameTitle).width);
 
-      // Drop shadow
       ctx.globalAlpha = 0.55;
       ctx.fillStyle = "#000";
-      ctx.font = pixelFont(32);
+      ctx.font = pixelFont(titleFontSize);
       ctx.textAlign = "center";
-      ctx.fillText("BYTEFALL", titleCX + 3, titleY + 3);
-      ctx.font = pixelFont(18);
-      ctx.fillText("SEGFAULT SUMMIT", titleCX + 3, titleY + 39);
+      ctx.fillText(gameTitle, titleCX + 3, titleY + 3);
       ctx.globalAlpha = 1;
 
-      // Main title gradient — gold → amber → white shimmer
       const shine = shinePct(t, 3.2);
-      const titleGrad = ctx.createLinearGradient(titleX, titleY - 32, titleX + 440, titleY + 5);
+      const titleWidth = 560;
+      const titleGrad = ctx.createLinearGradient(titleCX - titleWidth / 2, titleY - 28, titleCX + titleWidth / 2, titleY + 5);
       titleGrad.addColorStop(0,                       "#d97706");
       titleGrad.addColorStop(Math.max(0, shine - 0.1),"#ffcc66");
       titleGrad.addColorStop(shine,                   "#fffbe6");
       titleGrad.addColorStop(Math.min(1, shine + 0.1),"#ffcc66");
       titleGrad.addColorStop(1,                       "#d97706");
 
-      ctx.font = pixelFont(32);
-      ctx.textAlign = "center";
+      ctx.font = pixelFont(titleFontSize);
       ctx.fillStyle = titleGrad;
-      ctx.fillText("BYTEFALL", titleCX, titleY);
+      ctx.fillText(gameTitle, titleCX, titleY);
 
-      ctx.font = pixelFont(18);
-      ctx.fillText("SEGFAULT SUMMIT", titleCX, titleY + 36);
-
-      // Subtitle
-      ctx.font = pixelFont(14);
-      ctx.fillStyle = "#60a5fa";
-      ctx.fillText("RETRO PLATFORMER", titleCX, titleY + 62);
-
-      // Thin underline accent
-      const ulW = 300;
+      const ulW = Math.min(500, ctx.measureText(gameTitle).width);
       const ulGrad = ctx.createLinearGradient(titleCX - ulW / 2, 0, titleCX + ulW / 2, 0);
       ulGrad.addColorStop(0,   "transparent");
       ulGrad.addColorStop(0.5, "#60a5fa");
@@ -464,8 +453,8 @@ export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }
       ctx.strokeStyle = ulGrad;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(titleCX - ulW / 2, titleY + 73);
-      ctx.lineTo(titleCX + ulW / 2, titleY + 73);
+      ctx.moveTo(titleCX - ulW / 2, titleY + 18);
+      ctx.lineTo(titleCX + ulW / 2, titleY + 18);
       ctx.stroke();
 
       // ── 6. Menu items with animated cursor sword ──────────────────────────
@@ -642,12 +631,12 @@ export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }
       ctx.font = pixelFont(5);
       ctx.fillStyle = "#2a4a6a";
       ctx.textAlign = "right";
-      const brandW = 72;
-      const brandH = 16;
-      const brandX = W - 10 - brandW;
+      const brandW = 40;
+      const brandH = 40;
+      const brandX = W - 8 - brandW;
       const brandY = H - 8 - brandH;
 
-      ctx.fillText("v0.2.0", brandX - 8, H - 6);
+      ctx.fillText("v0.2.0", brandX - 8, brandY + brandH / 2 + 2);
 
       const stencil = stencilRef.current;
       if (stencil && stencil.complete && stencil.naturalWidth > 0) {

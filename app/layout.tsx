@@ -6,9 +6,9 @@ import { Press_Start_2P } from "next/font/google";
 const pressStart2P = Press_Start_2P({ weight: "400", subsets: ["latin"], variable: "--font-pixel" });
 
 export const metadata: Metadata = {
-  title: "Bytefall: Segfault Summit",
+  title: "RetroVania | Rogue-like Platformer",
   description:
-    "A retro action-platformer where you dash, jump, and debug your way up a collapsing codebase.",
+    "A retro rogue-like platformer where you dash, jump, and battle through a hostile pixel world.",
 };
 
 export const viewport: Viewport = {

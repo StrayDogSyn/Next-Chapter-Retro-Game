@@ -17,6 +17,15 @@ export const T_PLATFORM = 2;
 export const T_SPIKE = 3;
 export const T_DOOR_KEY = 4; // 'D' — solid until flags.hasKey
 export const T_DOOR_BEAST = 5; // 'd' — solid until flags.mechSlain
+// Ability-gate doors (restored 2026-07-15, ADR-028): the jump-envelope buff
+// that let the base (no-upgrades) jump reach every previously ability-gated
+// item (24 -> 0, see ADR-027) meant physics-based gating could no longer be
+// trusted to actually block anything. These reuse the exact same "solid
+// until a runtime flag is true" pattern as T_DOOR_KEY/T_DOOR_BEAST, so
+// gating is now robust to future jump retuning instead of being an
+// incidental property of exact velocity numbers.
+export const T_DOOR_DOUBLEJUMP = 6; // 'j' — solid until upgrades.doubleJump > 0
+export const T_DOOR_DASH = 7; // 'a' — solid until upgrades.dash > 0
 
 export type SpawnKind =
   | "player"
@@ -90,6 +99,8 @@ function parseRoom(def: RoomDef): LoadedRoom {
       else if (ch === "^") tile = T_SPIKE;
       else if (ch === "D") tile = T_DOOR_KEY;
       else if (ch === "d") tile = T_DOOR_BEAST;
+      else if (ch === "j") tile = T_DOOR_DOUBLEJUMP;
+      else if (ch === "a") tile = T_DOOR_DASH;
       else if (ENTITY_CHARS[ch]) spawns.push({ kind: ENTITY_CHARS[ch], col, row });
       else if (ch !== "." && ch !== " ") {
         throw new Error(`[world] Room ${def.id} row ${row} col ${col}: unknown char "${ch}"`);
@@ -248,13 +259,30 @@ const BASE_PROFILE: ReachProfile = { riseTiles: JUMP_RISE_TILES, gapTiles: JUMP_
 const UPGRADED_PROFILE: ReachProfile = { riseTiles: UPGRADED_JUMP_RISE_TILES, gapTiles: UPGRADED_JUMP_GAP_TILES };
 
 function isFloorTile(tile: number): boolean {
-  // Reachability treats key/beast doors as passable (best case: player has the
-  // gate condition) since gate state is a runtime flag, not load-time data.
-  return tile === T_SOLID || tile === T_PLATFORM || tile === T_DOOR_KEY || tile === T_DOOR_BEAST;
+  // Reachability treats key/beast/ability-gate doors as passable (best case:
+  // player has the gate condition) since gate state is a runtime flag, not
+  // load-time data. This means an item behind a door no longer shows up in
+  // the `gated` audit list once a door is placed in front of it - the door
+  // itself is now the real, explicit gate; a jump-envelope comparison isn't
+  // a meaningful description of its reachability anymore.
+  return (
+    tile === T_SOLID ||
+    tile === T_PLATFORM ||
+    tile === T_DOOR_KEY ||
+    tile === T_DOOR_BEAST ||
+    tile === T_DOOR_DOUBLEJUMP ||
+    tile === T_DOOR_DASH
+  );
 }
 
 function isOpenTile(tile: number): boolean {
-  return tile !== T_SOLID && tile !== T_DOOR_KEY && tile !== T_DOOR_BEAST;
+  return (
+    tile !== T_SOLID &&
+    tile !== T_DOOR_KEY &&
+    tile !== T_DOOR_BEAST &&
+    tile !== T_DOOR_DOUBLEJUMP &&
+    tile !== T_DOOR_DASH
+  );
 }
 
 /** A cell the player could stand on: open, with floor directly beneath (or room bottom). */

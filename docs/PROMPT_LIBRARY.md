@@ -23,6 +23,65 @@ Reusable, effective prompts from this project's agentic workflow, with notes on 
 
 ## Entries
 
+## v0.2.0 Overhaul & Polish Prompts
+
+### Template 1: Full-Bleed Responsive Viewport
+
+```markdown
+**Objective:** Remove the strict letterboxing constraints and update the game wrapper to responsively fill the browser container for various screen sizes.
+
+**Instructions:**
+1. In `app/globals.css`, locate `#game-stage-viewport`. Remove `max-width`, `aspect-ratio`, and `margin: auto`.
+2. Implement Full-Bleed Sizing: Use `width: 100vw; height: 100dvh; margin: 0; padding: 0; position: relative; overflow: hidden;`.
+3. Verify `.game-canvas-stage` and `<canvas>` are set to `width: 100%; height: 100%; position: absolute; top: 0; left: 0;`.
+```
+
+### Template 2: The "Space Marine" Physical Overhaul
+
+```markdown
+**Objective:** Completely overhaul the player character's physical scale, jump reach, and environmental clearance.
+
+**Instructions:**
+1. **Hero Scale & Hitbox:** Increase `pw` and `ph` for a heavier presence. Proportionally increase `drawW` and `drawH` to prevent visual clipping. Update `dx` and `dy` anchors.
+2. **Jump Physics Buff:** Buff base jump (adjust `JUMP_BASE_VELOCITY` or `GRAVITY`) to guarantee apex clears 4 to 5 tiles. Update envelope constants (`JUMP_RISE_TILES`, etc.) in `levelLoader.ts`.
+3. **Widen Door Apertures:** Adjust the parser logic in `levelLoader.ts` to increase vertical/horizontal clearance of doors and choke points by 1-2 tiles.
+4. **Tests:** Update `jump-physics.test.ts` to match the new simulated jump heights.
+```
+
+### Template 3: Deep-Dive Logic Remediation
+
+```markdown
+**Objective:** Log newly discovered code review findings (CR-014 through CR-022) into the living documentation, and immediately patch the highest-priority logic bugs.
+
+**Instructions:**
+1. **Fix Mech Drift:** Clamp X-position: `enemy.x = Math.max(0, Math.min(enemy.x, VIEW_W - enemy.w));`.
+2. **Fix Start Menu Stale Ref:** Stabilize `activateSelected` closure via `useCallback` or explicit index passing.
+3. **Fix `respawnHoldT` Leak:** Reset `this.respawnHoldT = 0;` on respawn.
+4. **Fix Burn DoT Frame Skip:** Snapshot phase before damage to prevent processing projectiles/pickups on a dead boss frame.
+```
+
+### Template 4: Start Menu Typography & Metadata
+
+```markdown
+**Objective:** Update start screen and browser metadata title to "RetroVania | Rogue-like Platformer".
+
+**Instructions:**
+1. Update start-screen canvas renderer to use a single larger line at `pixelFont(28)`. Adjust underline proportionally.
+2. Update `layout.tsx` browser metadata title to match exactly.
+```
+
+### Template 5: Footer Branding Watermark & Version Bump
+
+```markdown
+**Objective:** Replace placeholder footer text with the StrayDog stencil watermark and bump game version to v0.2.0.
+
+**Instructions:**
+1. Copy `assets/img/branding/stray-stencil.png` to `public/assets/branding/stray-stencil.png`.
+2. Update hardcoded version from `v0.1.0` to `v0.2.0`. Remove placeholder text.
+3. Render the stencil image directly to the right of the version number with lowered opacity (`0.5`) as a watermark.
+4. Update `package.json`, `BETA_TESTING.md`, and `README.md` to `0.2.0`.
+```
+
 ### Documentation governance sync prompt (2026-07-15)
 
 **Used for:** Repeatable docs-maintenance passes (archive superseded docs, refresh living process docs, update README state, and validate internal links)
@@ -863,67 +922,6 @@ React component lifecycle safety issues.
 - "Measure before trusting" discipline (alpha-band analysis, baked-in label cross-check, labeled grid overlay) caught two independent wrong claims from prior docs (cell size and pose count).
 - The asset-debt logging convention (alias nearest available row, don't invent rects) keeps the spritemeta honest without blocking the visual swap.
 - Separate M1/M2/M3 commits make the PR reviewable and allow partial rollback if any mission hits an unforeseen blocker.
-
----
-
-### v0.2.0 Polish & Physics Overhaul Prompts
-
-#### Template 1: Full-Bleed Responsive Viewport
-
-```markdown
-**Objective:** Remove the strict letterboxing constraints and update the game wrapper to responsively fill the browser container for various screen sizes.
-**Instructions:**
-1. In `app/globals.css`, locate `#game-stage-viewport`. Remove `max-width`, `aspect-ratio`, and `margin: auto`.
-2. Implement Full-Bleed Sizing: Use `width: 100vw; height: 100dvh; margin: 0; padding: 0; position: relative; overflow: hidden;`.
-3. Verify `.game-canvas-stage` and `<canvas>` are set to `width: 100%; height: 100%; position: absolute; top: 0; left: 0;`.
-
-```
-
-#### Template 2: The "Space Marine" Physical Overhaul
-
-```markdown
-**Objective:** Completely overhaul the player character's physical scale, jump reach, and environmental clearance.
-**Instructions:**
-1. **Hero Scale & Hitbox:** Increase `pw` and `ph` for a heavier presence. Proportionally increase `drawW` and `drawH` to prevent visual clipping. Update `dx` and `dy` anchors.
-2. **Jump Physics Buff:** Buff base jump (adjust `JUMP_BASE_VELOCITY` or `GRAVITY`) to guarantee apex clears 4 to 5 tiles. Update envelope constants (`JUMP_RISE_TILES`, etc.) in `levelLoader.ts`.
-3. **Widen Door Apertures:** Adjust the parser logic in `levelLoader.ts` to increase vertical/horizontal clearance of doors and choke points by 1-2 tiles.
-4. **Tests:** Update `jump-physics.test.ts` to match the new simulated jump heights.
-
-```
-
-#### Template 3: Deep-Dive Logic Remediation
-
-```markdown
-**Objective:** Log newly discovered code review findings (CR-014 through CR-022) into the living documentation, and immediately patch the highest-priority logic bugs.
-**Instructions:**
-1. **Fix Mech Drift:** Clamp X-position: `enemy.x = Math.max(0, Math.min(enemy.x, VIEW_W - enemy.w));`.
-2. **Fix Start Menu Stale Ref:** Stabilize `activateSelected` closure via `useCallback` or explicit index passing.
-3. **Fix `respawnHoldT` Leak:** Reset `this.respawnHoldT = 0;` on respawn.
-4. **Fix Burn DoT Frame Skip:** Snapshot phase before damage to prevent processing projectiles/pickups on a dead boss frame.
-
-```
-
-#### Template 4: Start Menu Typography & Metadata
-
-```markdown
-**Objective:** Update start screen and browser metadata title to "RetroVania | Rogue-like Platformer".
-**Instructions:**
-1. Update start-screen canvas renderer to use a single larger line at `pixelFont(28)`. Adjust underline proportionally.
-2. Update `layout.tsx` browser metadata title to match exactly.
-
-```
-
-#### Template 5: Footer Branding Watermark & Version Bump
-
-```markdown
-**Objective:** Replace placeholder footer text with the StrayDog stencil watermark and bump game version to v0.2.0.
-**Instructions:**
-1. Copy `assets/img/branding/stray-stencil.png` to `public/assets/branding/stray-stencil.png`.
-2. Update hardcoded version from `v0.1.0` to `v0.2.0`. Remove placeholder text.
-3. Render the stencil image directly to the right of the version number with lowered opacity (`0.5`) as a watermark.
-4. Update `package.json`, `BETA_TESTING.md`, and `README.md` to `0.2.0`.
-
-```
 
 ---
 

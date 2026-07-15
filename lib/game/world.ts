@@ -17,6 +17,8 @@
  *   D  locked door (opens with ancient key)
  *   d  beast door (opens when the wyrmwolf is slain)
  *   J  double-jump upgrade (Aether Wings)   A  dash module
+ *   j  double-jump gate door (solid until the player has Aether Wings)
+ *   a  dash gate door (solid until the player has the Phase Dash Module)
  *
  * Zones control background art + music, reusing the confirmed asset set:
  *   outskirts -> parallax mountain layers      caverns -> mangrove painting
@@ -50,6 +52,10 @@ export const ROOMS: RoomDef[] = [
     name: "Wolf's Doorstep",
     zone: "outskirts",
     exits: { right: "R02" },
+    // Ability-gate restoration (ADR-028): row 11's platform (was a plain
+    // "-" run) gates the coin at (23,10) behind double-jump - this was one
+    // of the 24 items the round-3 jump buff made trivially reachable
+    // without any ability (see ADR-027).
     map: [
       "########################################",
       "#......................................#",
@@ -62,7 +68,7 @@ export const ROOMS: RoomDef[] = [
       "#..........----........................#",
       "#......................................#",
       "#......................c...............#",
-      "#...................----------.........#",
+      "#...................jjjjjjjjjj.........#",
       "#......................................#",
       "#......................................#",
       "#.....P.........................c......#",
@@ -80,6 +86,8 @@ export const ROOMS: RoomDef[] = [
     name: "Tumbled Ridge",
     zone: "outskirts",
     exits: { left: "R01", right: "R03" },
+    // Ability-gate restoration (ADR-028): gates the two coins that the
+    // round-3 jump buff made trivially reachable (see ADR-027).
     map: [
       "########################################",
       "#......................................#",
@@ -88,12 +96,12 @@ export const ROOMS: RoomDef[] = [
       "#......................................#",
       "#......................................#",
       "#..........c...........................#",
-      "#........------........................#",
+      "#........jjjjjj........................#",
       "#......................................#",
       "#......................###.............#",
       "#......................................#",
       "#.............................c........#",
-      "#..........................------......#",
+      "#..........................aaaaaa......#",
       "#......###.............................#",
       "#......................................#",
       "#......................................#",
@@ -154,6 +162,8 @@ export const ROOMS: RoomDef[] = [
     // (ph=44px=2.75 tiles) can no longer fit through at all. Moving it up a
     // row instead was considered and rejected: row 11 has an 'f' spawn at
     // col24 that a shifted block would have overwritten.
+    // Ability-gate restoration (ADR-028): gates the two coins the round-3
+    // jump buff made trivially reachable (see ADR-027).
     map: [
       "########################################",
       "#......................................#",
@@ -163,10 +173,10 @@ export const ROOMS: RoomDef[] = [
       "#...........b..........................#",
       "#......................................#",
       "#.........................c............#",
-      "#.......................------.........#",
+      "#.......................jjjjjj.........#",
       "#......................................#",
       "#..........c...........................#",
-      "#........------.........f..............#",
+      "#........aaaaaa.........f..............#",
       "#......................................#",
       "#......................................#",
       "#......................................#",
@@ -184,6 +194,8 @@ export const ROOMS: RoomDef[] = [
     name: "Goblin Gauntlet",
     zone: "outskirts",
     exits: { left: "R04", right: "R06" },
+    // Ability-gate restoration (ADR-028): gates the three coins the round-3
+    // jump buff made trivially reachable (see ADR-027).
     map: [
       "########################################",
       "#......................................#",
@@ -192,7 +204,7 @@ export const ROOMS: RoomDef[] = [
       "#......................................#",
       "#......................................#",
       "#.......c.......c.......c..............#",
-      "#.....------..------..------...........#",
+      "#.....jjjjjj..aaaaaa..jjjjjj...........#",
       "#......................................#",
       "#......................................#",
       "#......................................#",
@@ -214,6 +226,12 @@ export const ROOMS: RoomDef[] = [
     name: "Sealed Treasury",
     zone: "outskirts",
     exits: { left: "R05" },
+    // Ability-gate restoration (ADR-028): the vault floor (chest + key) and
+    // the two coins below it were all part of the 24 items the round-3 jump
+    // buff made trivially reachable (see ADR-027). Note the key here is
+    // what opens R13's locked door - it staying double-jump-gated is
+    // intentional layered design (a bonus vault, not a required-progression
+    // key), confirmed via the reachability audit's "0 dead-ends" check.
     map: [
       "########################################",
       "#......................................#",
@@ -225,11 +243,11 @@ export const ROOMS: RoomDef[] = [
       "#......................................#",
       "#......................................#",
       "#................C......K..............#",
-      "#..............##########..............#",
+      "#..............jjjjjjjjjj..............#",
       "#......................................#",
       "#......................................#",
       "#...........c..............c...........#",
-      "#.........-----............-----.......#",
+      "#.........aaaaa............jjjjj.......#",
       "#......................................#",
       "........................................",
       "#......................................#",
@@ -311,6 +329,8 @@ export const ROOMS: RoomDef[] = [
     name: "Fungal Junction",
     zone: "caverns",
     exits: { left: "R08", right: "R10", down: "R11" },
+    // Ability-gate restoration (ADR-028): gates the coin and health pickup
+    // the round-3 jump buff made trivially reachable (see ADR-027).
     map: [
       "########################################",
       "#......................................#",
@@ -318,7 +338,7 @@ export const ROOMS: RoomDef[] = [
       "#......................................#",
       "#......................................#",
       "#............c.........................#",
-      "#..........-----.......................#",
+      "#..........jjjjj.......................#",
       "#......................................#",
       "#.....................------...........#",
       "#......................................#",
@@ -326,7 +346,7 @@ export const ROOMS: RoomDef[] = [
       "#........----..........................#",
       "#......................................#",
       "#......................+...............#",
-      "#....................-----.............#",
+      "#....................aaaaa.............#",
       "#......................................#",
       "........................................",
       "........................................",
@@ -341,6 +361,8 @@ export const ROOMS: RoomDef[] = [
     name: "Wyrm's Approach",
     zone: "caverns",
     exits: { left: "R09", right: "R12" },
+    // Ability-gate restoration (ADR-028): gates the two coins the round-3
+    // jump buff made trivially reachable (see ADR-027).
     map: [
       "########################################",
       "#......................................#",
@@ -350,7 +372,7 @@ export const ROOMS: RoomDef[] = [
       "#......................................#",
       "#......................................#",
       "#..........c...........c...............#",
-      "#........------......------............#",
+      "#........jjjjjj......aaaaaa............#",
       "#......................................#",
       "#......................................#",
       "#......................................#",
@@ -434,6 +456,12 @@ export const ROOMS: RoomDef[] = [
     name: "Hive Mouth",
     zone: "hive",
     exits: { left: "R11", right: "R14" },
+    // Ability-gate restoration (ADR-028): gates the two coins the round-3
+    // jump buff made trivially reachable (see ADR-027). Unrelated to the
+    // locked-door wall further down this room (cols10, rows16-19), which
+    // gates the shrine/enemy area below via the R06 key, not via jump
+    // physics - the main left/right traversal stays open through the
+    // upper platforms regardless (confirmed via reachability audit).
     map: [
       "########################################",
       "#......................................#",
@@ -444,10 +472,10 @@ export const ROOMS: RoomDef[] = [
       "#......................................#",
       "#......................................#",
       "#...........c..........................#",
-      "#.........------.......................#",
+      "#.........jjjjjj.......................#",
       "#......................................#",
       "#.......................c..............#",
-      "#.....................------...........#",
+      "#.....................aaaaaa...........#",
       "#......................................#",
       "#......................................#",
       "#......................................#",
@@ -464,6 +492,8 @@ export const ROOMS: RoomDef[] = [
     name: "Pulsing Gallery",
     zone: "hive",
     exits: { left: "R13", right: "R15" },
+    // Ability-gate restoration (ADR-028): gates the two coins the round-3
+    // jump buff made trivially reachable (see ADR-027).
     map: [
       "########################################",
       "#......................................#",
@@ -471,7 +501,7 @@ export const ROOMS: RoomDef[] = [
       "#......................................#",
       "#......................................#",
       "#..........c...............c...........#",
-      "#........------..........------........#",
+      "#........jjjjjj..........aaaaaa........#",
       "#......................................#",
       "#......................................#",
       "#......................................#",
@@ -494,6 +524,8 @@ export const ROOMS: RoomDef[] = [
     name: "Spore Choir",
     zone: "hive",
     exits: { left: "R14", right: "R16" },
+    // Ability-gate restoration (ADR-028): gates the health pickup the
+    // round-3 jump buff made trivially reachable (see ADR-027).
     map: [
       "########################################",
       "#......................................#",
@@ -503,7 +535,7 @@ export const ROOMS: RoomDef[] = [
       "#......................................#",
       "#......................................#",
       "#.........+............................#",
-      "#.......-----...........................",
+      "#.......jjjjj...........................",
       "#......................................#",
       "#......................................#",
       "#.................----.................#",
@@ -558,6 +590,8 @@ export const ROOMS: RoomDef[] = [
     name: "Back Vein",
     zone: "hive",
     exits: { down: "R16", right: "R03" },
+    // Ability-gate restoration (ADR-028): gates the coin the round-3 jump
+    // buff made trivially reachable (see ADR-027).
     map: [
       "########################################",
       "#......................................#",
@@ -574,7 +608,7 @@ export const ROOMS: RoomDef[] = [
       "#......................................#",
       "#......................................#",
       "#......................c...............#",
-      "#...................--------............",
+      "#...................aaaaaaaa............",
       "#.......................................",
       "#.......................................",
       "#..............b........................",
@@ -685,6 +719,8 @@ export const ROOMS: RoomDef[] = [
     name: "Falling Terrace",
     zone: "sky",
     exits: { left: "R20", down: "R22" },
+    // Ability-gate restoration (ADR-028): gates the two coins the round-3
+    // jump buff made trivially reachable (see ADR-027).
     map: [
       "########################################",
       "#......................................#",
@@ -692,7 +728,7 @@ export const ROOMS: RoomDef[] = [
       "#......................................#",
       "#......................................#",
       "#..........c..............c............#",
-      "#........------.........------.........#",
+      "#........jjjjjj.........aaaaaa.........#",
       "#......................................#",
       "#......................................#",
       "#......................................#",

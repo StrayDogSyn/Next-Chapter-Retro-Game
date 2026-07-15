@@ -19,6 +19,8 @@ import {
   type LoadedRoom,
   type Spawn,
   T_DOOR_BEAST,
+  T_DOOR_DASH,
+  T_DOOR_DOUBLEJUMP,
   T_DOOR_KEY,
   T_EMPTY,
   T_PLATFORM,
@@ -680,6 +682,13 @@ export class Game {
     if (tile === T_SOLID) return true;
     if (tile === T_DOOR_KEY) return !this.flags.hasKey;
     if (tile === T_DOOR_BEAST) return !this.flags.mechSlain;
+    // T_DOOR_DOUBLEJUMP/T_DOOR_DASH are NOT treated as solid here (unlike
+    // the key/beast doors above) - they gate a landing PLATFORM, not a
+    // corridor wall. A "solid until unlocked" wall would still let the
+    // player stand ON TOP of it while locked (solid tiles are landable from
+    // above), which would reach the gated item anyway. See moveBody()'s
+    // platform-landing check below for how these actually gate: the tile
+    // simply doesn't exist as a landing surface at all until unlocked.
     return false;
   }
 
@@ -725,8 +734,15 @@ export class Game {
         const row = Math.floor(feetY / TILE);
         const tile = this.tileAt(col, row);
         const solid = this.isSolidTile(tile);
+        // T_DOOR_DOUBLEJUMP/T_DOOR_DASH behave exactly like T_PLATFORM once
+        // the corresponding ability is owned, and don't exist as a landing
+        // surface at all until then (see isSolidTile()'s comment for why
+        // "solid until unlocked" is wrong for a platform-shaped gate).
+        const isUnlockedAbilityPlatform =
+          (tile === T_DOOR_DOUBLEJUMP && this.stat("doubleJump") > 0) ||
+          (tile === T_DOOR_DASH && this.stat("dash") > 0);
         const platform =
-          tile === T_PLATFORM &&
+          (tile === T_PLATFORM || isUnlockedAbilityPlatform) &&
           !dropThrough &&
           body.y + body.h <= row * TILE + 1; // was above the platform top
         if (solid || platform) {
@@ -2366,7 +2382,14 @@ export class Game {
             ctx.fillStyle = "#334155";
             ctx.fillRect(x, y, TILE, TILE);
           }
-        } else if (tile === T_PLATFORM && tilesImg) {
+        } else if (
+          (tile === T_PLATFORM ||
+            (tile === T_DOOR_DOUBLEJUMP && this.stat("doubleJump") > 0) ||
+            (tile === T_DOOR_DASH && this.stat("dash") > 0)) &&
+          tilesImg
+        ) {
+          // Unlocked ability-gate tiles render (and collide) exactly like a
+          // normal platform - the gate is gone once the ability is owned.
           const idx = this.tileIndex("platform");
           if (idx >= 0) {
             ctx.drawImage(tilesImg, idx * TILE, 0, TILE, TILE, x, y, TILE, TILE);
@@ -2377,7 +2400,11 @@ export class Game {
         } else if (tile === T_SOLID) {
           ctx.fillStyle = "#334155";
           ctx.fillRect(x, y, TILE, TILE);
-        } else if (tile === T_PLATFORM) {
+        } else if (
+          tile === T_PLATFORM ||
+          (tile === T_DOOR_DOUBLEJUMP && this.stat("doubleJump") > 0) ||
+          (tile === T_DOOR_DASH && this.stat("dash") > 0)
+        ) {
           ctx.fillStyle = "#60a5fa";
           ctx.fillRect(x, y + TILE - 4, TILE, 4);
         } else if (tile === T_SPIKE) {
@@ -2400,6 +2427,25 @@ export class Game {
           ctx.fillRect(x, y, TILE, TILE);
           ctx.fillStyle = "#c084fc";
           ctx.fillRect(x + 6, y + 3, 4, 10);
+        } else if (tile === T_DOOR_DOUBLEJUMP && this.stat("doubleJump") <= 0) {
+          // Matches the doubleJump pickup's wing-chevron motif/color (#7dd3fc).
+          ctx.fillStyle = "#0c4a6e";
+          ctx.fillRect(x, y, TILE, TILE);
+          ctx.fillStyle = "#7dd3fc";
+          ctx.beginPath();
+          ctx.moveTo(x + 3, y + 12);
+          ctx.lineTo(x + 8, y + 3);
+          ctx.lineTo(x + 13, y + 12);
+          ctx.fill();
+        } else if (tile === T_DOOR_DASH && this.stat("dash") <= 0) {
+          // Speed-line motif distinct from the beast door's purple to avoid
+          // visual confusion (the dash pickup's own #c084fc is too close to
+          // T_DOOR_BEAST's accent color to reuse here).
+          ctx.fillStyle = "#7c2d12";
+          ctx.fillRect(x, y, TILE, TILE);
+          ctx.fillStyle = "#fb923c";
+          ctx.fillRect(x + 3, y + 5, 10, 2);
+          ctx.fillRect(x + 3, y + 9, 10, 2);
         }
       }
     }
