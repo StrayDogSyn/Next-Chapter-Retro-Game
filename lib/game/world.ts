@@ -26,6 +26,8 @@
  *   citadel   -> mountain layers, night shift
  */
 
+import { Rng } from "./rng";
+
 export type ZoneId = "outskirts" | "caverns" | "hive" | "sky" | "citadel";
 
 export type RoomDef = {
@@ -843,3 +845,73 @@ export const ROOMS: RoomDef[] = [
 ];
 
 export const START_ROOM = "R01";
+
+/**
+ * Seeded room-order shuffle (ADR-029). Rooms are still 100% hand-authored -
+ * no procedural generation - but WHICH room's content (map/spawns/name/
+ * zone/boss) sits at which graph position is now seed-dependent, so a New
+ * Run doesn't put the same rooms/enemies/obstacles in the same order every
+ * time (per direct user feedback), while Daily Seed still gives every
+ * player the same layout and Enter Seed stays reproducible/shareable.
+ *
+ * Design: a "position" is a fixed graph node - its id and its `exits`
+ * (which direction leads to which OTHER position) never change, because a
+ * room's exit openings are physically carved into its own hand-authored
+ * map at specific columns/rows (ADR-004). What changes per seed is which
+ * room's CONTENT (name/zone/map/boss - everything except id/exits) is
+ * displayed at that position. Content only ever moves between positions
+ * that have the EXACT same exit-direction signature (e.g. a position
+ * needing {left,right} only ever receives content whose own original
+ * exits were also exactly {left,right}), so every content payload's
+ * physically-carved openings line up with the position's actual edges.
+ *
+ * This makes full connectivity/no-dead-ends a guarantee BY CONSTRUCTION,
+ * not something that needs a runtime BFS check: the graph's edges are
+ * never rewired, only relabeled, and the original (unshuffled) graph was
+ * already verified fully connected with 0 dead-ends (BUG-003). The start
+ * room is pinned (never shuffled) so the game always opens on the same
+ * room with the player spawn marker, regardless of seed.
+ */
+function roomSignature(room: RoomDef): string {
+  return Object.keys(room.exits).sort().join(",");
+}
+
+export function shuffleWorldGraph(
+  rooms: RoomDef[],
+  seed: string,
+  pinnedId: string = START_ROOM,
+): RoomDef[] {
+  const rng = new Rng(seed);
+  const groups = new Map<string, RoomDef[]>();
+  for (const room of rooms) {
+    if (room.id === pinnedId) continue;
+    const sig = roomSignature(room);
+    const group = groups.get(sig);
+    if (group) group.push(room);
+    else groups.set(sig, [room]);
+  }
+
+  const contentByPositionId = new Map<string, RoomDef>();
+  for (const positions of groups.values()) {
+    const shuffledContent = rng.shuffle(positions);
+    positions.forEach((position, i) => {
+      contentByPositionId.set(position.id, shuffledContent[i]);
+    });
+  }
+
+  return rooms.map((position) => {
+    if (position.id === pinnedId) return position;
+    const content = contentByPositionId.get(position.id);
+    if (!content) {
+      throw new Error(`[world] shuffleWorldGraph: no content assigned to position ${position.id}`);
+    }
+    return {
+      id: position.id,
+      exits: position.exits,
+      name: content.name,
+      zone: content.zone,
+      map: content.map,
+      boss: content.boss,
+    };
+  });
+}

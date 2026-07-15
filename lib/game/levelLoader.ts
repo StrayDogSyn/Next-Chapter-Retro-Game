@@ -9,7 +9,15 @@
  * sealed rooms.
  */
 
-import { ROOMS, ROOM_H, ROOM_W, START_ROOM, type RoomDef, type ZoneId } from "./world";
+import {
+  ROOMS,
+  ROOM_H,
+  ROOM_W,
+  shuffleWorldGraph,
+  START_ROOM,
+  type RoomDef,
+  type ZoneId,
+} from "./world";
 
 export const T_EMPTY = 0;
 export const T_SOLID = 1;
@@ -480,9 +488,18 @@ export function computeRoomCoords(world: Map<string, LoadedRoom>): Map<string, {
   return coords;
 }
 
-export function loadWorld(): Map<string, LoadedRoom> {
+/**
+ * @param seed - When provided, room CONTENT is shuffled across
+ * same-exit-signature graph positions (ADR-029); the start room stays
+ * pinned. Omitted entirely (not just falsy), the canonical unshuffled
+ * topology loads - this is what door-clearance.test.ts and other tests
+ * exercise, since it's the stable baseline every room was authored/audited
+ * against.
+ */
+export function loadWorld(seed?: string): Map<string, LoadedRoom> {
+  const roomDefs = seed ? shuffleWorldGraph(ROOMS, seed) : ROOMS;
   const world = new Map<string, LoadedRoom>();
-  for (const def of ROOMS) {
+  for (const def of roomDefs) {
     if (world.has(def.id)) throw new Error(`[world] Duplicate room id ${def.id}`);
     const room = parseRoom(def);
     ensureExitClearance(room);

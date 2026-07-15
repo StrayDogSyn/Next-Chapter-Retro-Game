@@ -252,8 +252,11 @@ export class Game {
   private loop = new GameLoop();
   private input: InputManager;
   private audio = new AudioManager();
-  private world = loadWorld();
-  private roomCoords = computeRoomCoords(this.world);
+  // Assigned in the constructor, not here, because the seed-based room-order
+  // shuffle (ADR-029) needs this.rng - a class field initializer runs before
+  // the constructor body sets that up.
+  private world: ReturnType<typeof loadWorld>;
+  private roomCoords: ReturnType<typeof computeRoomCoords>;
   private visitedRooms = new Set<string>([START_ROOM]);
   private clearedRooms = new Set<string>();
   private roomStates = new Map<string, RoomState>();
@@ -381,6 +384,12 @@ export class Game {
     this.shopRng = this.rng.fork("shop");
     this.vfxRng = this.rng.fork("vfx");
     this.runSeed = this.rng.fork("loot-seed").int(0, 999_999);
+    // ADR-029: room order is seed-shuffled (same seed -> same layout, so
+    // Daily/Enter Seed stay reproducible; a fresh New Run seed -> a fresh
+    // layout). "layout" is its own fork so opening a chest or fighting an
+    // enemy never perturbs which room order this run got, and vice versa.
+    this.world = loadWorld(this.rng.fork("layout").seed);
+    this.roomCoords = computeRoomCoords(this.world);
   }
 
   resizeViewport(width: number, height: number) {
