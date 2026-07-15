@@ -90,6 +90,13 @@ export const ROOMS: RoomDef[] = [
     exits: { left: "R01", right: "R03" },
     // Ability-gate restoration (ADR-028): gates the two coins that the
     // round-3 jump buff made trivially reachable (see ADR-027).
+    // Spike placement fix: moved the row-18 spikes down to row 19 (5 other
+    // rooms had this exact same issue). Row 19 is where a player's feet
+    // actually land when standing on the real floor (row 20's solid tile),
+    // and it's flush with that floor's top surface visually. Row 18 left 3
+    // rows of harmless open air between the spike and anything walkable -
+    // the spike was floating, undetectable during normal play, and
+    // visually disconnected from any surface.
     map: [
       "########################################",
       "#......................................#",
@@ -109,8 +116,8 @@ export const ROOMS: RoomDef[] = [
       "#......................................#",
       "........................................",
       "........................................",
-      "......g.........^^...........g..........",
-      "........................................",
+      "......g......................g..........",
+      "................^^......................",
       "########################################",
       "########################################",
     ],
@@ -166,6 +173,9 @@ export const ROOMS: RoomDef[] = [
     // col24 that a shifted block would have overwritten.
     // Ability-gate restoration (ADR-028): gates the two coins the round-3
     // jump buff made trivially reachable (see ADR-027).
+    // Spike placement fix: moved the row-18 spikes down to row 19, flush
+    // with the real floor (row 20) - see R02's comment for the full
+    // reasoning (same issue in 6 rooms).
     map: [
       "########################################",
       "#......................................#",
@@ -185,8 +195,8 @@ export const ROOMS: RoomDef[] = [
       "#........----------------------........#",
       "........................................",
       "........................................",
-      ".....g............^^^...........g.......",
-      "........................................",
+      ".....g..........................g.......",
+      "..................^^^...................",
       "########################################",
       "########################################",
     ],
