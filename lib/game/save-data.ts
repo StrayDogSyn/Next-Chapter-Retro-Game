@@ -20,11 +20,17 @@ export type SaveDataV1 = {
   py: number;
   hp: number;
   coins: number;
+  /** Crafting-material currency (distinct from coins), earned by scrapping. */
+  materials: number;
   level: number;
   xp: number;
   xpToNext: number;
   weapon: WeaponInstance;
   secondary: WeaponInstance | null;
+  /** Inventory overflow storage - see Game.BAG_CAPACITY for the cap. Absent
+   *  entirely on saves written before this field existed; loaders must
+   *  default to []. */
+  bag: WeaponInstance[];
   upgrades: Partial<Record<UpgradeId, number>>;
   flags: GameFlags;
   visitedRooms: string[];
@@ -51,11 +57,13 @@ export type BuildSaveDataInput = {
   maxHp: number;
   hp: number;
   coins: number;
+  materials: number;
   level: number;
   xp: number;
   xpToNext: number;
   weapon: WeaponInstance;
   secondary: WeaponInstance | null;
+  bag: WeaponInstance[];
   upgrades: Partial<Record<UpgradeId, number>>;
   isUpgradeId: (id: string) => id is UpgradeId;
   flags: GameFlags;
@@ -63,9 +71,12 @@ export type BuildSaveDataInput = {
   shopAtkBonus: number;
 };
 
+const BAG_CAPACITY = 16;
+
 export function buildSaveData(input: BuildSaveDataInput): SaveDataV1 {
   const clampedHp = Math.round(clampNumber(input.hp, 0, input.maxHp, input.maxHp));
   const clampedCoins = Math.round(clampNumber(input.coins, 0, 999_999, 0));
+  const clampedMaterials = Math.round(clampNumber(input.materials, 0, 999_999, 0));
   const clampedLevel = Math.round(clampNumber(input.level, 1, 999, 1));
   const clampedXpToNext = Math.round(clampNumber(input.xpToNext, 1, 1_000_000, 150));
   const clampedXp = Math.round(clampNumber(input.xp, 0, clampedXpToNext, 0));
@@ -77,11 +88,13 @@ export function buildSaveData(input: BuildSaveDataInput): SaveDataV1 {
     py: clampNumber(input.py, 0, input.viewH - input.playerH, 0),
     hp: clampedHp,
     coins: clampedCoins,
+    materials: clampedMaterials,
     level: clampedLevel,
     xp: clampedXp,
     xpToNext: clampedXpToNext,
     weapon: cloneWeapon(input.weapon),
     secondary: input.secondary ? cloneWeapon(input.secondary) : null,
+    bag: input.bag.slice(0, BAG_CAPACITY).map(cloneWeapon),
     upgrades: Object.fromEntries(
       Object.entries(input.upgrades)
         .filter(([id]) => input.isUpgradeId(id))

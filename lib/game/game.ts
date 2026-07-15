@@ -165,8 +165,11 @@ export type HudSnapshot = {
   shield: number;
   maxShield: number;
   coins: number;
+  materials: number;
   weapon: { name: string; rarity: string; color: string; rolledBy: string; damage: number; speed: number };
   secondary: { name: string; rarity: string; color: string; damage: number; speed: number } | null;
+  bag: { name: string; rarity: string; color: string; damage: number; speed: number }[];
+  bagCapacity: number;
   roomName: string;
   zone: ZoneId;
   gamepad: string | null;
@@ -353,8 +356,28 @@ export class Game {
   private dashT = 0;
   private dashCooldown = 0;
   private coins = 0;
+  private materials = 0;
   private weapon: WeaponInstance = { ...STARTING_WEAPON };
   private secondary: WeaponInstance | null = null;
+  // Real inventory storage (previously: any weapon that didn't beat both
+  // primary and secondary DPS was silently auto-scrapped with no player
+  // input beyond a passing toast). `secondary` is left as-is (the existing
+  // quick-swap slot, Y/L keybind) - this is genuinely new overflow storage
+  // for everything else, manually managed via the menu's Inventory tab.
+  private bag: WeaponInstance[] = [];
+  private static readonly BAG_CAPACITY = 16;
+  private static readonly SELL_VALUE: Record<Rarity, number> = {
+    common: 6,
+    uncommon: 15,
+    rare: 35,
+    epic: 80,
+  };
+  private static readonly SCRAP_MATERIALS: Record<Rarity, number> = {
+    common: 1,
+    uncommon: 2,
+    rare: 4,
+    epic: 8,
+  };
   private upgrades: Partial<Record<UpgradeId, number>> = {};
   private flags = { hasKey: false, wyrmSlain: false, mechSlain: false, beastSlain: false };
 
@@ -1777,22 +1800,110 @@ export class Game {
       this.showMessage(`${describeLoot(loot)} [${loot.rolledBy}]`);
       return;
     }
-    // weapon: auto-equip if better DPS, otherwise stash to secondary
+    // weapon: auto-equip if better DPS, stash to secondary if that's better,
+    // otherwise into the bag - only auto-scrapped (for materials, not coins)
+    // if the bag is also full. Nothing is silently discarded anymore: a
+    // displaced primary/secondary always goes into the bag rather than
+    // overwriting/dropping whatever used to be there.
     const dps = (w: WeaponInstance) => w.damage * w.speed;
     this.audio.play(Game.RARITY_SOUND[loot.rarity], 0.8);
     if (dps(loot) >= dps(this.weapon)) {
+      if (this.secondary) this.pushToBag(this.secondary);
       this.secondary = this.weapon;
       this.weapon = loot;
       this.showMessage(`Equipped ${describeLoot(loot)}`);
       this.triggerEquipFx();
       this.saveGame(); // ADR-010: equipment change is a save checkpoint
     } else if (!this.secondary || dps(loot) > dps(this.secondary)) {
+      if (this.secondary) this.pushToBag(this.secondary);
       this.secondary = loot;
       this.showMessage(`Stashed ${describeLoot(loot)} (Y/L to swap)`);
     } else {
-      this.coins += 5;
-      this.showMessage(`Scrapped ${loot.name} (+5 coins)`);
+      this.pushToBag(loot);
     }
+  }
+
+  /** Adds to the bag if there's room, otherwise auto-scraps for materials
+   *  (never coins - scrapping and selling are deliberately distinct actions,
+   *  see the menu's Inventory tab) so a full bag never blocks a pickup. */
+  private pushToBag(item: WeaponInstance) {
+    if (this.bag.length < Game.BAG_CAPACITY) {
+      this.bag.push(item);
+      this.showMessage(`Stored ${describeLoot(item)} in bag (${this.bag.length}/${Game.BAG_CAPACITY})`);
+    } else {
+      const mats = Game.SCRAP_MATERIALS[item.rarity];
+      this.materials += mats;
+      this.showMessage(`Bag full - scrapped ${item.name} (+${mats} materials)`);
+    }
+  }
+
+  /** Equip a bag item as the primary weapon; the displaced primary goes
+   *  back into the bag (swap, not discard) at the same index. */
+  equipBagItem(index: number) {
+    const item = this.bag[index];
+    if (!item) return;
+    const displaced = this.weapon;
+    this.weapon = item;
+    this.bag[index] = displaced;
+    this.showMessage(`Equipped ${describeLoot(item)}`);
+    this.triggerEquipFx();
+    this.saveGame();
+  }
+
+  sellBagItem(index: number) {
+    const item = this.bag[index];
+    if (!item) return;
+    this.bag.splice(index, 1);
+    this.coins += Game.SELL_VALUE[item.rarity];
+    this.showMessage(`Sold ${item.name} (+${Game.SELL_VALUE[item.rarity]} coins)`);
+  }
+
+  scrapBagItem(index: number) {
+    const item = this.bag[index];
+    if (!item) return;
+    this.bag.splice(index, 1);
+    this.materials += Game.SCRAP_MATERIALS[item.rarity];
+    this.showMessage(`Scrapped ${item.name} (+${Game.SCRAP_MATERIALS[item.rarity]} materials)`);
+  }
+
+  /** Sell/scrap the currently equipped weapon or secondary. Primary always
+   *  gets a replacement (bag[0], then secondary, then the starting weapon)
+   *  so the player is never left unarmed; secondary just clears to null. */
+  private replacePrimaryAfterDisposal() {
+    if (this.bag.length > 0) {
+      this.weapon = this.bag.shift()!;
+    } else if (this.secondary) {
+      this.weapon = this.secondary;
+      this.secondary = null;
+    } else {
+      this.weapon = { ...STARTING_WEAPON };
+    }
+  }
+
+  sellEquipped(slot: "primary" | "secondary") {
+    if (slot === "secondary") {
+      if (!this.secondary) return;
+      this.coins += Game.SELL_VALUE[this.secondary.rarity];
+      this.showMessage(`Sold ${this.secondary.name} (+${Game.SELL_VALUE[this.secondary.rarity]} coins)`);
+      this.secondary = null;
+      return;
+    }
+    this.coins += Game.SELL_VALUE[this.weapon.rarity];
+    this.showMessage(`Sold ${this.weapon.name} (+${Game.SELL_VALUE[this.weapon.rarity]} coins)`);
+    this.replacePrimaryAfterDisposal();
+  }
+
+  scrapEquipped(slot: "primary" | "secondary") {
+    if (slot === "secondary") {
+      if (!this.secondary) return;
+      this.materials += Game.SCRAP_MATERIALS[this.secondary.rarity];
+      this.showMessage(`Scrapped ${this.secondary.name} (+${Game.SCRAP_MATERIALS[this.secondary.rarity]} materials)`);
+      this.secondary = null;
+      return;
+    }
+    this.materials += Game.SCRAP_MATERIALS[this.weapon.rarity];
+    this.showMessage(`Scrapped ${this.weapon.name} (+${Game.SCRAP_MATERIALS[this.weapon.rarity]} materials)`);
+    this.replacePrimaryAfterDisposal();
   }
 
   /** Luck-equivalent added per consecutive sub-rare drop. Rides the existing
@@ -1943,11 +2054,13 @@ export class Game {
       maxHp: this.maxHp(),
       hp: safeHp,
       coins: this.coins,
+      materials: this.materials,
       level: this.level,
       xp: this.xp,
       xpToNext: this.xpToNext,
       weapon: this.weapon,
       secondary: this.secondary,
+      bag: this.bag,
       upgrades: this.upgrades,
       isUpgradeId,
       flags: this.flags,
@@ -2026,8 +2139,14 @@ export class Game {
       this.xp = xp;
       this.hp = Math.round(clampNumber(d.hp, 1, maxHpAtLevel, maxHpAtLevel));
       this.coins = Math.round(clampNumber(d.coins, 0, 999_999, 0));
+      this.materials = Math.round(clampNumber(d.materials, 0, 999_999, 0));
       this.weapon = { ...d.weapon };
       this.secondary = d.secondary ? { ...d.secondary } : null;
+      // Saves written before the bag existed simply won't have this field -
+      // Array.isArray(undefined) is false, so it correctly defaults to [].
+      this.bag = Array.isArray(d.bag)
+        ? d.bag.filter(isWeaponInstance).slice(0, Game.BAG_CAPACITY).map((w) => ({ ...w }))
+        : [];
       const upgradesInput = d.upgrades && typeof d.upgrades === "object" ? d.upgrades : {};
       const normalizedUpgrades: Partial<Record<UpgradeId, number>> = {};
       for (const [id, value] of Object.entries(upgradesInput as Record<string, unknown>)) {
@@ -2128,6 +2247,7 @@ export class Game {
       shield: 0,
       maxShield: 0,
       coins: this.coins,
+      materials: this.materials,
       weapon: {
         name: this.weapon.name,
         rarity: this.weapon.rarity,
@@ -2145,6 +2265,14 @@ export class Game {
             speed: this.secondary.speed,
           }
         : null,
+      bag: this.bag.map((item) => ({
+        name: item.name,
+        rarity: item.rarity,
+        color: RARITIES[item.rarity].color,
+        damage: item.damage,
+        speed: item.speed,
+      })),
+      bagCapacity: Game.BAG_CAPACITY,
       roomName: `${this.room().name} (${this.roomId})`,
       zone: this.room().zone,
       gamepad: this.input.state.gamepadConnected ? this.input.state.gamepadId : null,

@@ -226,6 +226,16 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
     }
   };
 
+  // Inventory actions (Game holds the real state; these just forward the
+  // call). No manual snapshot refresh needed - pushSnapshot() already runs
+  // on a ~100ms throttle every frame regardless of menu state, so the next
+  // tick picks up the mutation.
+  const equipBagItem = (index: number) => gameRef.current?.equipBagItem(index);
+  const sellBagItem = (index: number) => gameRef.current?.sellBagItem(index);
+  const scrapBagItem = (index: number) => gameRef.current?.scrapBagItem(index);
+  const sellEquipped = (slot: "primary" | "secondary") => gameRef.current?.sellEquipped(slot);
+  const scrapEquipped = (slot: "primary" | "secondary") => gameRef.current?.scrapEquipped(slot);
+
   return (
     <div
       className="game-canvas-shell"
@@ -271,7 +281,16 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
           </div>
         ) : null}
         <GameHudOverlay snapshot={snapshot} onToggleMenu={() => setMenuOpen((open) => !open)} onCopySeed={copySeed} />
-        <GameMenuModal open={menuOpen} snapshot={snapshot} onClose={() => setMenuOpen(false)} />
+        <GameMenuModal
+          open={menuOpen}
+          snapshot={snapshot}
+          onClose={() => setMenuOpen(false)}
+          onEquipBagItem={equipBagItem}
+          onSellBagItem={sellBagItem}
+          onScrapBagItem={scrapBagItem}
+          onSellEquipped={sellEquipped}
+          onScrapEquipped={scrapEquipped}
+        />
       </div>
     </div>
   );

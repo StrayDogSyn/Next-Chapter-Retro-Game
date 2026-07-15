@@ -1,15 +1,28 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { HudSnapshot } from "@/lib/game/game";
 
 type Props = {
   open: boolean;
   snapshot: HudSnapshot | null;
   onClose: () => void;
+  onEquipBagItem: (index: number) => void;
+  onSellBagItem: (index: number) => void;
+  onScrapBagItem: (index: number) => void;
+  onSellEquipped: (slot: "primary" | "secondary") => void;
+  onScrapEquipped: (slot: "primary" | "secondary") => void;
 };
 
 type TabId = "inventory" | "character" | "world";
+
+/** What's currently selected in the Inventory tab - one unified selection
+ *  model covers both loadout slots and bag cells, since primary/secondary/
+ *  bag items all support the same sell/scrap actions (bag items also get
+ *  Equip). Distinguishing "kind" up front means the action panel doesn't
+ *  need to re-derive which item is selected from two separate pieces of
+ *  state. */
+type Selection = { kind: "primary" } | { kind: "secondary" } | { kind: "bag"; index: number };
 
 function formatTime(totalSeconds: number): string {
   const seconds = Math.max(0, Math.floor(totalSeconds));
@@ -18,9 +31,31 @@ function formatTime(totalSeconds: number): string {
   return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 }
 
-export function GameMenuModal({ open, snapshot, onClose }: Props) {
+export function GameMenuModal({
+  open,
+  snapshot,
+  onClose,
+  onEquipBagItem,
+  onSellBagItem,
+  onScrapBagItem,
+  onSellEquipped,
+  onScrapEquipped,
+}: Props) {
   const [tab, setTab] = useState<TabId>("inventory");
-  const [selectedSlot, setSelectedSlot] = useState<"primary" | "secondary">("primary");
+  const [selection, setSelection] = useState<Selection>({ kind: "primary" });
+
+  // A sell/scrap can remove the exact bag index the player has selected
+  // (or the whole bag can shrink out from under a stale index after a
+  // sale) - snap back to viewing the primary weapon rather than pointing
+  // at a slot that no longer exists or silently showing the wrong item.
+  useEffect(() => {
+    if (!snapshot) return;
+    if (selection.kind === "secondary" && !snapshot.secondary) {
+      setSelection({ kind: "primary" });
+    } else if (selection.kind === "bag" && selection.index >= snapshot.bag.length) {
+      setSelection({ kind: "primary" });
+    }
+  }, [snapshot, selection]);
 
   const diff = useMemo(() => {
     if (!snapshot?.secondary) return null;
@@ -30,6 +65,13 @@ export function GameMenuModal({ open, snapshot, onClose }: Props) {
   }, [snapshot]);
 
   if (!open || !snapshot) return null;
+
+  const selectedItem =
+    selection.kind === "primary"
+      ? snapshot.weapon
+      : selection.kind === "secondary"
+        ? snapshot.secondary
+        : snapshot.bag[selection.index] ?? null;
 
   return (
     <div className="game-menu-backdrop" role="dialog" aria-modal="true" aria-label="Game menu">
@@ -49,19 +91,25 @@ export function GameMenuModal({ open, snapshot, onClose }: Props) {
           <div className="menu-grid inventory-grid">
             <div>
               <h3>Loadout</h3>
-              <button type="button" className={`slot${selectedSlot === "primary" ? " active" : ""}`} onClick={() => setSelectedSlot("primary")}>
+              <button
+                type="button"
+                className={`slot${selection.kind === "primary" ? " active" : ""}`}
+                onClick={() => setSelection({ kind: "primary" })}
+                style={{ borderColor: snapshot.weapon.color }}
+              >
                 Weapon: {snapshot.weapon.name}
               </button>
               <button
                 type="button"
-                className={`slot${selectedSlot === "secondary" ? " active" : ""}`}
-                onClick={() => setSelectedSlot("secondary")}
+                className={`slot${selection.kind === "secondary" ? " active" : ""}`}
+                onClick={() => setSelection({ kind: "secondary" })}
                 disabled={!snapshot.secondary}
+                style={snapshot.secondary ? { borderColor: snapshot.secondary.color } : undefined}
               >
                 Secondary: {snapshot.secondary ? snapshot.secondary.name : "empty"}
               </button>
 
-              {selectedSlot === "secondary" && snapshot.secondary ? (
+              {selection.kind === "secondary" && snapshot.secondary ? (
                 <div className="slot-diff">
                   <div style={{ color: (diff?.atkDelta ?? 0) >= 0 ? "#74e09a" : "#ef6f6f" }}>
                     ATK {(diff?.atkDelta ?? 0) >= 0 ? `+${diff?.atkDelta ?? 0}` : diff?.atkDelta}
@@ -73,15 +121,60 @@ export function GameMenuModal({ open, snapshot, onClose }: Props) {
               ) : null}
             </div>
             <div>
-              <h3>Bag</h3>
+              <h3>
+                Bag ({snapshot.bag.length}/{snapshot.bagCapacity}) — {snapshot.materials} materials
+              </h3>
               <div className="bag-grid" aria-label="Storage bag grid">
-                {Array.from({ length: 16 }).map((_, idx) => (
-                  <div key={idx} className="bag-cell">
-                    {idx === 0 && snapshot.secondary ? "S" : ""}
-                  </div>
-                ))}
+                {Array.from({ length: snapshot.bagCapacity }).map((_, idx) => {
+                  const item = snapshot.bag[idx];
+                  const isSelected = selection.kind === "bag" && selection.index === idx;
+                  return (
+                    <button
+                      type="button"
+                      key={idx}
+                      className={`bag-cell${isSelected ? " active" : ""}`}
+                      style={item ? { borderColor: item.color } : undefined}
+                      disabled={!item}
+                      onClick={() => setSelection({ kind: "bag", index: idx })}
+                      aria-label={item ? item.name : `Empty bag slot ${idx + 1}`}
+                      title={item ? item.name : undefined}
+                    >
+                      {item ? item.name.slice(0, 1).toUpperCase() : ""}
+                    </button>
+                  );
+                })}
               </div>
             </div>
+
+            {selectedItem ? (
+              <div className="menu-grid inventory-actions">
+                <div className="selected-item-info">
+                  <strong style={{ color: selectedItem.color }}>{selectedItem.name}</strong>
+                  <span>{Math.round(selectedItem.damage)} dmg @ {selectedItem.speed.toFixed(1)}/s</span>
+                </div>
+                <div className="inventory-action-buttons">
+                  {selection.kind === "bag" ? (
+                    <button type="button" onClick={() => onEquipBagItem(selection.index)}>Equip</button>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      selection.kind === "bag" ? onSellBagItem(selection.index) : onSellEquipped(selection.kind)
+                    }
+                  >
+                    Sell
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      selection.kind === "bag" ? onScrapBagItem(selection.index) : onScrapEquipped(selection.kind)
+                    }
+                  >
+                    Scrap
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </div>
         ) : null}
 
@@ -101,6 +194,7 @@ export function GameMenuModal({ open, snapshot, onClose }: Props) {
             <div>Rooms Visited: {snapshot.minimap.filter((room) => room.visited).length}</div>
             <div>Enemies Defeated: {snapshot.enemiesDefeated}</div>
             <div>Coins Banked: {snapshot.coins}</div>
+            <div>Materials: {snapshot.materials}</div>
             <div>Time Elapsed: {formatTime(snapshot.elapsedSeconds)}</div>
           </div>
         ) : null}

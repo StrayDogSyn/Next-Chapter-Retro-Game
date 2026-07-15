@@ -30,11 +30,13 @@ function baseInput(overrides: Partial<BuildSaveDataInput> = {}): BuildSaveDataIn
     maxHp: 100,
     hp: 80,
     coins: 42,
+    materials: 7,
     level: 3,
     xp: 10,
     xpToNext: 150,
     weapon: WEAPON,
     secondary: null,
+    bag: [],
     upgrades: {},
     isUpgradeId,
     flags: { hasKey: false, wyrmSlain: false, mechSlain: false, beastSlain: false },
@@ -66,6 +68,19 @@ describe("buildSaveData", () => {
   it("clamps coins to [0, 999_999]", () => {
     expect(buildSaveData(baseInput({ coins: -1 })).coins).toBe(0);
     expect(buildSaveData(baseInput({ coins: 5_000_000 })).coins).toBe(999_999);
+  });
+
+  it("clamps materials to [0, 999_999]", () => {
+    expect(buildSaveData(baseInput({ materials: -1 })).materials).toBe(0);
+    expect(buildSaveData(baseInput({ materials: 5_000_000 })).materials).toBe(999_999);
+  });
+
+  it("caps the bag at 16 items and clones each entry rather than aliasing", () => {
+    const bag = Array.from({ length: 20 }, (_, i) => ({ ...WEAPON, name: `Sword ${i}` }));
+    const data = buildSaveData(baseInput({ bag }));
+    expect(data.bag).toHaveLength(16);
+    expect(data.bag[0]).toEqual(bag[0]);
+    expect(data.bag[0]).not.toBe(bag[0]);
   });
 
   it("clamps level to [1, 999] and xp to [0, xpToNext]", () => {

@@ -724,6 +724,56 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #dbeafe;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.bag-cell.active {
+  border-color: #facc15;
+  box-shadow: inset 0 0 0 1px #facc15;
+}
+
+.bag-cell:disabled {
+  opacity: 0.4;
+}
+
+.inventory-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 1px solid #47627d;
+  border-radius: 4px;
+  background: rgba(10, 23, 36, 0.8);
+  padding: 0.45rem 0.6rem;
+}
+
+.selected-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.85rem;
+}
+
+.inventory-action-buttons {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.inventory-action-buttons button {
+  border: 1px solid #5f7f9f;
+  background: rgba(20, 38, 58, 0.95);
+  color: #dbeafe;
+  border-radius: 3px;
+  padding: 0.2rem 0.5rem;
+}
+
+.inventory-action-buttons button:hover {
+  border-color: #facc15;
+  color: #facc15;
 }
 
 .character-grid,
