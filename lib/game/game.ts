@@ -1289,8 +1289,15 @@ export class Game {
     this.audio.play(Game.DEATH_SOUND[enemy.kind] ?? "kill", 0.8);
     this.awardXp(enemy.level * 10);
     const killedInRoom = this.roomId;
+    const def = ENEMY_DEFS[enemy.kind];
+    // drawEnemies() bottom-anchors the sprite on the (smaller) hitbox -
+    // dy = enemy.y + enemy.h - drawH - so the sprite's visual vertical
+    // center sits above enemy.y + enemy.h/2 whenever drawH > h (true for
+    // every enemy, most dramatically the mech: h=48 vs drawH=84). Death FX
+    // and loot/coin drops both anchor here, so they pop from where the
+    // sprite was actually drawn, not from the invisible hitbox's center.
     const cx = enemy.x + enemy.w / 2;
-    const cy = enemy.y + enemy.h / 2;
+    const cy = enemy.y + enemy.h - def.drawH / 2;
 
     if (enemy.kind === "werewolf") {
       this.flags.beastSlain = true;
@@ -1314,7 +1321,10 @@ export class Game {
       // Regular (non-boss) enemies get a quick dissolve-whirl instead of
       // just vanishing. Bosses skip this - werewolf already gets its own
       // victory-screen treatment and the mech gets the explosion above.
-      this.spawnSpriteFx(cx, cy, "fx_diewhirl", "whirl", 48, 48, 7);
+      // Sized off the dying enemy's own draw box (was a fixed 48x48,
+      // which dwarfed small enemies like the bat - drawW/drawH 28x28).
+      const whirlSize = Math.max(def.drawW, def.drawH) * 1.2;
+      this.spawnSpriteFx(cx, cy, "fx_diewhirl", "whirl", whirlSize, whirlSize, 7);
     }
     if (enemy.boss) this.updateMusic();
 
@@ -2855,22 +2865,13 @@ export class Game {
     // hitbox is expected and intentional (the hitbox stays tighter than the
     // sprite silhouette on purpose - see pw/ph's own comment).
     //
-    // Scale derivation (measured, not assumed - see SESSION_LOG for the
-    // full pixel measurements): drawW/drawH were never actually the bug.
-    // They were 32x34 before AND after the ADR-020 swap - identical. What
-    // changed is how much of that box the source art fills. The retired
-    // hero_0.png went through pack_rows(), which trims each frame to its
-    // content bbox and rescales it to fill its packed cell (fill ratio
-    // ~37/48 = 0.7708 measured on its walkRight row). char-sheet-alpha.png
-    // was copied into the pipeline as-is (ADR-020's "no pack_rows() needed"
-    // call), so its cells carry real unfilled padding (fill ratio ~32/46 =
-    // 0.6957 measured on its run row). Same 32x34 box, less of it filled ->
-    // the character reads smaller even though nothing about "S" was ever
-    // set below 1. Fix: scale the box by S = 0.7708/0.6957 ~= 1.108 to
-    // restore the old sheet's effective on-screen stature, using the
-    // existing per-entity draw-scale mechanism (drawW/drawH are already a
-    // per-call parameter to drawSheetAnim(), the same one every enemy uses
-    // via ENEMY_DEFS[...].drawW/drawH) rather than reprocessing the sheet.
+    // Draw-scale derivation (measured, not assumed - see SESSION_LOG for the
+    // full pixel measurements): drawW/drawH were never the bug. They stayed
+    // 32x34 after the ADR-020 swap; what changed is how much of that box the
+    // source art fills. char-sheet-alpha.png was copied into the pipeline as-
+    // is (ADR-020's "no pack_rows() needed" path), so its cells carry real
+    // unfilled padding. Scale the box by S = 1.108 to restore the intended
+    // on-screen stature using the existing per-entity draw-scale mechanism.
     //
     // Space Marine Overhaul on top of that: the hitbox grew non-uniformly
     // from its original 14x26 to 24x44 (x1.7143 / x1.6923 vs. original) for
@@ -2887,9 +2888,8 @@ export class Game {
     const dx = this.px + this.pw / 2 - drawW / 2;
     const dy = this.py + this.ph - drawH;
     // ADR-020: char-sheet-alpha.png is single-facing (always faces right in
-    // the source art, unlike the retired hero_0.png which had dedicated
-    // walkLeft/walkRight rows). Flip via canvas transform when runtime facing
-    // differs from HERO_NATIVE_FACING, matching the existing enemy pattern.
+    // the source art). Flip via canvas transform when runtime facing differs
+    // from HERO_NATIVE_FACING, matching the existing enemy pattern.
     const anim = selectPlayerAnim({ grounded: this.onGround, vx: this.pvx, vy: this.pvy });
     const flip = shouldFlipHeroSprite(this.facing);
     this.drawSheetAnim("hero", anim, this.animT, dx, dy, drawW, drawH, flip, 9);
@@ -3052,7 +3052,12 @@ export class Game {
         // replacing five separate hand-drawn primitive shapes. See
         // prepare-assets.py's "pickupIcons" section for the exact crop.
         case "coin":
-          this.drawSheetAnim("pickupIcons", "coin", 0, x - 1, y - 1, 18, 18, false);
+          ctx.fillStyle = "#facc15";
+          ctx.beginPath();
+          ctx.arc(x + 5, y + 5, 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#a16207";
+          ctx.fillRect(x + 4, y + 2, 2, 6);
           break;
         case "health":
           this.drawSheetAnim("pickupIcons", "health", 0, x - 2, y - 3, 18, 18, false);

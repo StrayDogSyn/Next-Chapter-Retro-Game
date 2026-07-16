@@ -2,7 +2,7 @@
 
 > **Purpose:** This is the working record of how this project was built in collaboration with an AI coding agent — what was asked, what came back, what was kept, changed, or thrown out, and why. It's updated after every pairing session, not written retroactively at submission time.
 >
-> **Last updated:** _2026-07-15 (RetroVania start-screen repair and documentation truth sync)_
+> **Last updated:** _2026-07-16 (added Project Post-Mortem, accuracy-checked against SESSION_LOG.md)_
 > **Maintainer:** StrayDogSyn
 
 ---
@@ -16,6 +16,7 @@
 - [Decisions & Rationale](#decisions--rationale)
 - [Human vs. Agent Contribution Map](#human-vs-agent-contribution-map)
 - [Retro & Learnings](#retro--learnings)
+- [Project Post-Mortem](#project-post-mortem)
 - [Linked Documents](#linked-documents)
 
 ---
@@ -137,6 +138,40 @@ This is the honesty section. Bootcamp reviewers care about this more than the co
 - **What I'd prompt differently next time:** Build a ground-truth verification step in from the start rather than bolting it on after multiple rounds of mismatched claims. `scripts/project-status.py` now exists for exactly this — it reads the filesystem/git state directly instead of relying on any agent's self-report, and every pairing session should run it before accepting a "done." For documentation sessions, cross-check every asserted UI/behavior claim against the current source before writing it down.
 
 </details>
+
+## Project Post-Mortem
+
+> Every claim below is cross-checked against [SESSION_LOG.md](SESSION_LOG.md) rather than narrated from memory — the same ground-truth discipline the rest of this doc holds itself to (see [Retro & Learnings](#retro--learnings) on why that check matters).
+
+### 1. Agentic Workflow & Architecture Strategy
+
+Development used a multi-agent workflow across seven tools, split by role rather than used interchangeably:
+
+- **Claude Code, GitHub Copilot / VS Code CoPilot, and Windsurf Cascade** did the hands-on implementation work — coding, debugging, and verification-gated feature sprints. Their specific, session-by-session contributions are the [Session Log](#session-log) table above; the FX/mech-boss sprint, the StrictMode fix, the platform-removal decision, and the asset-pipeline work described below were all Claude Code sessions, and are traceable to specific dated entries in SESSION_LOG.md.
+- **Gemini, Perplexity, and Comet Assistant (Browser)** handled prompt drafting, web search for open-source art/audio assets, and lightweight in-browser verification — work that didn't need a full implementation agent's context budget.
+- **Devin Cloud** took on supplementary background/investigation tasks outside the main implementation loop.
+
+**Documentation as source of truth:** `docs/MASTER_BUILD_SPEC.md`, this file, and `docs/SESSION_LOG.md` were kept current throughout rather than reconstructed at submission time, specifically to keep long agent sessions grounded and prevent regressions from an agent re-deriving context incorrectly.
+
+**Test-driven execution:** no agent output was accepted on narration alone. Every sprint closed with `npm test`, `npx tsc --noEmit`, and `python scripts/project-status.py` — the last one reads actual filesystem/git state rather than any agent's self-report, which is exactly what caught the false-completion pattern documented in [Retro & Learnings](#retro--learnings).
+
+### 2. Audits & Deep Debugging
+
+- **The StrictMode zombie loop.** Interaction triggers (shrine/shopkeeper activation) were failing intermittently — roughly 50% of the time, independent of how long a key was held. Live-instrumented tracing (frame-counter logging across repeated runs) caught the tell: the frame counter would reset mid-sequence with the player snapped back to spawn, proving a *second* `Game` instance was running its own physics/input/audio loop in parallel. Root cause: React 18 StrictMode's dev-only double-mount calls `Game.destroy()` on the first instance while its async `start()` (sprite/audio preloading) is still in flight; `destroy()` had no way to signal "abort," so `start()` finished anyway and spawned a zombie `requestAnimationFrame` loop plus a zombie `InputManager` listening on the same `document` key events for the rest of the session. Fix: a `private destroyed` flag on the `Game` class, checked immediately before `loop.start()` in `start()` — a plain guard clause, not a React hook (`Game` is intentionally a framework-free class per ADR-002, so no `useRef` lives inside it). This also explained a broader pattern of previously-isolated "intermittent/flaky" reports (duplicate audio, inconsistent input) that had been investigated one at a time before the shared root cause was found.
+- **Bypassing the room-shuffle RNG for FX testing.** ADR-029's seeded room-order shuffle means a room's authored ID (e.g., the mech boss's home room) doesn't reliably map to the same content across runs, which made "walk to the boss and test the new FX" an unreliable test plan — one attempt hardcoded a room ID and found no boss there; a second, scripted-navigation attempt died to a stray bat mid-walk before arriving. The fix that actually worked: temporarily exposing the live `Game` instance on `window` with a debug spawn/kill hook, so entities and FX could be triggered directly in whatever room a test happened to load into, sidestepping level layout entirely. All temporary hooks were removed before merge, confirmed via a final grep for the debug markers.
+- **Compliance auditing before submission.** Verification gates (`npm test`, `tsc --noEmit`, `project-status.py`) were re-run after every doc/asset change, not just after code changes, and a root-level `index.html` submission portal exists specifically so evaluators reach a working entry point regardless of Next.js static-export routing quirks.
+
+### 3. Iteration & Pragmatic Scope Management (Cutting the Fat)
+
+- **The one-way-platform pivot.** Beta feedback claimed a collision bug in one-way drop-through platforms. Three separate diagnostic passes — including a live instrumented trap stress-tested across ~30 jump/fall cycles in the platform-densest rooms — found the system clean, with zero reproductions. Rather than silently comply or silently refuse, the audit findings were laid out plainly and the trade-off was made explicit: removing one-way platforms entirely would guarantee 100% collision reliability at the cost of the drop-through mechanic. The user made an informed call to proceed anyway; the change was then scoped carefully (converting plain platforms to solid stone while preserving the ability-gated dash/double-jump door tiles that share the same rendering path) and verified against the world's reachability audit before merge.
+- **Loot readability over complexity.** An early pass at dropped-powerup icons used color-coded capsules; direct pixel measurement showed the color differentiation lived only in tiny end-caps, not the dominant body color, so they read as visually identical at gameplay speed. Replaced with a legible letter-badge set (health/currency/key/double-jump/dash) instead.
+- **Muzzle-flash simplification.** A full rotation-band mapping of the muzzle-flash sheet (matching projectile travel angle frame-by-frame) was scoped and then shelved in favor of one tightly-cropped static flash frame, shipping working visual feedback without the added risk of a more complex, less-tested rendering path.
+
+### 4. Open-Source Asset Sourcing & Pipeline Integration
+
+- **Sourcing:** replacing placeholder shapes and mismatched "ratchet" sprites meant sourcing permissively-licensed art from sites like OpenGameArt — tracked with attribution in `docs/CREDITS.md` and `assets/manifest.csv`.
+- **Automated asset packing:** raw downloaded sheets never fit an engine's exact geometry out of the box, so `scripts/prepare-assets.py` parses, crops, scale-normalizes, and packs raw source art into production sheets. Every new pipeline section opens its source image and hard-fails with a measured-exact-size error if dimensions drift, so a bad crop offset fails loudly instead of shipping silently. The FX/mech-boss sheets (`fx_projectile`, `fx_muzzle`, `fx_explosion`, `fx_diewhirl`, `mech_gunner`, `pickupIcons`) were added this way, each crop region measured directly from the source pixels rather than trusted off a sheet's printed labels.
+- **Unified metadata:** the script writes every sheet's cell size and animation frame layout into one `public/sprites/spritemeta.json`, which the TypeScript engine reads at runtime — so a new animated entity (like the mech boss's idle/attack rows, or the multi-frame boss-death explosion) is wired by adding data, not by hardcoding pixel offsets into the renderer.
 
 ## Linked Documents
 

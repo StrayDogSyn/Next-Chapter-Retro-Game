@@ -3,7 +3,6 @@ assets/img/bulk/bat_sprite.png
 assets/img/bulk/demon_flower_monster_sprite_sheet.zip
 assets/img/bulk/dirt_platformer_tiles.png
 assets/img/bulk/goblin_sprite.zip
-assets/img/bulk/hero_0.png
 assets/img/bulk/living_tissue_background.zip
 assets/img/bulk/lpc_imp.zip
 assets/img/bulk/mangrove.png

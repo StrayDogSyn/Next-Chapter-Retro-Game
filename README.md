@@ -62,28 +62,40 @@ Scope discipline was intentional: prioritize the smallest complete demonstration
 
 ## Features
 
-### Core gameplay
+### Complete
+
+**Core gameplay**
 
 - Hand-rolled `requestAnimationFrame` game loop (no Phaser/Pixi)
 - 24 single-screen interconnected rooms across 5 zones
-- 4 enemy types + 3 boss encounters
-- Melee/projectile combat, damage/effects loops, and loot-driven progression
+- 4 enemy types + 3 boss encounters, each with sprite-sheet idle/attack animation and a dedicated multi-frame death sequence
+- Melee/projectile combat with sprite-backed projectiles, muzzle-flash and impact FX, and rarity-tinted hit feedback
+- Loot-driven progression: rarity-tiered weapons with rolled stats and elemental affixes (burn/freeze/shock/curse)
 - Real inventory with equip/sell/scrap flows
-- Shrine/save flow with server mirror + local fallback
+- Shrine save flow with server mirror + local fallback; NPC shop economy sink
 
-### Replayability and progression
+**Replayability and progression**
 
 - Deterministic seeded runs with forked RNG streams
 - Daily seed and manual seed-entry modes
 - Run summary on death/victory (seed, time, progress, combat stats)
 - Ability/key gating system integrated with world traversal
 
-### Platform and UX support
+**Platform and UX support**
 
 - Keyboard + gamepad + touch input support
-- React HUD + modal UI layered over canvas runtime
+- React HUD (XP bar, mini-map) + modal UI layered over canvas runtime
 - Degraded-mode resilience when backend is unavailable
 - Public deployment model: static frontend + independent Python service
+
+### Next Up
+
+- **Coherent single biome**: unify tiles, backdrops, and enemies under one consistent art set — currently mixed across source sheets (see `docs/BUGS_IMPROVEMENT_GUIDE.md` AST-016)
+- **Zone-specific backdrops**: distinct backgrounds per zone instead of one shared background family (AST-018)
+- **Level-cleared tracking**: persist which rooms have already been looted so revisiting a cleared room doesn't imply infinite re-farming (open item in `docs/ARCHITECTURE.md`)
+- **Equipment HUD polish**: stronger highlight/swap feedback when gear changes (UI-002)
+- **Treasure micro-interactions**: richer pickup animation and currency visual variety (UX-006)
+- **Remaining asset ingestion**: wire the unprocessed archives under `./downloads` into the asset pipeline (AST-010)
 
 ### Architecture snapshot
 
@@ -110,15 +122,27 @@ See `docs/ARCHITECTURE.md` for full detail.
 
 ## AI Tools Used
 
-This project was built using AI pair-programming workflows with:
+This project deliberately used a range of AI tools rather than defaulting to one. Each tool has different strengths, weaknesses, and context/token budgets, and matching the tool to the task — implementation vs. research vs. asset sourcing vs. in-browser verification — kept token usage efficient and avoided asking any single model to do work it wasn't well-suited for.
 
-- Claude
-- GitHub Copilot
+**Primary implementation agents** (hands-on coding, debugging, and verification-gated feature work — extensively logged in `docs/SESSION_LOG.md` / `docs/AGENTIC_WORKFLOW.md`):
+
+- Claude Code
+- GitHub Copilot / VS Code CoPilot
 - Windsurf Cascade
 
-Comprehensive AI collaboration evidence is documented in:
+**Research, prompting, and browser-based verification** (used for prompt drafting, sourcing open-source art/audio assets via web search, and running automated in-browser tests/reports where a lighter-weight tool was the better fit than burning implementation-agent context on it):
 
-- `docs/AGENTIC_WORKFLOW.md`
+- Gemini
+- Perplexity
+- Comet Assistant (Browser)
+
+**Supplementary cloud agent:**
+
+- Devin Cloud — offloaded background/investigation tasks outside the main implementation loop.
+
+Comprehensive AI collaboration evidence — including a full post-mortem on workflow strategy, debugging, and scope decisions — is documented in:
+
+- `docs/AGENTIC_WORKFLOW.md` (see the [Project Post-Mortem](docs/AGENTIC_WORKFLOW.md#project-post-mortem) section)
 - `docs/SESSION_LOG.md`
 - `docs/PROMPT_LIBRARY.md`
 - `docs/DECISIONS.md`

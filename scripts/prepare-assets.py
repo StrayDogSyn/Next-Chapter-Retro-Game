@@ -658,20 +658,6 @@ def main() -> None:
         cell_h=280,
     )
 
-    # NOTE: hero_0.png (a 4x4-grid, 256px-cell sheet) used to be packed here
-    # as the player's "hero" sheet via pack_rows(). It's retired (see
-    # game.ts's drawPlayer() comment - the live player sprite is
-    # char-sheet-alpha.png, wired near the top of main()) and this block was
-    # deleted 2026-07-16: it silently overwrote the real hero.png/META["hero"]
-    # with hero_0's stale walkRight/walkLeft/front data every time this
-    # script reached this point - which, until the boss_werewolf zip below
-    # was restored (see SESSION_LOG), it never actually did, because the
-    # pipeline always crashed earlier at that missing file. Fixing the zip
-    # let execution reach here for the first time and exposed the conflict as
-    # a test failure (hero_skin_*.png dimensions no longer matching hero.png)
-    # rather than as a silent wrong-asset bug - deleting this block, not
-    # reconciling it, since char-sheet-alpha.png is the actual shipped sprite.
-
     # ---------- Enemy: bat (32px frames in 128x128 grid) ----------
     bat = Image.open(ASSETS / "img/bulk/bat_sprite.png")
     WIRED.append("assets/img/bulk/bat_sprite.png")

@@ -81,6 +81,44 @@ For comprehensive history, session-by-session evidence, and architecture decisio
 
 ---
 
+## AI Collaboration & Prompt History
+
+The following selections highlight key interactions with Claude, GitHub Copilot, and Windsurf Cascade throughout the development of RetroVania. They demonstrate architectural planning, deep debugging, and strategic scope management when AI tools failed to resolve an issue.
+
+### 1. Strategic Scope Management: The "Ghost Bug" and the Blue Platforms
+**Context:** Live beta testing revealed an inconsistent collision bug with the one-way blue platforms (`-` tile). Despite multiple attempts to isolate it, the AI assistant could not reproduce the issue mathematically in its testing environment and pushed back against further blind fixes.
+
+**The Prompt (Pivot):**
+> "Claude has stated that three separate audits found zero evidence of a one-way-platform collision bug in its isolated environment, but the bug persists in the live build. We are pivoting. Completely remove the colored/one-way platforms from the parser. Locate the tile parsing logic where the ASCII character `-` is mapped to `T_PLATFORM`. Change this mapping so that `-` parses directly into the standard solid stone tile ID (`T_SOLID`). Accept that drop-through becomes dead input."
+
+**Outcome:** Rather than burning development hours fighting an AI over a bug it couldn't see, I made the executive decision to cut the feature and replace the platforms with solid stone at the parser level, guaranteeing absolute stability for the submission build.
+
+### 2. Deep Debugging: React StrictMode Zombie Loop
+**Context:** The game loop was inexplicably doubling its execution speed and crashing the browser memory.
+
+**The Prompt:**
+> "The game loop is firing twice per frame, causing a memory leak and doubling physics gravity. I suspect Next.js/React `StrictMode` is double-mounting the `useEffect` that initializes the `requestAnimationFrame` loop. Refactor the `GameEngine` component to include a `useRef` mounting guard that prevents the loop from instantiating twice during development mode."
+
+**Outcome:** The AI successfully implemented a mount-flag guard, stopping the zombie loop and stabilizing the physics engine without having to disable `StrictMode` globally.
+
+### 3. Iterative Planning: Space Marine Physical Overhaul
+**Context:** The default jump physics felt too floaty for a heavy, armored character. The AI initially suggested arbitrarily changing gravity values.
+
+**The Prompt (Correction):**
+> "Arbitrarily increasing gravity breaks the horizontal platforming arcs. Let's calculate this properly. Derive the exact vertical velocity required to achieve a maximum jump height of exactly 1.5x the player's bounding box height (`ph`), assuming a gravity constant of 0.4. Apply this specific derivation to the jump input trigger."
+
+**Outcome:** By forcing the AI to use exact mathematical constraints based on the entity's bounding box, the jump arc was perfected without breaking the level design.
+
+### 4. Creative Testing: The "Global Window" Bypass
+**Context:** Implementing new visual FX (muzzle flashes, death whirls) required frequent testing, but ADR-029 procedural generation shuffled room layouts, making it tedious to find enemies to test on.
+
+**The Prompt:**
+> "Hardcoded room IDs aren't reliable test fixtures here since ADR-029 shuffles room content per-seed. Modify `lib/game/game.ts` to temporarily expose the live `Game` instance to the global `window` object in development mode. This will allow me to manually spawn enemies and trigger FX from the browser console without having to hunt them down in the procedural maze."
+
+**Outcome:** The AI wired the instance to the window, completely bypassing the RNG dependency for testing and drastically speeding up the FX integration sprint.
+
+---
+
 ## Notes
 
 - Prompts shown here are intentionally condensed for readability.
