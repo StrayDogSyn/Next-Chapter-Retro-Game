@@ -408,6 +408,20 @@ export class Game {
   private xpToNext = 150;
   private externalMenuOpen = false;
   private externalMenuPaused = false;
+  // React 18 StrictMode intentionally mounts every component twice in dev
+  // (mount -> cleanup -> mount) to surface missing-cleanup bugs. GameCanvas's
+  // effect calls destroy() on the first instance's cleanup, but start()'s
+  // long async asset/audio-loading preamble is almost always still in-flight
+  // at that point (destroy() fires within the same tick; asset loads take
+  // hundreds of ms+) - without this guard, that in-flight start() resumes
+  // after being "destroyed", reaches loop.start() anyway, and a zombie
+  // second game loop + InputManager end up running forever alongside the
+  // real one, both listening on the same document keydown/keyup and both
+  // driving their own animation frames. Confirmed via a live repro: two
+  // independent update() tick sequences interleaved indefinitely in dev,
+  // which plausibly explains this session's intermittent input/render
+  // flakiness (duplicate listeners racing for the same key events).
+  private destroyed = false;
   private runStartedAt = performance.now();
   private enemiesDefeated = 0;
   // ADR-017: this-seed death count for the run summary screen - reset only
@@ -573,6 +587,10 @@ export class Game {
     const loaded = continueFromSave && (await this.loadSavedGame());
     if (!loaded) this.spawnIntoRoom(START_ROOM, "spawnPoint");
     void this.probeLootService();
+    // See `destroyed`'s doc comment: destroy() may already have fired while
+    // the awaits above were in flight (StrictMode's dev-only double mount).
+    // Starting the loop anyway would leave a zombie instance running forever.
+    if (this.destroyed) return;
     this.loop.start(
       (dt) => this.update(Math.min(dt, 0.05)),
       () => this.render(),
@@ -580,6 +598,7 @@ export class Game {
   }
 
   destroy() {
+    this.destroyed = true;
     this.loop.stop();
     this.input.destroy();
     void this.audio.close();
@@ -2778,27 +2797,91 @@ export class Game {
     }
   }
 
+  /**
+   * No shrine/shopkeeper sprite exists in the asset library that matches this
+   * game's side-view pixel-art style (the one source file named "shop" in the
+   * raw assets is actually shop-UI icon art, not a character - checked before
+   * ruling it out). User's call: polish these canvas primitives to match the
+   * Space Marine sci-fi aesthetic - a hovering save crystal and an automated
+   * vendor kiosk - rather than wire in visibly mismatched art. The ground
+   * shadow stays fixed at each entity's base rather than hovering with it:
+   * that's what keeps the crystal's float from reading as "floating away"
+   * the way the original spike/gate placement bugs did - the shadow anchors
+   * it to a spot on the ground even while the crystal itself bobs above it.
+   */
   private drawInteractables() {
     const ctx = this.ctx;
     for (const it of this.roomState(this.roomId).interactables) {
+      const cx = it.x + it.w / 2;
+      ctx.fillStyle = "rgba(0,0,0,0.35)";
+      ctx.beginPath();
+      ctx.ellipse(cx, it.y + it.h + 2, it.w * 0.55, 3, 0, 0, Math.PI * 2);
+      ctx.fill();
+
       if (it.kind === "shrine") {
-        const glow = 0.6 + Math.sin(this.animT * 2) * 0.25;
-        ctx.fillStyle = `rgba(96, 165, 250, ${glow})`;
+        const pulse = (Math.sin(this.animT * 3) + 1) / 2; // 0..1
+        // Amplitude kept small (entity is only 20px) so the crystal never
+        // drifts far enough from its fixed ground shadow to look detached.
+        const hoverY = Math.sin(this.animT * 2) * 3;
+        const cy = it.y + it.h / 2;
+
+        ctx.save();
+        ctx.translate(cx, cy + hoverY);
+
+        // glowing aura
+        ctx.shadowColor = "#22d3ee";
+        ctx.shadowBlur = 10 + pulse * 8;
+        ctx.fillStyle = `rgba(34, 211, 238, ${0.35 + pulse * 0.2})`;
         ctx.beginPath();
-        ctx.arc(it.x + it.w / 2, it.y + it.h / 2, it.w / 2, 0, Math.PI * 2);
+        ctx.moveTo(0, -it.h / 2);
+        ctx.lineTo(it.w / 2, 0);
+        ctx.lineTo(0, it.h / 2);
+        ctx.lineTo(-it.w / 2, 0);
+        ctx.closePath();
         ctx.fill();
-        ctx.strokeStyle = "#dbeafe";
-        ctx.lineWidth = 2;
-        ctx.stroke();
+
+        // solid core
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "#e0ffff";
+        ctx.beginPath();
+        ctx.moveTo(0, -it.h / 3);
+        ctx.lineTo(it.w / 3, 0);
+        ctx.lineTo(0, it.h / 3);
+        ctx.lineTo(-it.w / 3, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
       } else {
-        ctx.fillStyle = "#8b5e34";
-        ctx.fillRect(it.x + 4, it.y + 10, it.w - 8, it.h - 10);
-        ctx.fillStyle = "#e2b877";
-        ctx.beginPath();
-        ctx.arc(it.x + it.w / 2, it.y + 8, 7, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = "#facc15";
-        ctx.fillRect(it.x + it.w / 2 - 6, it.y + it.h - 8, 12, 5);
+        // automated vendor kiosk
+        ctx.save();
+        ctx.translate(it.x, it.y);
+
+        const grad = ctx.createLinearGradient(0, 0, it.w, 0);
+        grad.addColorStop(0, "#3a3a4a");
+        grad.addColorStop(0.5, "#5c5c6a");
+        grad.addColorStop(1, "#2e2e3a");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, it.w, it.h);
+
+        // dark screen display
+        ctx.fillStyle = "#111";
+        ctx.fillRect(4, 4, it.w - 8, 12);
+
+        // animated scanline
+        const scanline = (this.animT * 20) % 12;
+        ctx.fillStyle = "rgba(0, 255, 0, 0.6)";
+        ctx.fillRect(4, 4 + scanline, it.w - 8, 2);
+
+        // hardware vents
+        ctx.fillStyle = "#222";
+        ctx.fillRect(4, it.h - 12, it.w - 8, 2);
+        ctx.fillRect(4, it.h - 8, it.w - 8, 2);
+
+        // outline for definition against busy backgrounds
+        ctx.strokeStyle = "#1a1a22";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(0.5, 0.5, it.w - 1, it.h - 1);
+        ctx.restore();
       }
     }
   }
