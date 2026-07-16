@@ -103,7 +103,16 @@ function parseRoom(def: RoomDef): LoadedRoom {
       const ch = rowStr[col];
       let tile = T_EMPTY;
       if (ch === "#") tile = T_SOLID;
-      else if (ch === "-") tile = T_PLATFORM;
+      // '-' parses directly to T_SOLID (not T_PLATFORM) per an explicit
+      // user decision to remove one-way platforms game-wide, made after
+      // three independent audits (see docs/SESSION_LOG.md, 2026-07-16 "one
+      // -way / colored platforms" entries) found no collision bug - this is
+      // a deliberate design change, not a fix. T_PLATFORM itself is left
+      // defined and still live: T_DOOR_DOUBLEJUMP/T_DOOR_DASH render and
+      // collide exactly like it once their ability is unlocked (see
+      // moveBody() and drawTiles()), and that ability-gating behavior was
+      // explicitly kept - only the plain '-' platforms were converted.
+      else if (ch === "-") tile = T_SOLID;
       else if (ch === "^") tile = T_SPIKE;
       else if (ch === "D") tile = T_DOOR_KEY;
       else if (ch === "d") tile = T_DOOR_BEAST;
