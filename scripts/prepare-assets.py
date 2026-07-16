@@ -98,6 +98,50 @@ def pack_rows(
     log(f"wrote {out.relative_to(ROOT)}  ({sheet.width}x{sheet.height})")
 
 
+def crop_to_content(img: Image.Image) -> Image.Image:
+    """Crop to the opaque-content bounding box, dropping transparent padding.
+
+    A frame that's fully transparent (bbox is None) is returned unchanged
+    rather than crashing - pack_rows() already tolerates a blank frame.
+    """
+    rgba = img.convert("RGBA")
+    bbox = rgba.getbbox()
+    return rgba.crop(bbox) if bbox else rgba
+
+
+def normalize_anim_scale(frame_groups: dict[str, list[Image.Image]], target_height: float) -> dict[str, float]:
+    """Per-animation uniform resize factor so each group's *typical* (median)
+    content height lands on target_height, computed from each frame's own
+    content bbox - not its raw canvas.
+
+    Why median, and why per-animation rather than per-frame: some animations
+    (death's collapse, howl's neck extension) are SUPPOSED to have frames at
+    very different heights than their neighbors - that's the animation, not
+    noise. A per-frame normalization would flatten it out and look wrong.
+    Median height is a robust stand-in for "this animation's typical/resting
+    pose", so scaling the whole group by one factor derived from it preserves
+    each animation's own internal motion while equalizing typical scale
+    *across* animations - which is the actual bug (idle/walk render near-
+    full-size, run/attack/howl render visibly smaller, because their raw
+    source clips were captured on much wider canvases for stride/swing reach,
+    and a naive fit-whole-canvas-to-cell scale punishes that padding as if it
+    were part of the character).
+    """
+    scales: dict[str, float] = {}
+    for name, frames in frame_groups.items():
+        heights = []
+        for f in frames:
+            bbox = f.convert("RGBA").getbbox()
+            if bbox:
+                heights.append(bbox[3] - bbox[1])
+        if not heights:
+            scales[name] = 1.0
+            continue
+        median_h = sorted(heights)[len(heights) // 2]
+        scales[name] = target_height / median_h if median_h > 0 else 1.0
+    return scales
+
+
 def key_background_to_alpha(img: Image.Image) -> Image.Image:
     """Convert a flat background color (sampled from corner) to transparent."""
     rgba = img.convert("RGBA")
@@ -240,9 +284,10 @@ def main() -> None:
     TMP.mkdir(exist_ok=True)
 
     # ---------- Player: swm hero (char-sheet-alpha.png, CC-BY 4.0 Emcee Flesher) ----------
-    # Placed first in main() so it survives the pre-existing, unrelated failure
-    # further down (assets/img/beast_boss_darksaber.zip is missing from disk -
-    # see SESSION_LOG 2026-07-14). Already a clean 46x46-cell RGBA grid sheet
+    # Placed first in main() so it survives any unrelated failure further down
+    # the pipeline (historically: assets/img/beast_boss_darksaber.zip being
+    # missing from disk, resolved 2026-07-16 - see SESSION_LOG). Already a
+    # clean 46x46-cell RGBA grid sheet
     # (confirmed via alpha-band analysis + the sheet's own baked-in "46x46"
     # label - do NOT re-derive this as 64px; that was an earlier agent's
     # unverified guess). No pack_rows() needed: the source is already alpha'd
@@ -300,13 +345,14 @@ def main() -> None:
     log("registered 8 hero palette-variant skins (data-only, not preloaded)")
 
     # Persist immediately rather than waiting for main()'s final spritemeta.json
-    # write: a separate, pre-existing, unrelated bug (assets/img/beast_boss_
-    # darksaber.zip missing from disk, logged in SESSION_LOG 2026-07-14) crashes
-    # main() a few steps below before it reaches that write, which would
-    # otherwise silently drop these hero/skin entries on every pipeline run
-    # until that unrelated bug is fixed. Merge into whatever spritemeta.json
-    # already exists on disk (from the last successful full run) so tiles/bat/
-    # goblin/etc. entries survive, then let main()'s own write at the end
+    # write: a safety net against any unrelated failure a few steps below
+    # crashing main() before it reaches that write, which would otherwise
+    # silently drop these hero/skin entries on every pipeline run until fixed
+    # (this bit anyone in practice when assets/img/beast_boss_darksaber.zip
+    # was missing from disk, resolved 2026-07-16 - see SESSION_LOG). Merge
+    # into whatever spritemeta.json already exists on disk (from the last
+    # successful full run) so tiles/bat/goblin/etc. entries survive, then let
+    # main()'s own write at the end
     # overwrite this with the complete METa dict on any run that does succeed.
     _meta_path = SPRITES_OUT / "spritemeta.json"
     _existing_meta = json.loads(_meta_path.read_text()) if _meta_path.exists() else {}
@@ -405,39 +451,73 @@ def main() -> None:
     log(f"merged AST-014/015 entries into {_meta_path.relative_to(ROOT)}")
 
     # ---------- Boss: Dark Saber Werewolf (CC-BY 3.0 MindChamber) ----------
+    # Source is 7 separate clip folders (idle/walk/run/attack/hit/death/howl),
+    # each shot on its own raw canvas size - run/attack/howl's canvases are
+    # much WIDER (captured with room for stride/swing reach) than idle/walk's,
+    # so naively fitting each frame's whole canvas into a fixed cell
+    # (pack_rows()'s normal behavior, correct for every other sprite in this
+    # file) punishes that padding as if it were part of the character: the
+    # werewolf used to visibly shrink and grow switching between animations.
+    # Fixed at the source instead of a draw-time compensation table (which is
+    # what shipped previously, while this zip was missing from disk - see
+    # SESSION_LOG): crop every frame to its own content bbox first (drop the
+    # padding), then apply one uniform per-animation resize so each group's
+    # median content height lands on the same target (normalize_anim_scale's
+    # docstring explains why median/per-animation, not per-frame). What's left
+    # after that is genuine pose-to-pose variation (an attack lunge IS wider
+    # than an idle stance) - not scale drift, so it's left alone.
     ds = extract("img/beast_boss_darksaber.zip", TMP / "ds", ("DarkSaber/",)) / "DarkSaber"
 
     def pick(folder: str, pattern: str, step: int, limit: int) -> list[Image.Image]:
         files = sorted((ds / folder).glob(pattern))
         return [Image.open(f) for f in files[::step][:limit]]
 
+    werewolf_rows: dict[str, list[Image.Image]] = {
+        "idle": pick("idle", "*.png", 10, 10),
+        "walk": pick("walk", "*.png", 5, 8),
+        "run": [Image.open(f) for f in sorted((ds / "run").glob("*.png"))[4:17:2]],
+        "attack": pick("attack", "*.png", 8, 10),
+        "hit": pick("Hit", "*.png", 6, 5),
+        "death": pick("death", "*.png", 10, 10),
+        "howl": pick("Howl", "*.png", 4, 6),
+    }
+    werewolf_rows = {name: [crop_to_content(f) for f in frames] for name, frames in werewolf_rows.items()}
+    # Target chosen empirically (see docs/SESSION_LOG.md): large enough for a
+    # crisp downscale to the in-game draw size, small enough that the sheet
+    # (and its widest poses - run/attack's stride/swing reach) stays a
+    # reasonable file size rather than the ~9000x3600px a full-raw-resolution
+    # normalization would produce.
+    WEREWOLF_TARGET_H = 200.0
+    werewolf_scale = normalize_anim_scale(werewolf_rows, WEREWOLF_TARGET_H)
+    log(f"boss_werewolf per-animation normalization scale: {({k: round(v, 3) for k, v in werewolf_scale.items()})}")
+    werewolf_rows = {
+        name: [
+            f.resize((max(1, round(f.width * werewolf_scale[name])), max(1, round(f.height * werewolf_scale[name]))), Image.LANCZOS)
+            for f in frames
+        ]
+        for name, frames in werewolf_rows.items()
+    }
+
     pack_rows(
         "boss_werewolf",
-        {
-            "idle": pick("idle", "*.png", 10, 10),
-            "walk": pick("walk", "*.png", 5, 8),
-            "run": [Image.open(f) for f in sorted((ds / "run").glob("*.png"))[4:17:2]],
-            "attack": pick("attack", "*.png", 8, 10),
-            "hit": pick("Hit", "*.png", 6, 5),
-            "death": pick("death", "*.png", 10, 10),
-            "howl": pick("Howl", "*.png", 4, 6),
-        },
-        cell_w=152,
-        cell_h=160,
+        werewolf_rows,
+        cell_w=460,
+        cell_h=280,
     )
 
-    # ---------- Player: hero_0.png (4x4 grid of 256px cells) ----------
-    hero = Image.open(ASSETS / "img/bulk/hero_0.png")
-    WIRED.append("assets/img/bulk/hero_0.png")
-    cells = lambda row: [
-        hero.crop((c * 256, row * 256, (c + 1) * 256, (row + 1) * 256)) for c in range(4)
-    ]
-    pack_rows(
-        "hero",
-        {"walkRight": cells(2), "walkLeft": cells(3), "front": cells(0)},
-        cell_w=48,
-        cell_h=48,
-    )
+    # NOTE: hero_0.png (a 4x4-grid, 256px-cell sheet) used to be packed here
+    # as the player's "hero" sheet via pack_rows(). It's retired (see
+    # game.ts's drawPlayer() comment - the live player sprite is
+    # char-sheet-alpha.png, wired near the top of main()) and this block was
+    # deleted 2026-07-16: it silently overwrote the real hero.png/META["hero"]
+    # with hero_0's stale walkRight/walkLeft/front data every time this
+    # script reached this point - which, until the boss_werewolf zip below
+    # was restored (see SESSION_LOG), it never actually did, because the
+    # pipeline always crashed earlier at that missing file. Fixing the zip
+    # let execution reach here for the first time and exposed the conflict as
+    # a test failure (hero_skin_*.png dimensions no longer matching hero.png)
+    # rather than as a silent wrong-asset bug - deleting this block, not
+    # reconciling it, since char-sheet-alpha.png is the actual shipped sprite.
 
     # ---------- Enemy: bat (32px frames in 128x128 grid) ----------
     bat = Image.open(ASSETS / "img/bulk/bat_sprite.png")

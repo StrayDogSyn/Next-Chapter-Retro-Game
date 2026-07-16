@@ -237,39 +237,13 @@ const ENEMY_DEFS: Record<
   flower: { sheet: "flower", w: 26, h: 30, drawW: 48, drawH: 48, nativeFacing: 1, hp: 30, touchDamage: 10, level: 2 },
   wyrmwolf: { sheet: "wyrmwolf", w: 70, h: 46, drawW: 110, drawH: 82, nativeFacing: 1, hp: 220, touchDamage: 18, level: 5, boss: true },
   mech: { sheet: "mech", w: 44, h: 60, drawW: 64, drawH: 74, nativeFacing: 1, hp: 260, touchDamage: 16, level: 6, boss: true },
-  werewolf: { sheet: "boss_werewolf", w: 44, h: 70, drawW: 84, drawH: 88, nativeFacing: 1, hp: 420, touchDamage: 22, level: 8, boss: true },
-};
-
-// boss_werewolf's source sheet (scripts/prepare-assets.py's pack_rows()) was
-// assembled from 7 SEPARATE source clip folders (idle/walk/run/attack/hit/
-// death/howl), each with its own raw canvas size. pack_rows() fits each
-// frame's own bounding box into a fixed cell preserving aspect
-// (`scale = min(cellW/frameW, cellH/frameH)`), which only produces a
-// uniform on-screen character size if every clip's source canvas has a
-// consistent size-to-character-height ratio. It doesn't: measured directly
-// off the generated sheet (public/sprites/boss_werewolf.png), average
-// content-bbox height per row is idle=155.6px/walk=144.1px (near-filling
-// the 160px cell) vs. run=59.1px/attack=56.0px (~36% of idle's height,
-// likely because those clips' source canvases are much WIDER - captured to
-// include the full stride/swing reach - which forces pack_rows' min-scale
-// down harder than a narrower idle/walk canvas needs). Net effect: the
-// werewolf visibly shrinks and grows as it switches between these
-// animations. The source ZIP (assets/img/beast_boss_darksaber.zip) isn't
-// available locally to re-crop/re-pack properly, so this compensates at
-// draw time instead - the same lower-risk pattern ADR-020 used for the
-// hero sprite rather than reprocessing a binary asset. Never shrinks a row
-// (a multiplier below 1.0 would make the common idle/walk case look
-// different than before, which is worse, not better) and caps at 1.6x
-// (an uncapped correction would need ~2.8x for attack/run, distorting the
-// character far more than a plausible pose-to-pose size difference).
-const WEREWOLF_ANIM_SCALE: Record<string, number> = {
-  idle: 1.0,
-  walk: 1.08,
-  run: 1.6,
-  attack: 1.6,
-  hit: 1.6,
-  death: 1.6,
-  howl: 1.46,
+  // drawW/drawH aspect (196:120 = 1.633) matches boss_werewolf.png's packed
+  // cell aspect (460:280 = 1.643, close enough after rounding) - the sheet
+  // is now scale-normalized per animation at the source (see prepare-
+  // assets.py's normalize_anim_scale()), so unlike every fix before this
+  // one, drawSheetAnim() draws every row through the exact same box with no
+  // per-animation runtime compensation needed.
+  werewolf: { sheet: "boss_werewolf", w: 44, h: 70, drawW: 196, drawH: 120, nativeFacing: 1, hp: 420, touchDamage: 22, level: 8, boss: true },
 };
 
 const BOSS_NAMES: Record<string, string> = {
@@ -2862,12 +2836,8 @@ export class Game {
     for (const enemy of state.enemies) {
       if (enemy.hp <= 0) continue;
       const def = ENEMY_DEFS[enemy.kind];
-      // See WEREWOLF_ANIM_SCALE's comment: compensates that boss's uneven
-      // per-animation source-sheet packing. Every other enemy is unaffected
-      // (lookup misses fall back to 1).
-      const animScale = enemy.kind === "werewolf" ? (WEREWOLF_ANIM_SCALE[enemy.anim] ?? 1) : 1;
-      const drawW = def.drawW * animScale;
-      const drawH = def.drawH * animScale;
+      const drawW = def.drawW;
+      const drawH = def.drawH;
       const dx = enemy.x + enemy.w / 2 - drawW / 2;
       const dy = enemy.y + enemy.h - drawH;
       // Flip only when desired runtime facing differs from each sheet's native orientation.

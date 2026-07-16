@@ -3,7 +3,6 @@ assets/img/bulk/bat_sprite.png
 assets/img/bulk/demon_flower_monster_sprite_sheet.zip
 assets/img/bulk/dirt_platformer_tiles.png
 assets/img/bulk/goblin_sprite.zip
-assets/img/bulk/hero_0.png
 assets/img/bulk/living_tissue_background.zip
 assets/img/bulk/lpc_imp.zip
 assets/img/bulk/mangrove.png
@@ -25,3 +24,17 @@ assets/sounds/bulk/retro_level_up_levelup_wav.mp3
 assets/sounds/bulk/society_in_ruins.mp3
 assets/sounds/bulk/treasure_chest_open_treasure_chest_open.mp3
 assets/sounds/bulk/victory_fanfare_8bit_victory_fanfare_8_bit_thunder_1.mp3
+assets/sprites/char-sheet-alpha.png
+assets/sprites/char-sheet-alt-colours-1-alpha.png
+assets/sprites/char-sheet-alt-colours-2-alpha.png
+assets/sprites/char-sheet-alt-colours-3-alpha.png
+assets/sprites/char-sheet-alt-colours-4-alpha.png
+assets/sprites/char-sheet-alt-colours-5-alpha.png
+assets/sprites/char-sheet-alt-colours-6-alpha.png
+assets/sprites/char-sheet-alt-colours-7-alpha.png
+assets/sprites/char-sheet-alt-colours-8-alpha.png
+assets/sprites/impacts-sheet-colour-1-alpha.png
+assets/sprites/impacts-sheet-colour-2-alpha.png
+assets/sprites/impacts-sheet-colour-3-alpha.png
+assets/sprites/impacts-sheet-colour-4-alpha.png
+assets/sprites/powerups-sheet-alpha.png
