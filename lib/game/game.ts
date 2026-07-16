@@ -503,6 +503,8 @@ export class Game {
       "bg_sky",
       "bg_mangrove",
       "bg_tissue",
+      "keeper",
+      "shrine_crystal",
       LOOT_PICKUP_SPRITE.sheet,
       ...(["common", "uncommon", "rare", "epic"] as const).map(impactBurstSheet),
     ];
@@ -817,30 +819,45 @@ export class Game {
     // vertical
     let ny = body.y + body.vy * dt;
     if (body.vy > 0) {
-      const feetY = ny + body.h;
+      // Swept across every row the feet cross this frame, not just the row
+      // the final position lands in - a single very large dt (frame-rate
+      // stutter/GC pause; dt is capped at 0.05s by the caller, and vy caps
+      // at 420px/s, so up to ~21px can be covered in one step) could
+      // otherwise move the feet from above a one-tile-thick platform to
+      // below it within a single frame, skipping the row the platform
+      // actually occupies entirely and tunneling through. Checking every
+      // row from the pre-movement feet position down to the post-movement
+      // one and landing on the first hit (closest to the top) preserves the
+      // exact single-row behavior for a normal frame while making a large
+      // one safe too.
+      const feetYOld = body.y + body.h;
+      const feetYNew = ny + body.h;
+      const rowStart = Math.floor(feetYOld / TILE);
+      const rowEnd = Math.floor(feetYNew / TILE);
       const cols = [body.x + 1, body.x + body.w / 2, body.x + body.w - 1];
-      for (const cx of cols) {
-        const col = Math.floor(cx / TILE);
-        const row = Math.floor(feetY / TILE);
-        const tile = this.tileAt(col, row);
-        const solid = this.isSolidTile(tile);
-        // T_DOOR_DOUBLEJUMP/T_DOOR_DASH behave exactly like T_PLATFORM once
-        // the corresponding ability is owned, and don't exist as a landing
-        // surface at all until then (see isSolidTile()'s comment for why
-        // "solid until unlocked" is wrong for a platform-shaped gate).
-        const isUnlockedAbilityPlatform =
-          (tile === T_DOOR_DOUBLEJUMP && this.stat("doubleJump") > 0) ||
-          (tile === T_DOOR_DASH && this.stat("dash") > 0);
-        const platform =
-          (tile === T_PLATFORM || isUnlockedAbilityPlatform) &&
-          !dropThrough &&
-          body.y + body.h <= row * TILE + 1; // was above the platform top
-        if (solid || platform) {
-          ny = row * TILE - body.h - 0.01;
-          body.vy = 0;
-          hitY = true;
-          onGround = true;
-          break;
+      outer: for (let row = rowStart; row <= rowEnd; row++) {
+        for (const cx of cols) {
+          const col = Math.floor(cx / TILE);
+          const tile = this.tileAt(col, row);
+          const solid = this.isSolidTile(tile);
+          // T_DOOR_DOUBLEJUMP/T_DOOR_DASH behave exactly like T_PLATFORM once
+          // the corresponding ability is owned, and don't exist as a landing
+          // surface at all until then (see isSolidTile()'s comment for why
+          // "solid until unlocked" is wrong for a platform-shaped gate).
+          const isUnlockedAbilityPlatform =
+            (tile === T_DOOR_DOUBLEJUMP && this.stat("doubleJump") > 0) ||
+            (tile === T_DOOR_DASH && this.stat("dash") > 0);
+          const platform =
+            (tile === T_PLATFORM || isUnlockedAbilityPlatform) &&
+            !dropThrough &&
+            feetYOld <= row * TILE + 1; // was above this row's top
+          if (solid || platform) {
+            ny = row * TILE - body.h - 0.01;
+            body.vy = 0;
+            hitY = true;
+            onGround = true;
+            break outer;
+          }
         }
       }
     } else if (body.vy < 0) {
@@ -2416,6 +2433,7 @@ export class Game {
     this.drawPickups();
     this.drawEnemies();
     this.drawPlayer();
+    this.drawInteractionPrompts();
     this.drawProjectiles();
     this.drawParticles();
     this.drawRarityBursts();
@@ -2838,16 +2856,18 @@ export class Game {
   }
 
   /**
-   * No shrine/shopkeeper sprite exists in the asset library that matches this
-   * game's side-view pixel-art style (the one source file named "shop" in the
-   * raw assets is actually shop-UI icon art, not a character - checked before
-   * ruling it out). User's call: polish these canvas primitives to match the
-   * Space Marine sci-fi aesthetic - a hovering save crystal and an automated
-   * vendor kiosk - rather than wire in visibly mismatched art. The ground
-   * shadow stays fixed at each entity's base rather than hovering with it:
-   * that's what keeps the crystal's float from reading as "floating away"
-   * the way the original spike/gate placement bugs did - the shadow anchors
-   * it to a spot on the ground even while the crystal itself bobs above it.
+   * shrine -> "shrine_crystal" (source: assets/sprites/Aqua Crystal Rock.png,
+   * already true-alpha, used as-is) and shopkeeper -> "keeper" (source:
+   * assets/sprites/keeper.png; had a flat, non-anti-aliased pure-black
+   * background - confirmed via pixel histogram before touching it - so an
+   * exact (0,0,0)->transparent chroma-key was safe and was applied once when
+   * copying it into public/sprites/, not at draw time). Both are square
+   * source images drawn at a fixed on-screen size independent of their
+   * (smaller) trigger-volume box, same pattern ENEMY_DEFS uses for
+   * drawW/drawH vs. collision w/h. The ground shadow stays fixed at each
+   * entity's base rather than moving with it, and the shrine keeps its
+   * pulse/hover animation applied to the draw position - only the shapes
+   * being drawn changed, not the animation or grounding logic.
    */
   private drawInteractables() {
     const ctx = this.ctx;
@@ -2859,70 +2879,63 @@ export class Game {
       ctx.fill();
 
       if (it.kind === "shrine") {
+        const img = this.sheets.get("shrine_crystal");
         const pulse = (Math.sin(this.animT * 3) + 1) / 2; // 0..1
         // Amplitude kept small (entity is only 20px) so the crystal never
         // drifts far enough from its fixed ground shadow to look detached.
         const hoverY = Math.sin(this.animT * 2) * 3;
-        const cy = it.y + it.h / 2;
-
-        ctx.save();
-        ctx.translate(cx, cy + hoverY);
-
-        // glowing aura
-        ctx.shadowColor = "#22d3ee";
-        ctx.shadowBlur = 10 + pulse * 8;
-        ctx.fillStyle = `rgba(34, 211, 238, ${0.35 + pulse * 0.2})`;
-        ctx.beginPath();
-        ctx.moveTo(0, -it.h / 2);
-        ctx.lineTo(it.w / 2, 0);
-        ctx.lineTo(0, it.h / 2);
-        ctx.lineTo(-it.w / 2, 0);
-        ctx.closePath();
-        ctx.fill();
-
-        // solid core
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = "#e0ffff";
-        ctx.beginPath();
-        ctx.moveTo(0, -it.h / 3);
-        ctx.lineTo(it.w / 3, 0);
-        ctx.lineTo(0, it.h / 3);
-        ctx.lineTo(-it.w / 3, 0);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
+        const drawSize = 30;
+        const dx = cx - drawSize / 2;
+        const dy = it.y + it.h - drawSize + hoverY;
+        if (img) {
+          ctx.save();
+          ctx.shadowColor = "#22d3ee";
+          ctx.shadowBlur = 8 + pulse * 8;
+          ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, drawSize, drawSize);
+          ctx.restore();
+        }
       } else {
-        // automated vendor kiosk
-        ctx.save();
-        ctx.translate(it.x, it.y);
-
-        const grad = ctx.createLinearGradient(0, 0, it.w, 0);
-        grad.addColorStop(0, "#3a3a4a");
-        grad.addColorStop(0.5, "#5c5c6a");
-        grad.addColorStop(1, "#2e2e3a");
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, it.w, it.h);
-
-        // dark screen display
-        ctx.fillStyle = "#111";
-        ctx.fillRect(4, 4, it.w - 8, 12);
-
-        // animated scanline
-        const scanline = (this.animT * 20) % 12;
-        ctx.fillStyle = "rgba(0, 255, 0, 0.6)";
-        ctx.fillRect(4, 4 + scanline, it.w - 8, 2);
-
-        // hardware vents
-        ctx.fillStyle = "#222";
-        ctx.fillRect(4, it.h - 12, it.w - 8, 2);
-        ctx.fillRect(4, it.h - 8, it.w - 8, 2);
-
-        // outline for definition against busy backgrounds
-        ctx.strokeStyle = "#1a1a22";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(0.5, 0.5, it.w - 1, it.h - 1);
-        ctx.restore();
+        const img = this.sheets.get("keeper");
+        const drawSize = 32;
+        const dx = cx - drawSize / 2;
+        const dy = it.y + it.h - drawSize;
+        if (img) {
+          ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, drawSize, drawSize);
+        }
       }
+    }
+  }
+
+  /**
+   * Hovering "Press E to Interact" hint, shown only while the player is
+   * actually within the same overlap zone checkInteractables() uses to
+   * decide whether pressing the button would do anything - reusing that
+   * exact box (rather than an independent ~32px radius) means the prompt
+   * can never appear when nothing would happen, or stay hidden when
+   * something would. Key label is "E" (input.ts's primary interact bind -
+   * Enter also works but is shared with menu confirm, so isn't the one to
+   * advertise here), not "UP", which isn't bound to interact at all.
+   */
+  private drawInteractionPrompts() {
+    const ctx = this.ctx;
+    const playerRect = { x: this.px, y: this.py, w: this.pw, h: this.ph };
+    for (const it of this.roomState(this.roomId).interactables) {
+      const box = { x: it.x - 6, y: it.y - 6, w: it.w + 12, h: it.h + 12 };
+      if (!rectsOverlap(playerRect, box)) continue;
+      const label = "Press E to Interact";
+      const cx = it.x + it.w / 2;
+      const bob = Math.sin(this.animT * 4) * 2;
+      const textY = it.y - 10 + bob;
+      ctx.font = "bold 8px monospace";
+      ctx.textAlign = "center";
+      const textWidth = ctx.measureText(label).width;
+      ctx.fillStyle = "rgba(0,0,0,0.75)";
+      ctx.fillRect(cx - textWidth / 2 - 4, textY - 8, textWidth + 8, 11);
+      ctx.strokeStyle = "#facc15";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(cx - textWidth / 2 - 4, textY - 8, textWidth + 8, 11);
+      ctx.fillStyle = "#ffe066";
+      ctx.fillText(label, cx, textY);
     }
   }
 
