@@ -450,6 +450,159 @@ def main() -> None:
     _meta_path.write_text(json.dumps(_existing_meta, indent=2))
     log(f"merged AST-014/015 entries into {_meta_path.relative_to(ROOT)}")
 
+    # ---------- FX sprint: projectiles, muzzle flash, explosion, enemy
+    # death-whirl, and a proper animated mech boss (all measured directly,
+    # not guessed) ----------
+
+    # Projectile bolt (ranged weapons) + magic swirl (magic weapons).
+    proj_src = ASSETS / "sprites" / "projectiles-sheet-alpha.png"
+    proj_im = Image.open(proj_src)
+    if proj_im.size != (616, 544) or proj_im.mode != "RGBA":
+        raise RuntimeError(
+            f"projectiles-sheet-alpha.png geometry drifted from the verified "
+            f"616x544 RGBA (got {proj_im.size} {proj_im.mode}) - re-verify "
+            f"the bolt/swirl frame offsets below before trusting them."
+        )
+    # 5th frame of the growing-bolt row - fullest silhouette at native 16x16.
+    bolt_frame = proj_im.crop((64, 0, 80, 16))
+    magic_frame = proj_im.crop((0, 355, 20, 375))  # teal energy-swirl row
+    pack_rows("fx_projectile", {"bolt": [bolt_frame], "magic": [magic_frame]}, cell_w=20, cell_h=20)
+    WIRED.append("assets/sprites/projectiles-sheet-alpha.png")
+
+    # Muzzle flash: weaponflash-sheet-colour-1-alpha.png (384x2608) packs 49
+    # near-identical rotation bands (48x54 cells) meant to align with a
+    # rotating character sprite's own coordinate frame - AST-015's comment
+    # above notes a full angle-to-facing mapping was tried in an earlier
+    # pass and shelved as too ambiguous to trust. Sidestepped that problem
+    # entirely: this game's weapons only ever face left/right (never a full
+    # rotation sweep), so a single frame works fine as a small static flash
+    # accent - cropped tight to its own measured content bbox (37,20)-
+    # (46,27) within the first cell, not the full 48x54 cell.
+    flash_src = ASSETS / "sprites" / "weaponflash-sheet-colour-1-alpha.png"
+    flash_im = Image.open(flash_src)
+    if flash_im.size != (384, 2608) or flash_im.mode != "RGBA":
+        raise RuntimeError(
+            f"weaponflash-sheet-colour-1-alpha.png geometry drifted from the "
+            f"verified 384x2608 RGBA (got {flash_im.size} {flash_im.mode}) - "
+            f"re-verify the (37,20)-(46,27) content bbox before trusting it."
+        )
+    flash_frame = flash_im.crop((37, 20, 46, 27))
+    pack_rows("fx_muzzle", {"flash": [flash_frame]}, cell_w=9, cell_h=7)
+    WIRED.append("assets/sprites/weaponflash-sheet-colour-1-alpha.png")
+
+    # Explosion: jrob774-explosion_2-sheet-alpha.png (1152x200) stacks 4 size
+    # tiers (24/32/48/96px cells stacked top-to-bottom, heights sum exactly
+    # to 200 - verified, not assumed); the bottom 96x96x12 row is the
+    # biggest/most dramatic tier, used for the boss death sequence.
+    boom_src = ASSETS / "sprites" / "jrob774-explosion_2-sheet-alpha.png"
+    boom_im = Image.open(boom_src)
+    if boom_im.size != (1152, 200) or boom_im.mode != "RGBA":
+        raise RuntimeError(
+            f"jrob774-explosion_2-sheet-alpha.png geometry drifted from the "
+            f"verified 1152x200 RGBA (got {boom_im.size} {boom_im.mode}) - "
+            f"re-verify the bottom-row y-offset before trusting it."
+        )
+    BOOM_CELL = 96
+    BOOM_FRAMES = 12
+    boom_y0 = boom_im.height - BOOM_CELL
+    boom_frames = [
+        boom_im.crop((i * BOOM_CELL, boom_y0, (i + 1) * BOOM_CELL, boom_y0 + BOOM_CELL)) for i in range(BOOM_FRAMES)
+    ]
+    pack_rows("fx_explosion", {"burst": boom_frames}, cell_w=BOOM_CELL, cell_h=BOOM_CELL)
+    WIRED.append("assets/sprites/jrob774-explosion_2-sheet-alpha.png")
+
+    # Enemy death-whirl (regular, non-boss enemies): diewhirl-sheet-alpha.png
+    # (336x240, 48x48 cells, 7 cols x 5 rows) - top row is a humanoid figure
+    # dissolving into particles within a shrinking ring, the cleanest single
+    # read of "this thing just died." Not explicitly requested beyond
+    # "ensure this asset is loaded" - wired to an actual death-dissolve
+    # effect rather than preloaded-and-unused, since an unused preload only
+    # costs bandwidth for no benefit (same call as the hero-skins decision
+    # earlier in this file).
+    whirl_src = ASSETS / "sprites" / "diewhirl-sheet-alpha.png"
+    whirl_im = Image.open(whirl_src)
+    if whirl_im.size != (336, 240) or whirl_im.mode != "RGBA":
+        raise RuntimeError(
+            f"diewhirl-sheet-alpha.png geometry drifted from the verified "
+            f"336x240 RGBA (got {whirl_im.size} {whirl_im.mode}) - re-verify "
+            f"the top-row frame offsets before trusting them."
+        )
+    WHIRL_CELL = 48
+    WHIRL_FRAMES = 7
+    whirl_frames = [whirl_im.crop((i * WHIRL_CELL, 0, (i + 1) * WHIRL_CELL, WHIRL_CELL)) for i in range(WHIRL_FRAMES)]
+    pack_rows("fx_diewhirl", {"whirl": whirl_frames}, cell_w=WHIRL_CELL, cell_h=WHIRL_CELL)
+    WIRED.append("assets/sprites/diewhirl-sheet-alpha.png")
+
+    # War Mech boss replacement: "Super Dero Gunner" from enemies-sheet-alpha
+    # .png (320x528, CC-BY 4.0 Emcee Flesher - the same artist as the live
+    # player sprite, char-sheet-alpha.png), a hovering mechanical gunner -
+    # already animated (4 frames/row) and thematically exact for a boss that
+    # "hovers in a slow sine, volleys lasers" (see game.ts). The previous
+    # mech.png was a single static portrait frame with no animation at all,
+    # visibly behind the rest of the cast after the boss_werewolf fix.
+    # Bottom two rows verified via direct content-bbox measurement (not
+    # guessed off the printed "68x60" label alone): both rows sit at
+    # x=[0,272) in 68px-pitch columns, gold/olive row at y=[392,452), orange
+    # row at y=[452,512) - reused as the boss's idle and attack states
+    # respectively (a colour swap doubling as a "weapon-hot" tell needs no
+    # extra art).
+    enemies_src = ASSETS / "sprites" / "enemies-sheet-alpha.png"
+    enemies_im = Image.open(enemies_src)
+    if enemies_im.size != (320, 528) or enemies_im.mode != "RGBA":
+        raise RuntimeError(
+            f"enemies-sheet-alpha.png geometry drifted from the verified "
+            f"320x528 RGBA (got {enemies_im.size} {enemies_im.mode}) - "
+            f"re-verify the gunner row offsets (392/452) before trusting them."
+        )
+    GUNNER_CELL_W = 68
+    GUNNER_CELL_H = 60
+    gunner_cols = lambda y0: [
+        enemies_im.crop((i * GUNNER_CELL_W, y0, (i + 1) * GUNNER_CELL_W, y0 + GUNNER_CELL_H)) for i in range(4)
+    ]
+    pack_rows(
+        "mech_gunner",
+        {"idle": gunner_cols(392), "attack": gunner_cols(452)},
+        cell_w=GUNNER_CELL_W,
+        cell_h=GUNNER_CELL_H,
+    )
+    WIRED.append("assets/sprites/enemies-sheet-alpha.png")
+
+    # Pickup icons: powerups-sheet-alpha.png's letter-badge grid (18x18
+    # cells, verified via row/column content scan - each letter repeats
+    # twice consecutively, e.g. "A A B B C C..."). This "Super Dero Space
+    # Gunner" sheet's own collectible-letter set skips several letters
+    # (no full A-Z run), but H/D/C/K/J all exist in the same red-badge row
+    # (y=[92,110)) - used as one-letter mnemonic icons (Health/Dash/Coin/
+    # Key/(double-)Jump) in place of the flat canvas-primitive shapes
+    # drawPickups() used before, all pulled from the same row so they read
+    # as one coherent icon family rather than five mismatched styles.
+    powerups_src2 = ASSETS / "sprites" / "powerups-sheet-alpha.png"
+    powerups_im2 = Image.open(powerups_src2)
+    if powerups_im2.size != (640, 544) or powerups_im2.mode != "RGBA":
+        raise RuntimeError(
+            f"powerups-sheet-alpha.png geometry drifted from the verified "
+            f"640x544 RGBA (got {powerups_im2.size} {powerups_im2.mode}) - "
+            f"re-verify the letter-badge row offset (y=92) before trusting it."
+        )
+    LETTER_CELL = 18
+    LETTER_Y0 = 92
+    letter_col = lambda col: powerups_im2.crop((col * LETTER_CELL, LETTER_Y0, (col + 1) * LETTER_CELL, LETTER_Y0 + LETTER_CELL))
+    pickup_icon_rows = {
+        "health": [letter_col(14)],  # H
+        "dash": [letter_col(6)],  # D
+        "coin": [letter_col(4)],  # C
+        "key": [letter_col(20)],  # K
+        "doubleJump": [letter_col(18)],  # J
+    }
+    pack_rows("pickupIcons", pickup_icon_rows, cell_w=LETTER_CELL, cell_h=LETTER_CELL)
+    WIRED.append("assets/sprites/powerups-sheet-alpha.png")
+
+    _fx_keys = ["fx_projectile", "fx_muzzle", "fx_explosion", "fx_diewhirl", "mech_gunner", "pickupIcons"]
+    _existing_meta = json.loads(_meta_path.read_text())
+    _existing_meta.update({k: META[k] for k in _fx_keys})
+    _meta_path.write_text(json.dumps(_existing_meta, indent=2))
+    log(f"merged FX/mech-gunner entries into {_meta_path.relative_to(ROOT)}")
+
     # ---------- Boss: Dark Saber Werewolf (CC-BY 3.0 MindChamber) ----------
     # Source is 7 separate clip folders (idle/walk/run/attack/hit/death/howl),
     # each shot on its own raw canvas size - run/attack/howl's canvases are

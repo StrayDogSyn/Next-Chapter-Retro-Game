@@ -355,6 +355,90 @@
       }
     }
   },
+  "fx_projectile": {
+    "cellW": 20,
+    "cellH": 20,
+    "anims": {
+      "bolt": {
+        "row": 0,
+        "frames": 1
+      },
+      "magic": {
+        "row": 1,
+        "frames": 1
+      }
+    }
+  },
+  "fx_muzzle": {
+    "cellW": 9,
+    "cellH": 7,
+    "anims": {
+      "flash": {
+        "row": 0,
+        "frames": 1
+      }
+    }
+  },
+  "fx_explosion": {
+    "cellW": 96,
+    "cellH": 96,
+    "anims": {
+      "burst": {
+        "row": 0,
+        "frames": 12
+      }
+    }
+  },
+  "fx_diewhirl": {
+    "cellW": 48,
+    "cellH": 48,
+    "anims": {
+      "whirl": {
+        "row": 0,
+        "frames": 7
+      }
+    }
+  },
+  "mech_gunner": {
+    "cellW": 68,
+    "cellH": 60,
+    "anims": {
+      "idle": {
+        "row": 0,
+        "frames": 4
+      },
+      "attack": {
+        "row": 1,
+        "frames": 4
+      }
+    }
+  },
+  "pickupIcons": {
+    "cellW": 18,
+    "cellH": 18,
+    "anims": {
+      "health": {
+        "row": 0,
+        "frames": 1
+      },
+      "dash": {
+        "row": 1,
+        "frames": 1
+      },
+      "coin": {
+        "row": 2,
+        "frames": 1
+      },
+      "key": {
+        "row": 3,
+        "frames": 1
+      },
+      "doubleJump": {
+        "row": 4,
+        "frames": 1
+      }
+    }
+  },
   "boss_werewolf": {
     "cellW": 460,
     "cellH": 280,

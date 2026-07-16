@@ -33,8 +33,13 @@ assets/sprites/char-sheet-alt-colours-5-alpha.png
 assets/sprites/char-sheet-alt-colours-6-alpha.png
 assets/sprites/char-sheet-alt-colours-7-alpha.png
 assets/sprites/char-sheet-alt-colours-8-alpha.png
+assets/sprites/diewhirl-sheet-alpha.png
+assets/sprites/enemies-sheet-alpha.png
 assets/sprites/impacts-sheet-colour-1-alpha.png
 assets/sprites/impacts-sheet-colour-2-alpha.png
 assets/sprites/impacts-sheet-colour-3-alpha.png
 assets/sprites/impacts-sheet-colour-4-alpha.png
+assets/sprites/jrob774-explosion_2-sheet-alpha.png
 assets/sprites/powerups-sheet-alpha.png
+assets/sprites/projectiles-sheet-alpha.png
+assets/sprites/weaponflash-sheet-colour-1-alpha.png

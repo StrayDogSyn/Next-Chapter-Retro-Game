@@ -2,6 +2,8 @@
 
 This file contains a short, reviewer-friendly sample of prompts used during development.
 
+Use this as the quick version for admissions review; the full history remains in project docs.
+
 For comprehensive history, session-by-session evidence, and architecture decisions, see the `docs/` folder:
 
 - `docs/AGENTIC_WORKFLOW.md`
@@ -83,3 +85,4 @@ For comprehensive history, session-by-session evidence, and architecture decisio
 
 - Prompts shown here are intentionally condensed for readability.
 - Full prompt variants and outcomes are documented in the linked `docs/` files.
+- Verification artifacts referenced by these prompts are captured in `docs/SESSION_LOG.md` and `docs/BUGS_IMPROVEMENT_GUIDE.md`.

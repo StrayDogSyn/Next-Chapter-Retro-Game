@@ -135,6 +135,25 @@ type Projectile = {
   color: string;
   r: number;
   effect?: WeaponInstance["effect"];
+  /** Which fx_projectile row to draw - "bolt" for ranged/laser, "magic" for spell-flavored shots. */
+  sprite: "bolt" | "magic";
+};
+
+/** One-shot sprite animation at a world position - muzzle flashes, the
+ *  boss's death explosion, a regular enemy's death-whirl. Distinct from
+ *  Particle (physics-simulated dots) and from the rarity/loot bursts
+ *  (which already have their own array): this one just plays a sheet
+ *  animation in place for `ttl` seconds, no movement or per-particle state. */
+type SpriteFx = {
+  x: number;
+  y: number;
+  sheet: string;
+  anim: string;
+  animT: number;
+  ttl: number;
+  w: number;
+  h: number;
+  flip: boolean;
 };
 
 /** Persistent, non-consumable room entities (SYS-011 shrine, SYS-012 shopkeeper). */
@@ -236,7 +255,17 @@ const ENEMY_DEFS: Record<
   imp: { sheet: "imp", w: 20, h: 30, drawW: 40, drawH: 40, nativeFacing: 1, hp: 25, touchDamage: 8, level: 2 },
   flower: { sheet: "flower", w: 26, h: 30, drawW: 48, drawH: 48, nativeFacing: 1, hp: 30, touchDamage: 10, level: 2 },
   wyrmwolf: { sheet: "wyrmwolf", w: 70, h: 46, drawW: 110, drawH: 82, nativeFacing: 1, hp: 220, touchDamage: 18, level: 5, boss: true },
-  mech: { sheet: "mech", w: 44, h: 60, drawW: 64, drawH: 74, nativeFacing: 1, hp: 260, touchDamage: 16, level: 6, boss: true },
+  // Replaced the single static mech.png portrait with "Super Dero Gunner"
+  // (enemies-sheet-alpha.png, mech_gunner sheet - see prepare-assets.py) -
+  // an actually-animated hovering gunner, matching this boss's existing
+  // "hovers in a slow sine, volleys lasers" behavior instead of clashing
+  // with it. drawW/drawH keep the source's 68x60 (~1.13:1) aspect at 1.4x
+  // scale rather than the old box's unrelated proportions; w/h (the
+  // collision box) widened to roughly match without changing its area much
+  // (44*60=2640 -> 56*48=2688), since the new silhouette reads wider than
+  // tall. The sheet's gun points left in every frame, so nativeFacing flips
+  // to -1 (was 1) - without this every draw would be mirrored backwards.
+  mech: { sheet: "mech_gunner", w: 56, h: 48, drawW: 95, drawH: 84, nativeFacing: -1, hp: 260, touchDamage: 16, level: 6, boss: true },
   // drawW/drawH aspect (196:120 = 1.633) matches boss_werewolf.png's packed
   // cell aspect (460:280 = 1.643, close enough after rounding) - the sheet
   // is now scale-normalized per animation at the source (see prepare-
@@ -382,6 +411,7 @@ export class Game {
   // AST-015: rarity-tinted impact burst FX (hits + pickups), separate from
   // the generic dot/text Particle system since these are sprite-animated.
   private rarityBursts: { x: number; y: number; rarity: Rarity; animT: number }[] = [];
+  private spriteFx: SpriteFx[] = [];
   private equipFlashT = 0;
   private comboCount = 0;
   private comboT = 0;
@@ -478,7 +508,7 @@ export class Game {
       "goblin",
       "imp",
       "flower",
-      "mech",
+      "mech_gunner",
       "wyrmwolf",
       "boss_werewolf",
       "tiles",
@@ -491,6 +521,11 @@ export class Game {
       "bg_tissue",
       "keeper",
       "shrine_crystal",
+      "fx_projectile",
+      "fx_muzzle",
+      "fx_explosion",
+      "fx_diewhirl",
+      "pickupIcons",
       LOOT_PICKUP_SPRITE.sheet,
       ...(["common", "uncommon", "rare", "epic"] as const).map(impactBurstSheet),
     ];
@@ -971,6 +1006,7 @@ export class Game {
     if (this.comboT > 0) this.comboT -= dt;
     this.updateParticles(dt);
     this.updateRarityBursts(dt);
+    this.updateSpriteFx(dt);
 
     if (this.input.state.pressed.pause) {
       if (this.phase === "playing") {
@@ -1117,9 +1153,11 @@ export class Game {
         this.meleeStrike();
       } else {
         const speed = this.weapon.projectileSpeed ?? 300;
+        const muzzleX = this.px + this.pw / 2 + this.facing * 10;
+        const muzzleY = this.py + this.ph * 0.45;
         this.projectiles.push({
-          x: this.px + this.pw / 2 + this.facing * 10,
-          y: this.py + this.ph * 0.45,
+          x: muzzleX,
+          y: muzzleY,
           vx: this.facing * speed,
           vy: 0,
           damage: this.weaponDamage(),
@@ -1128,7 +1166,9 @@ export class Game {
           color: this.weapon.kind === "magic" ? "#c084fc" : "#f87171",
           r: this.weapon.kind === "magic" ? 4 : 2.5,
           effect: this.weapon.effect,
+          sprite: this.weapon.kind === "magic" ? "magic" : "bolt",
         });
+        this.spawnSpriteFx(muzzleX, muzzleY, "fx_muzzle", "flash", 14, 11, 2, this.facing < 0);
       }
     }
 
@@ -1266,6 +1306,15 @@ export class Game {
       this.showMessage("The beast door grinds open...");
       this.audio.play("door", 0.9);
       this.audio.play("explosion", 0.9);
+      // Was audio-only ("explosion" sfx with nothing on screen to match it) -
+      // the big 96x96x12 tier of jrob774-explosion_2-sheet-alpha.png finally
+      // gives the mech boss a death worth the sound cue.
+      this.spawnSpriteFx(cx, cy, "fx_explosion", "burst", 96, 96, 12);
+    } else if (!enemy.boss) {
+      // Regular (non-boss) enemies get a quick dissolve-whirl instead of
+      // just vanishing. Bosses skip this - werewolf already gets its own
+      // victory-screen treatment and the mech gets the explosion above.
+      this.spawnSpriteFx(cx, cy, "fx_diewhirl", "whirl", 48, 48, 7);
     }
     if (enemy.boss) this.updateMusic();
 
@@ -1413,7 +1462,9 @@ export class Game {
               ttl: 2.4,
               color: "#a3e635",
               r: 4,
+              sprite: "magic",
             });
+            this.spawnSpriteFx(enemy.x + enemy.w / 2, enemy.y + 6, "fx_muzzle", "flash", 14, 11, 2);
             this.audio.play("magic", 0.5);
           }
           break;
@@ -1448,8 +1499,13 @@ export class Game {
           break;
         }
         case "mech": {
-          // hovers in a slow sine, volleys lasers
-          enemy.anim = "idle";
+          // hovers in a slow sine, volleys lasers. anim flips to "attack"
+          // (the mech_gunner sheet's orange/weapon-hot row) right as it
+          // fires and reverts to "idle" once the brief flash window passes -
+          // same pattern as flower's near-based anim switch, timer-driven
+          // here since the mech's firing is a burst-then-rest cycle rather
+          // than "always attacking while close."
+          if (enemy.anim === "attack" && enemy.stateTime > 0.3) enemy.anim = "idle";
           enemy.y = enemy.homeY - enemy.h - 30 + Math.sin(this.animT * 1.4) * 22;
           enemy.x += Math.sign(distX) * 22 * speedScale * dt;
           enemy.x = Math.max(0, Math.min(enemy.x, VIEW_W - enemy.w));
@@ -1457,6 +1513,7 @@ export class Game {
           const volleyEvery = enemy.hp < enemy.maxHp / 2 ? 1.6 : 2.4;
           if (!stunned && dist < 320 && enemy.stateTime > volleyEvery) {
             enemy.stateTime = 0;
+            enemy.anim = "attack";
             for (const spread of [-0.15, 0, 0.15]) {
               const angle = Math.atan2(distY, distX) + spread;
               this.projectiles.push({
@@ -1469,8 +1526,10 @@ export class Game {
                 ttl: 2.2,
                 color: "#f87171",
                 r: 3,
+                sprite: "bolt",
               });
             }
+            this.spawnSpriteFx(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, "fx_muzzle", "flash", 14, 11, 2);
             this.audio.play("laser", 0.6);
           }
           break;
@@ -1606,7 +1665,14 @@ export class Game {
       if (p.ttl <= 0) return false;
       p.x += p.vx * dt;
       p.y += p.vy * dt;
-      if (this.solidAt(p.x, p.y)) return false;
+      if (this.solidAt(p.x, p.y)) {
+        // Wall impact - previously just vanished with no feedback. Reuses
+        // the existing rarity-burst sprite system (a generic "common" tier
+        // reads as a neutral spark, not tied to any weapon) rather than
+        // building a second, parallel impact-FX system for the same sheet.
+        this.spawnRarityBurst(p.x, p.y, "common");
+        return false;
+      }
 
       if (p.friendly) {
         for (const enemy of enemies) {
@@ -1620,6 +1686,9 @@ export class Game {
         pointInRect(p.x, p.y, { x: this.px, y: this.py, w: this.pw, h: this.ph })
       ) {
         this.damagePlayer(p.damage);
+        // damagePlayer() had no visual feedback beyond the iframe flicker -
+        // a small red sparkle at the actual impact point closes that gap.
+        this.spawnSparkle(p.x, p.y, "#ef4444", 5);
         return false;
       }
       return true;
@@ -1698,6 +1767,25 @@ export class Game {
         false,
         Game.IMPACT_BURST_FPS,
       );
+    }
+  }
+
+  private static readonly SPRITE_FX_FPS = 14;
+  private spawnSpriteFx(x: number, y: number, sheet: string, anim: string, w: number, h: number, frames: number, flip = false) {
+    this.spriteFx.push({ x, y, sheet, anim, animT: 0, ttl: frames / Game.SPRITE_FX_FPS, w, h, flip });
+  }
+
+  private updateSpriteFx(dt: number) {
+    this.spriteFx = this.spriteFx.filter((fx) => {
+      fx.animT += dt;
+      fx.ttl -= dt;
+      return fx.ttl > 0;
+    });
+  }
+
+  private drawSpriteFx() {
+    for (const fx of this.spriteFx) {
+      this.drawSheetAnim(fx.sheet, fx.anim, fx.animT, fx.x - fx.w / 2, fx.y - fx.h / 2, fx.w, fx.h, fx.flip, Game.SPRITE_FX_FPS);
     }
   }
 
@@ -2452,6 +2540,7 @@ export class Game {
     this.drawProjectiles();
     this.drawParticles();
     this.drawRarityBursts();
+    this.drawSpriteFx();
     ctx.restore();
     if (this.phase === "paused") this.drawOverlay("PAUSED", "press START / ESC / P to resume");
     if (this.phase === "dead") this.drawRunSummary("YOU DIED", "press JUMP to rise again");
@@ -2958,38 +3047,24 @@ export class Game {
       const x = pickup.x;
       const y = pickup.y + bob;
       switch (pickup.kind) {
+        // Letter-badge icons (H/D/C/K/J) cropped from powerups-sheet-alpha
+        // .png's collectible-letter grid - one mnemonic-letter family
+        // replacing five separate hand-drawn primitive shapes. See
+        // prepare-assets.py's "pickupIcons" section for the exact crop.
         case "coin":
-          ctx.fillStyle = "#facc15";
-          ctx.beginPath();
-          ctx.arc(x + 5, y + 5, 4, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = "#a16207";
-          ctx.fillRect(x + 4, y + 2, 2, 6);
+          this.drawSheetAnim("pickupIcons", "coin", 0, x - 1, y - 1, 18, 18, false);
           break;
         case "health":
-          ctx.fillStyle = "#ef4444";
-          ctx.fillRect(x + 4, y, 6, 12);
-          ctx.fillRect(x, y + 3, 14, 6);
+          this.drawSheetAnim("pickupIcons", "health", 0, x - 2, y - 3, 18, 18, false);
           break;
         case "key":
-          ctx.fillStyle = "#facc15";
-          ctx.fillRect(x, y + 4, 8, 3);
-          ctx.beginPath();
-          ctx.arc(x + 9, y + 5, 3, 0, Math.PI * 2);
-          ctx.fill();
+          this.drawSheetAnim("pickupIcons", "key", 0, x - 3, y - 3, 18, 18, false);
           break;
         case "doubleJump":
-          ctx.fillStyle = "#7dd3fc";
-          ctx.beginPath();
-          ctx.moveTo(x, y + 12);
-          ctx.lineTo(x + 8, y);
-          ctx.lineTo(x + 16, y + 12);
-          ctx.fill();
+          this.drawSheetAnim("pickupIcons", "doubleJump", 0, x - 1, y - 2, 18, 18, false);
           break;
         case "dash":
-          ctx.fillStyle = "#c084fc";
-          ctx.fillRect(x, y + 6, 16, 4);
-          ctx.fillRect(x + 10, y + 2, 6, 12);
+          this.drawSheetAnim("pickupIcons", "dash", 0, x, y - 3, 18, 18, false);
           break;
         case "chest":
           ctx.fillStyle = pickup.opened ? "#78716c" : "#b45309";
@@ -3029,7 +3104,25 @@ export class Game {
 
   private drawProjectiles() {
     const ctx = this.ctx;
+    const img = this.sheets.get("fx_projectile");
+    const metaEntry = this.meta?.fx_projectile;
     for (const p of this.projectiles) {
+      const size = p.r * 6; // r was tuned for the old circle radius; this keeps on-screen scale comparable
+      if (img && metaEntry && "anims" in metaEntry) {
+        const animDef = metaEntry.anims[p.sprite];
+        if (animDef) {
+          const sx = 0; // single-frame rows
+          const sy = animDef.row * metaEntry.cellH;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(Math.atan2(p.vy, p.vx));
+          ctx.drawImage(img, sx, sy, metaEntry.cellW, metaEntry.cellH, -size / 2, -size / 2, size, size);
+          ctx.restore();
+          continue;
+        }
+      }
+      // Fallback (sheet not loaded yet) - the old plain circle, so a
+      // projectile never renders as literally nothing.
       ctx.fillStyle = p.color;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);

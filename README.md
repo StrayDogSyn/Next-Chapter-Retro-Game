@@ -2,6 +2,13 @@
 
 A retro-inspired full-stack rogue-like platformer built as a Next Chapter admissions project. It combines a hand-rolled canvas game engine, deterministic seeded runs, and Python-backed loot/persistence while documenting real AI-paired development end to end.
 
+**Reviewer Quick Check**
+
+- Live demo: https://straydogsyn.github.io/Next-Chapter-Retro-Game/
+- Prompt history file: `prompt-history.md` (repo root)
+- AI workflow evidence: `docs/AGENTIC_WORKFLOW.md`, `docs/SESSION_LOG.md`
+- Build command: `npm run build` (generates `/out/index.html` for static export)
+
 ![Current gameplay](assets/img/screenshots/updated-working-model.png)
 
 ![Status](https://img.shields.io/badge/status-in--progress-yellow)
@@ -23,9 +30,9 @@ For active testing scope and known limitations, see `docs/BETA_TESTING.md`.
 
 ## Problem
 
-Most static portfolio projects are quick to skim and easy to forget. They often demonstrate simple UI composition but do not prove sustained logic design, state orchestration, runtime debugging skill, or iteration under changing requirements.
+Many static portfolio projects are fast to skim but hard to evaluate for real engineering depth. They can show layout and styling, but often do not clearly demonstrate sustained logic design, state orchestration, debugging under pressure, and iterative delivery.
 
-This project targets that gap: instead of a static showcase, it delivers a playable, systems-heavy application where reviewers can quickly observe real gameplay logic, collisions, combat loops, progression systems, and resilience behavior.
+This project addresses that gap by shipping a playable, systems-heavy application where reviewers can directly observe collisions, combat loops, progression systems, persistence behavior, and resilience paths.
 
 ## Value
 
@@ -39,6 +46,7 @@ The result is a submission that demonstrates:
 - Complex logic composition (physics, combat, AI, inventory, room graph traversal).
 - Real state management across runtime/UI/save flows.
 - Structured AI usage with verification, iteration, and documented decisions.
+- Maintainable engineering habits through ADRs, session logs, and repeatable verification checkpoints.
 
 ## Project Plan
 
@@ -114,6 +122,7 @@ Comprehensive AI collaboration evidence is documented in:
 - `docs/SESSION_LOG.md`
 - `docs/PROMPT_LIBRARY.md`
 - `docs/DECISIONS.md`
+- `prompt-history.md` (submission-ready condensed prompt sample)
 
 ## Running the Project
 
