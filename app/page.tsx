@@ -62,7 +62,18 @@ export default function Home() {
         {gameStarted ? (
           <section className="game-runtime">
             <div className="game-runtime-canvas">
-              <GameCanvas onSnapshot={setSnapshot} continueFromSave={continueFromSave} seedOverride={seedOverride} />
+              <GameCanvas
+                onSnapshot={setSnapshot}
+                continueFromSave={continueFromSave}
+                seedOverride={seedOverride}
+                onGiveUp={() => {
+                  setGameStarted(false);
+                  setContinueFromSave(false);
+                  setSeedOverride(undefined);
+                  setControlsOpen(false);
+                  setSnapshot(null);
+                }}
+              />
             </div>
             <div className="controls-drawer">
               <button type="button" className="controls-drawer-toggle" onClick={() => setControlsOpen((open) => !open)}>

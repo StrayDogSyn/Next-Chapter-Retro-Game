@@ -15,9 +15,10 @@ type GameCanvasProps = {
   onSnapshot: (snapshot: HudSnapshot) => void;
   continueFromSave?: boolean;
   seedOverride?: string;
+  onGiveUp?: () => void;
 };
 
-export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride }: GameCanvasProps) {
+export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride, onGiveUp }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const gameRef = useRef<Game | null>(null);
   const shellRef = useRef<HTMLDivElement | null>(null);
@@ -175,6 +176,12 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.code === "Escape" && snapshot?.phase === "dead") {
+        event.preventDefault();
+        setMenuOpen(false);
+        onGiveUp?.();
+        return;
+      }
       if (event.code === "Tab" || event.code === "KeyI") {
         event.preventDefault();
         setMenuOpen((open) => !open);
@@ -187,7 +194,7 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride 
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [menuOpen]);
+  }, [menuOpen, onGiveUp, snapshot?.phase]);
 
   useEffect(() => {
     let frame = 0;

@@ -655,6 +655,8 @@ export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }
       ctx.fillText("swap", 186, legendY + 44);
       ctx.fillStyle = "#9fb2c7";
       ctx.fillText("LB/LT dodge  RB/RT atk  START pause", 215, legendY + 44);
+      ctx.font = pixelFont(5);
+      ctx.fillText("ENTER interacts with save crystals and item shops", 16, legendY + 60);
 
       // ── 8. CRT scanlines ──────────────────────────────────────────────────
       ctx.globalAlpha = 0.045;

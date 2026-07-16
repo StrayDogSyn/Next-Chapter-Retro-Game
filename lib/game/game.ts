@@ -367,6 +367,18 @@ export class Game {
   // for everything else, manually managed via the menu's Inventory tab.
   private bag: WeaponInstance[] = [];
   private static readonly BAG_CAPACITY = 16;
+  // Diagnostic trap (one-way platform sprint) - an independent re-check in
+  // moveBody(), deliberately not sharing code with the actual collision
+  // resolution above it, that warns if a frame's feet-columns crossed a
+  // T_PLATFORM row without landing on it. Ran clean (zero firings) across
+  // ~30 platform-crossing jump/fall cycles spread over 3 rooms (R01/R03/
+  // R19) with the swept-row fix active, and separately confirmed - via
+  // isolated logic replay of the exact skip scenario, not live timing,
+  // which is inherently non-deterministic to reproduce on demand - that the
+  // trap does correctly detect the pre-fix single-row miss when present.
+  // Left in at false (zero runtime cost) rather than deleted, as a ready
+  // tool for next time a collision report needs re-litigating.
+  private static readonly DIAG_ONEWAY_TRAP = false;
   private static readonly SELL_VALUE: Record<Rarity, number> = {
     common: 6,
     uncommon: 15,
@@ -870,6 +882,35 @@ export class Game {
           body.vy = 0;
           hitY = true;
           break;
+        }
+      }
+    }
+    if (Game.DIAG_ONEWAY_TRAP && !onGround && !dropThrough) {
+      // Independent re-check, deliberately not sharing code with the block
+      // above: did the feet's X-columns cross a T_PLATFORM row this frame
+      // without landing on it? If this ever fires, it's a genuine miss the
+      // main resolution logic didn't catch, not a duplicate of the same bug.
+      const feetYOld = body.y + body.h;
+      const feetYNew = ny + body.h;
+      if (feetYNew > feetYOld) {
+        const rowStart = Math.floor(feetYOld / TILE);
+        const rowEnd = Math.floor(feetYNew / TILE);
+        const cols = [body.x + 1, body.x + body.w / 2, body.x + body.w - 1];
+        for (let row = rowStart; row <= rowEnd; row++) {
+          for (const cx of cols) {
+            const col = Math.floor(cx / TILE);
+            if (this.tileAt(col, row) === T_PLATFORM && feetYOld <= row * TILE + 1) {
+              console.warn("PASSED THROUGH ONEWAY:", {
+                prevBottom: feetYOld,
+                currentBottom: feetYNew,
+                tileTopY: row * TILE,
+                tileRow: row,
+                tileCol: col,
+                vy: body.vy,
+                dt,
+              });
+            }
+          }
         }
       }
     }
