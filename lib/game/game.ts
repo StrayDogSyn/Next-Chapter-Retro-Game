@@ -61,6 +61,7 @@ import {
   shouldFlipHeroSprite,
 } from "./player-sprite";
 import { loadAssetManifest, resolveManifestAsset, type AssetManifest } from "./assetManifest";
+import { computeArcadeScore, queuePendingHighScore, type HighScoreOutcome } from "./high-scores";
 import type { TouchInputManager } from "./touchInput";
 
 export const VIEW_W = ROOM_W * TILE; // 640
@@ -424,6 +425,11 @@ export class Game {
   private destroyed = false;
   private runStartedAt = performance.now();
   private enemiesDefeated = 0;
+  private scoreWindowStartedAt = performance.now();
+  private scoreWindowCoinsStart = 0;
+  private scoreWindowEnemiesStart = 0;
+  private scoreWindowLevelStart = 1;
+  private scoreWindowMaterialsStart = 0;
   // ADR-017: this-seed death count for the run summary screen - reset only
   // by a genuinely new seed (Game construction), not by respawn().
   private deathsThisSeed = 0;
@@ -586,6 +592,7 @@ export class Game {
 
     const loaded = continueFromSave && (await this.loadSavedGame());
     if (!loaded) this.spawnIntoRoom(START_ROOM, "spawnPoint");
+    this.resetScoreWindow();
     void this.probeLootService();
     // See `destroyed`'s doc comment: destroy() may already have fired while
     // the awaits above were in flight (StrictMode's dev-only double mount).
@@ -1108,6 +1115,7 @@ export class Game {
     if (this.hp <= 0 && this.phase === "playing") {
       this.phase = "dead";
       this.deathsThisSeed += 1;
+      this.commitHighScore("dead");
       this.audio.stopAllLoops();
       this.musicMode = "none";
       this.audio.play("gameover");
@@ -1215,6 +1223,7 @@ export class Game {
     if (enemy.kind === "werewolf") {
       this.flags.beastSlain = true;
       this.phase = "victory";
+      this.commitHighScore("victory");
       this.audio.stopAllLoops();
       this.musicMode = "none";
       this.audio.play("victory");
@@ -2010,6 +2019,37 @@ export class Game {
     this.roomStates.clear(); // enemies respawn; upgrades/weapons/flags are kept
     this.musicMode = "none";
     this.spawnIntoRoom(START_ROOM, "spawnPoint");
+    this.resetScoreWindow();
+  }
+
+  private resetScoreWindow() {
+    this.scoreWindowStartedAt = performance.now();
+    this.scoreWindowCoinsStart = this.coins;
+    this.scoreWindowEnemiesStart = this.enemiesDefeated;
+    this.scoreWindowLevelStart = this.level;
+    this.scoreWindowMaterialsStart = this.materials;
+  }
+
+  private commitHighScore(outcome: HighScoreOutcome) {
+    const timeSeconds = Math.max(0, (performance.now() - this.scoreWindowStartedAt) / 1000);
+    const runCoins = Math.max(0, this.coins - this.scoreWindowCoinsStart);
+    const runEnemies = Math.max(0, this.enemiesDefeated - this.scoreWindowEnemiesStart);
+    const runLevelUps = Math.max(0, this.level - this.scoreWindowLevelStart);
+    const runMaterials = Math.max(0, this.materials - this.scoreWindowMaterialsStart);
+    const score = computeArcadeScore({
+      coins: runCoins,
+      enemiesDefeated: runEnemies,
+      levelUps: runLevelUps,
+      materials: runMaterials,
+      timeSeconds,
+      outcome,
+    });
+    queuePendingHighScore({
+      seed: this.seedPhrase,
+      score,
+      timeSeconds,
+      outcome,
+    });
   }
 
   /**

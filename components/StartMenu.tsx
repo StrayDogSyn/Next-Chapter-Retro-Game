@@ -1,6 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import {
+  finalizePendingHighScore,
+  formatElapsed,
+  formatScore,
+  getHighScores,
+  getPendingHighScore,
+  type HighScoreEntry,
+  type PendingHighScore,
+} from "@/lib/game/high-scores";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -105,7 +114,35 @@ export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }
   const cloudOffRef = useRef<number>(0);
 
   const [seedInput, setSeedInput] = useState("");
+  const [initialsInput, setInitialsInput] = useState("");
+  const [highScores, setHighScores] = useState<HighScoreEntry[]>([]);
+  const [pendingScore, setPendingScore] = useState<PendingHighScore | null>(null);
+  const highScoresRef = useRef<HighScoreEntry[]>([]);
   const seedInputRef = useRef<HTMLInputElement | null>(null);
+  const pendingInputRef = useRef<HTMLInputElement | null>(null);
+  const pendingScoreRef = useRef<PendingHighScore | null>(null);
+
+  useEffect(() => {
+    const syncScores = () => {
+      setHighScores(getHighScores());
+      setPendingScore(getPendingHighScore());
+    };
+    syncScores();
+    const onFocus = () => syncScores();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, []);
+
+  useEffect(() => {
+    highScoresRef.current = highScores;
+  }, [highScores]);
+
+  useEffect(() => {
+    pendingScoreRef.current = pendingScore;
+    if (pendingScore) {
+      setTimeout(() => pendingInputRef.current?.focus(), 40);
+    }
+  }, [pendingScore]);
 
   // Menu items depend on hasSave
   const menuItems: MenuItem[] = useMemo(() => [
@@ -157,6 +194,15 @@ export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }
       if (seedFormVisibleRef.current) {
         if (e.code === "Escape") { setSeedFormVisible(false); e.preventDefault(); }
         return; // seed input owns the keyboard while open
+      }
+      if (pendingScoreRef.current) {
+        if (e.code === "Escape") {
+          finalizePendingHighScore("YOU");
+          setPendingScore(null);
+          setHighScores(getHighScores());
+          e.preventDefault();
+        }
+        return;
       }
       switch (e.code) {
         case "ArrowUp":
@@ -397,11 +443,17 @@ export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }
       ctx.font = pixelFont(6.5);
       ctx.fillText("HIGH SCORES", panelX + panelW / 2, panelY + 162);
 
-      const scores = [
-        { name: "YOU?",  score: "---",    time: "--:--" },
-        { name: "???",   score: "9999",   time: "12:34" },
-        { name: "AAA",   score: "7420",   time: "18:02" },
-      ];
+      const scores = [0, 1, 2].map((idx) => {
+        const entry = highScoresRef.current[idx];
+        if (!entry) {
+          return { name: "---", score: "----", time: "--:--" };
+        }
+        return {
+          name: entry.initials,
+          score: formatScore(entry.score),
+          time: formatElapsed(entry.timeSeconds),
+        };
+      });
       ctx.font = pixelFont(5.5);
       scores.forEach((s, i) => {
         const ry = panelY + 180 + i * 34;
@@ -661,6 +713,7 @@ export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }
   // ── Canvas click / tap → menu item hit-test ────────────────────────────────
   const handleCanvasClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (seedFormVisibleRef.current) return;
+    if (pendingScoreRef.current) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
@@ -727,6 +780,54 @@ export function StartMenu({ onStart, onContinue, onDaily, onEnterSeed, hasSave }
           onClick={() => setSeedFormVisible(false)}
         >
           ESC
+        </button>
+      </form>
+
+      <form
+        className={`start-seed-form${pendingScore ? "" : " hidden"}`}
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!pendingScoreRef.current) return;
+          const next = finalizePendingHighScore(initialsInput.trim() || "YOU");
+          setHighScores(next);
+          setPendingScore(null);
+          setInitialsInput("");
+        }}
+      >
+        {pendingScore ? (
+          <div style={{ color: "#facc15", fontFamily: "var(--font-pixel, monospace)", marginBottom: 8, textAlign: "center" }}>
+            NEW HIGH SCORE: {formatScore(pendingScore.score)} ({formatElapsed(pendingScore.timeSeconds)})
+          </div>
+        ) : null}
+        <input
+          ref={pendingInputRef}
+          type="text"
+          className="start-seed-input"
+          value={initialsInput}
+          onChange={(e) => setInitialsInput(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 3))}
+          placeholder="AAA"
+          aria-label="High score initials"
+          spellCheck={false}
+          autoComplete="off"
+          maxLength={3}
+        />
+        <button
+          type="submit"
+          className="start-seed-submit"
+        >
+          SAVE
+        </button>
+        <button
+          type="button"
+          className="start-seed-submit"
+          onClick={() => {
+            const next = finalizePendingHighScore("YOU");
+            setHighScores(next);
+            setPendingScore(null);
+            setInitialsInput("");
+          }}
+        >
+          SKIP
         </button>
       </form>
     </div>
