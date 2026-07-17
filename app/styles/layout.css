@@ -133,6 +133,16 @@
   opacity: 1;
 }
 
+/* Canvas-vs-UI stacking: the canvas itself never sets a z-index - it paints
+   in normal flow as the first child of #game-stage-viewport (position:
+   relative), so it's implicitly the bottom layer. Everything meant to sit
+   above gameplay either claims an explicit z-index within this same
+   containing block (.stage-toolbar at 9, touch.css's .touch-overlay at 8/12)
+   or, for full-screen overlays like the pause/inventory menu, relies on
+   being mounted last in DOM/React order rather than a z-index at all - see
+   the note in menu.css. Keep new HUD/overlay elements inside this same
+   stacking context (a descendant of .game-canvas-stage or a sibling within
+   #game-stage-viewport) so a single z-index scale stays meaningful. */
 .game-canvas-stage {
   position: absolute;
   top: 0;

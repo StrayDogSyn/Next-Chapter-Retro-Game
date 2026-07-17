@@ -18,7 +18,7 @@ A full-stack retro platformer built for admissions review with a custom Canvas r
 - Live submission entry (GitHub Pages index): https://straydogsyn.github.io/Next-Chapter-Retro-Game/
 - Repository submission portal source: [index.html](index.html)
 - Project source code: https://github.com/StrayDogSyn/Next-Chapter-Retro-Game
-- Prompt history (submission-ready): [docs/prompt-history.md](docs/prompt-history.md)
+- Prompt history (submission-ready): [docs/PROMPT_HISTORY.md](docs/PROMPT_HISTORY.md)
 
 ## Why This Project
 
@@ -50,7 +50,7 @@ Primary architecture documentation: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 ## Documentation Map
 
 - Workflow and engineering narrative: [docs/AGENTIC_WORKFLOW.md](docs/AGENTIC_WORKFLOW.md)
-- Prompt history summary: [docs/prompt-history.md](docs/prompt-history.md)
+- Prompt history summary: [docs/PROMPT_HISTORY.md](docs/PROMPT_HISTORY.md)
 - Session archive: [docs/archive/SESSION_LOG.md](docs/archive/SESSION_LOG.md)
 - Prompt library archive: [docs/archive/PROMPT_LIBRARY.md](docs/archive/PROMPT_LIBRARY.md)
 - Architecture decisions archive: [docs/archive/DECISIONS.md](docs/archive/DECISIONS.md)

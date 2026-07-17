@@ -1,3 +1,9 @@
+/* No explicit z-index here by design: this backdrop is only ever mounted
+   (via React conditional render) while the menu is open, and it's appended
+   after the canvas/HUD in the component tree, so plain DOM order already
+   puts it above gameplay within .game-panel's stacking context - see the
+   canvas-vs-UI note in layout.css. Add a z-index only if this ever needs to
+   coexist with another overlay that also relies on mount order. */
 .game-menu-backdrop {
   position: absolute;
   inset: 0;

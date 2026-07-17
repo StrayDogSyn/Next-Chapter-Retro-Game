@@ -1,4 +1,13 @@
 /* Reusable component styling for links, mascot panel, and floor strip. */
+
+/* Glassmorphism recipe used throughout this portal: a translucent rgba()
+   background (never solid) + backdrop-filter blur so the ambient .page-glow
+   gradient stays visible through cards, plus a low-opacity white border and
+   a soft box-shadow to fake edge lighting instead of a hard outline. The
+   -webkit- prefix is required for Safari, which never shipped unprefixed
+   backdrop-filter support. Applied consistently to a.portal-link and aside
+   below so new cards should reuse this trio (background/backdrop-filter/
+   box-shadow) rather than inventing a new surface treatment. */
 nav ul {
   list-style: none;
   margin: 0;

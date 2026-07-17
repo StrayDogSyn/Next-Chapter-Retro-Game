@@ -138,7 +138,7 @@ next-chapter-retro-game/
    ├─ DECISIONS.md (ADR log)  ARCHITECTURE.md  CREDITS.md  PLOT.md
 ```
 
-**Docs to write this phase:** Seed `DECISIONS.md` with **ADR-001** (Python FastAPI isolated backend owns all Neon access) and **ADR-002** (hand-rolled Canvas loop, no game-engine library). Add `ARCHITECTURE.md` with the interconnection diagram above. Start `SESSION_LOG.md`.
+**Docs to write this phase:** Seed [DECISIONS.md](archive/DECISIONS.md) with **ADR-001** (Python FastAPI isolated backend owns all Neon access) and **ADR-002** (hand-rolled Canvas loop, no game-engine library). Add [ARCHITECTURE.md](ARCHITECTURE.md) with the interconnection diagram above. Start [SESSION_LOG.md](archive/SESSION_LOG.md).
 
 **VERIFICATION CHECKPOINT 0** (PowerShell):
 ```powershell
@@ -182,7 +182,7 @@ export class AnimationController {
 - **OpenGameArt.org** — widest variety; **check each license individually** (CC0/CC-BY/GPL/OGA-BY). **Asset-pipeline filter for agents scraping OGA:** genuine downloadable asset anchors display a file size in the link text matching the regex `\d+(\.\d+)?\s*(KB|MB)`, and real files live under `/sites/default/files/` paths; **thumbnails** live under `/sites/default/files/styles/` — so the scraper must **reject any URL containing the `/styles/` segment** and keep only the sized `/files/` links.
 - **itch.io** free asset packs (filter by license) and **CraftPix** freebies (pre-split animated walk/attack/idle sheets).
 
-**Attribution requirement:** for every asset used, append a `CREDITS.md` row: `| asset | author | source URL | license | date |`. CC-BY assets are non-optional to credit.
+**Attribution requirement:** for every asset used, append a [CREDITS.md](archive/CREDITS.md) row: `| asset | author | source URL | license | date |`. CC-BY assets are non-optional to credit.
 
 **VERIFICATION CHECKPOINT 1:**
 ```powershell
@@ -191,7 +191,7 @@ curl http://localhost:3000 -UseBasicParsing    # 200 OK
 Get-ChildItem public/assets -Recurse           # atlas .png + .json present
 python scripts/project-status.py; "EXIT=$LASTEXITCODE"
 ```
-Observable evidence: player sprite **visibly cycles** idle→run→jump in browser (agent must paste a screenshot or a short frame-by-frame description of on-canvas behavior), atlas files exist on disk, `CREDITS.md` updated. **Do not accept "sprites are working" without the screenshot + file listing.**
+Observable evidence: player sprite **visibly cycles** idle→run→jump in browser (agent must paste a screenshot or a short frame-by-frame description of on-canvas behavior), atlas files exist on disk, [CREDITS.md](archive/CREDITS.md) updated. **Do not accept "sprites are working" without the screenshot + file listing.**
 
 ---
 
@@ -228,7 +228,7 @@ export const FEEL = {
 npm test                    # unit tests for coyote/buffer timing logic
 python scripts/project-status.py; "EXIT=$LASTEXITCODE"
 ```
-Observable evidence: unit tests assert that a jump input 100ms after leaving a ledge still jumps and a jump input 200ms after does not; agent pastes raw `npm test` output showing PASS counts. Manual browser check: jump feels responsive, hits freeze briefly. Write **ADR-003 (game-feel constants)**; log tuning values in `SESSION_LOG.md`.
+Observable evidence: unit tests assert that a jump input 100ms after leaving a ledge still jumps and a jump input 200ms after does not; agent pastes raw `npm test` output showing PASS counts. Manual browser check: jump feels responsive, hits freeze briefly. Write **ADR-003 (game-feel constants)**; log tuning values in [SESSION_LOG.md](archive/SESSION_LOG.md).
 
 ---
 
@@ -393,7 +393,7 @@ Lore pickups reuse the item schema's `desc` field; a "dialogue log" panel in the
 npm test -- dialogue        # trigger-firing + once-only logic
 python scripts/project-status.py; "EXIT=$LASTEXITCODE"
 ```
-Observable evidence: entering `prison-start` in the browser **fires Jack's intro line in the dialogue box** (agent describes on-screen text); `once:true` triggers don't re-fire; `docs/PLOT.md` and `CREDITS.md` updated (song titles credited to their artists). Write **ADR-007 (JSON-driven narrative + story/ability gate pairing)**.
+Observable evidence: entering `prison-start` in the browser **fires Jack's intro line in the dialogue box** (agent describes on-screen text); `once:true` triggers don't re-fire; `docs/PLOT.md` and [CREDITS.md](archive/CREDITS.md) updated (song titles credited to their artists). Write **ADR-007 (JSON-driven narrative + story/ability gate pairing)**.
 
 ---
 
@@ -434,7 +434,7 @@ Observable evidence: taking damage in-game **updates the HUD health number** whi
 
 **Fonts (CDN vs bundle decision):** use **`next/font/google`** for **Press Start 2P** — Next.js downloads and **self-hosts** it at build time (no runtime request to Google, zero layout shift, served from your domain with `Cache-Control: public, max-age=31536000, immutable`). This is strictly better than a `<link>` to Google's CDN. Set `display:'swap'` and expose as a CSS variable.
 
-**Audio (CDN vs bundle):** **Howler.js** is small and fine to self-host/bundle via npm; game SFX/music belong in `public/assets/audio/` (self-hosted, cache-friendly), not a third-party CDN, so gameplay never depends on an external host. **Freesound sourcing:** preview-quality MP3s (`preview-hq-mp3` ~128kbps) need only a **token API key**; full-quality **originals require OAuth2** — for a bootcamp project, prefer previews to avoid the OAuth dance, and credit each sound's author + license in `CREDITS.md`.
+**Audio (CDN vs bundle):** **Howler.js** is small and fine to self-host/bundle via npm; game SFX/music belong in `public/assets/audio/` (self-hosted, cache-friendly), not a third-party CDN, so gameplay never depends on an external host. **Freesound sourcing:** preview-quality MP3s (`preview-hq-mp3` ~128kbps) need only a **token API key**; full-quality **originals require OAuth2** — for a bootcamp project, prefer previews to avoid the OAuth dance, and credit each sound's author + license in [CREDITS.md](archive/CREDITS.md).
 
 **VERIFICATION CHECKPOINT 8:**
 ```powershell
@@ -443,7 +443,7 @@ npm run start
 curl http://localhost:3000 -UseBasicParsing
 python scripts/project-status.py; "EXIT=$LASTEXITCODE"
 ```
-Observable evidence: resizing the browser keeps pixels crisp with no blur (integer scaling), fullscreen works, audio plays, Press Start 2P renders. Final `SESSION_LOG.md` entry + **ADR-009 (responsive integer-scaling + self-hosted fonts/audio)**.
+Observable evidence: resizing the browser keeps pixels crisp with no blur (integer scaling), fullscreen works, audio plays, Press Start 2P renders. Final [SESSION_LOG.md](archive/SESSION_LOG.md) entry + **ADR-009 (responsive integer-scaling + self-hosted fonts/audio)**.
 
 ---
 
@@ -454,7 +454,7 @@ Observable evidence: resizing the browser keeps pixels crisp with no blur (integ
 
 **Phase 3 example prompt body:**
 > Implement seeded hybrid procedural generation in `lib/game/world/` and `lib/game/rng/mulberry32.ts`. Requirements: (1) two independent mulberry32 streams — `layoutRng` for the room graph, `lootRng` for treasure/enemies; (2) lock-and-key graph generation that is provably solvable (BFS check); (3) JSON room templates stitched per Dead Cells model. Then write Jest tests: same-seed → byte-identical graph; every gate reachable; loot varies with progression only. 
-> **PROOF REQUIRED — paste all of:** `npm test -- world` raw output; `python scripts/project-status.py` full output with `EXIT=$LASTEXITCODE`; `git status --porcelain`. Then update `DECISIONS.md` with ADR-004 and ADR-005 and paste the diff. Do not claim completion otherwise.
+> **PROOF REQUIRED — paste all of:** `npm test -- world` raw output; `python scripts/project-status.py` full output with `EXIT=$LASTEXITCODE`; `git status --porcelain`. Then update [DECISIONS.md](archive/DECISIONS.md) with ADR-004 and ADR-005 and paste the diff. Do not claim completion otherwise.
 
 Every phase prompt follows this shape: *objective → explicit file paths → required tests/endpoints → the exact PowerShell commands to run → "paste the full raw output; do not summarize; do not claim done without it."*
 
@@ -474,7 +474,7 @@ Every phase prompt follows this shape: *objective → explicit file paths → re
 | 7 | ADR-008 (state bridge) | GUI frame design | Any GUI art/fonts |
 | 8 | ADR-009 (responsive/assets) | Final polish | **Freesound sounds: author + license** |
 
-`AGENTIC_WORKFLOW.md` documents the verification-checkpoint discipline itself; `PROMPT_LIBRARY.md` stores the exact prompts used per phase (so successful prompts are reusable).
+[AGENTIC_WORKFLOW.md](AGENTIC_WORKFLOW.md) documents the verification-checkpoint discipline itself; [PROMPT_LIBRARY.md](archive/PROMPT_LIBRARY.md) stores the exact prompts used per phase (so successful prompts are reusable).
 
 ---
 
@@ -497,9 +497,9 @@ Every phase prompt follows this shape: *objective → explicit file paths → re
 
 ## Caveats
 
-- **Game-feel constants (coyote 83ms, jump buffer 120ms, hitstop 4 frames, XP coeff 1.4, etc.) are research-backed *starting points*, not tuned finals** — expect to iterate them in Phase 2/4 and log the final values in `SESSION_LOG.md`.
+- **Game-feel constants (coyote 83ms, jump buffer 120ms, hitstop 4 frames, XP coeff 1.4, etc.) are research-backed *starting points*, not tuned finals** — expect to iterate them in Phase 2/4 and log the final values in [SESSION_LOG.md](archive/SESSION_LOG.md).
 - **mulberry32 is chosen for simplicity/determinism, not statistical rigor**; it is not equidistributed and fails PractRand past 2^32. Fine for this scope; swap to sfc32/PCG32 if quality ever matters.
 - **The "I Am I" manuscript is a dark fantasy-horror-survival work**; several extracted elements (Jack's gallows humor, the funeral-necktie origin of the headband) are tonally heavy — adapt for the target audience of a bootcamp capstone as appropriate, and keep the dragon-hunt/hero framing front-and-center.
-- **Project docs (`PLOT.md`, `DECISIONS.md`, etc.) were not found as Google Docs** in the accessible Drive; two `retro-pro` folders exist and likely hold the project as code/markdown files that Drive search can't index by content. Confirm the repo's actual doc state in Phase 0 before assuming these files exist.
+- **Project docs (`PLOT.md`, [DECISIONS.md](archive/DECISIONS.md), etc.) were not found as Google Docs** in the accessible Drive; two `retro-pro` folders exist and likely hold the project as code/markdown files that Drive search can't index by content. Confirm the repo's actual doc state in Phase 0 before assuming these files exist.
 - **`devicePixelContentBoxSize` is Chrome/Edge-only**; Safari falls back to a slightly imperfect `contentBoxSize × devicePixelRatio`, so pixel-perfect 1:1 rendering can't be guaranteed on Safari — acceptable for a desktop-first capstone.
 - This spec assumes the agent has repo write access, a Neon account with a project provisioned, and Node + Python toolchains installed on the Windows host.

@@ -76,7 +76,7 @@ _Add new prompts below as they prove reusable. Prompts that failed are just as v
 
 ## UI refactor handoff brief (2026-07-08)
 
-Full brief: [ui-refactor-brief-2026-07-08.md](archive/historical/session-briefs/ui-refactor-brief-2026-07-08.md) — responsive canvas
+Full brief: [ui-refactor-brief-2026-07-08.md](historical/session-briefs/ui-refactor-brief-2026-07-08.md) — responsive canvas
 scaling, header/footer HUD chrome, arrow-key reliability investigation, GIF
 transparency fix in the asset pipeline. Written for a VS Code agent session
 after the first human playtest; includes per-task root-cause pointers into the

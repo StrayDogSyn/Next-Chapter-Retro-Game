@@ -134,7 +134,7 @@ This is the honesty section. Bootcamp reviewers care about this more than the co
 
 - **What worked:** Splitting sprite/SFX sourcing from asset-download automation into two distinct sessions kept scope manageable. Using a scraper script rather than manual downloads made the licensing/attribution tracking systematic instead of ad hoc.
 - **What didn't:** Across two separate coding-agent sessions (Windsurf, then VS Copilot), both narrated task completion — "moved files," "created docs/archive/CREDITS.md," "regenerated the manifest" — that didn't match the actual file tree or file contents afterward. In one case an agent's own script-fix summary was pasted back verbatim in a later turn as if it were a fresh run, with identical output, suggesting the fix had never actually been applied.
-- **What also didn't:** Stale tracking tables (`docs/archive/BUGS_IMPROVEMENT_GUIDE.md`) kept generating prompts that assumed features were missing when code already fixed them. A senior code review surfaced additional unverified claims (seed-entry UI, offline loot-source behavior) that had drifted from the code.
+- **What also didn't:** Stale tracking tables ([docs/archive/BUGS_IMPROVEMENT_GUIDE.md](archive/BUGS_IMPROVEMENT_GUIDE.md)) kept generating prompts that assumed features were missing when code already fixed them. A senior code review surfaced additional unverified claims (seed-entry UI, offline loot-source behavior) that had drifted from the code.
 - **What I'd prompt differently next time:** Build a ground-truth verification step in from the start rather than bolting it on after multiple rounds of mismatched claims. `scripts/project-status.py` now exists for exactly this — it reads the filesystem/git state directly instead of relying on any agent's self-report, and every pairing session should run it before accepting a "done." For documentation sessions, cross-check every asserted UI/behavior claim against the current source before writing it down.
 
 </details>
@@ -151,7 +151,7 @@ Development used a multi-agent workflow across seven tools, split by role rather
 - **Gemini, Perplexity, and Comet Assistant (Browser)** handled prompt drafting, web search for open-source art/audio assets, and lightweight in-browser verification — work that didn't need a full implementation agent's context budget.
 - **Devin Cloud** took on supplementary background/investigation tasks outside the main implementation loop.
 
-**Documentation as source of truth:** `docs/MASTER_BUILD_SPEC.md`, this file, and `docs/archive/SESSION_LOG.md` were kept current throughout rather than reconstructed at submission time, specifically to keep long agent sessions grounded and prevent regressions from an agent re-deriving context incorrectly.
+**Documentation as source of truth:** [docs/MASTER_BUILD_SPEC.md](MASTER_BUILD_SPEC.md), this file, and [docs/archive/SESSION_LOG.md](archive/SESSION_LOG.md) were kept current throughout rather than reconstructed at submission time, specifically to keep long agent sessions grounded and prevent regressions from an agent re-deriving context incorrectly.
 
 **Test-driven execution:** no agent output was accepted on narration alone. Every sprint closed with `npm test`, `npx tsc --noEmit`, and `python scripts/project-status.py` — the last one reads actual filesystem/git state rather than any agent's self-report, which is exactly what caught the false-completion pattern documented in [Retro & Learnings](#retro--learnings).
 
@@ -169,7 +169,7 @@ Development used a multi-agent workflow across seven tools, split by role rather
 
 ### 4. Open-Source Asset Sourcing & Pipeline Integration
 
-- **Sourcing:** replacing placeholder shapes and mismatched "ratchet" sprites meant sourcing permissively-licensed art from sites like OpenGameArt — tracked with attribution in `docs/archive/CREDITS.md` and `assets/manifest.csv`.
+- **Sourcing:** replacing placeholder shapes and mismatched "ratchet" sprites meant sourcing permissively-licensed art from sites like OpenGameArt — tracked with attribution in [docs/archive/CREDITS.md](archive/CREDITS.md) and [assets/manifest.csv](../assets/manifest.csv).
 - **Automated asset packing:** raw downloaded sheets never fit an engine's exact geometry out of the box, so `scripts/prepare-assets.py` parses, crops, scale-normalizes, and packs raw source art into production sheets. Every new pipeline section opens its source image and hard-fails with a measured-exact-size error if dimensions drift, so a bad crop offset fails loudly instead of shipping silently. The FX/mech-boss sheets (`fx_projectile`, `fx_muzzle`, `fx_explosion`, `fx_diewhirl`, `mech_gunner`, `pickupIcons`) were added this way, each crop region measured directly from the source pixels rather than trusted off a sheet's printed labels.
 - **Unified metadata:** the script writes every sheet's cell size and animation frame layout into one `public/sprites/spritemeta.json`, which the TypeScript engine reads at runtime — so a new animated entity (like the mech boss's idle/attack rows, or the multi-frame boss-death explosion) is wired by adding data, not by hardcoding pixel offsets into the renderer.
 
@@ -183,5 +183,5 @@ Development used a multi-agent workflow across seven tools, split by role rather
 | [ARCHITECTURE.md](ARCHITECTURE.md) | System design and the Python-service rationale |
 | [CREDITS.md](archive/CREDITS.md) | Third-party sprite/audio sourcing, licenses, and attribution status |
 | [WORKFLOW.md](archive/WORKFLOW.md) | Project workflow, documentation structure, and agent collaboration guidelines |
-| [archive/historical/README.md](archive/historical/README.md) | Archived/deprecated documentation index |
+| [archive/historical/HISTORICAL_CONTEXT.md](archive/historical/HISTORICAL_CONTEXT.md) | Archived/deprecated documentation index |
 | [archive/historical/legacy-imports/status-root-snapshot-2026-07-16.txt](archive/historical/legacy-imports/status-root-snapshot-2026-07-16.txt) | Most recent archived root status snapshot captured during documentation cleanup |

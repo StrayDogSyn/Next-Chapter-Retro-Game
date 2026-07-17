@@ -21,6 +21,13 @@
   z-index: 0;
 }
 
+/* .glass-pane-3/-2/(-1 below) form a manual parallax stack: ascending
+   z-index (1/2/3) paired with ascending translateZ toward 0 and rising
+   opacity/brightness, so each pane reads as progressively closer to the
+   camera under the .start-screen-wrap perspective. Each layer fakes frosted
+   glass with backdrop-filter blur+saturate over a near-transparent white
+   gradient rather than an opaque background, which is what sells the
+   glassmorphism - a flat rgba() fill alone would look like tinted plastic. */
 .glass-pane {
   position: absolute;
   inset: 0;

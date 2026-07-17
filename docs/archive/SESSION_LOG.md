@@ -1,6 +1,6 @@
 # Session Log
 
-Full chronological record of every AI-paired session on this project. The summary table in [AGENTIC_WORKFLOW.md](AGENTIC_WORKFLOW.md) shows the 3-5 most recent — this file is the complete archive.
+Full chronological record of every AI-paired session on this project. The summary table in [AGENTIC_WORKFLOW.md](../AGENTIC_WORKFLOW.md) shows the 3-5 most recent — this file is the complete archive.
 
 **How to add an entry:** copy the template below, fill it in immediately after a session while it's fresh, don't batch these up.
 

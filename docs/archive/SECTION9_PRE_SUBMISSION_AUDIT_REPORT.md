@@ -142,7 +142,7 @@ Audit expectation:
 ## Part 9 Prompt History Requirements
 
 Repository must include one file named:
-- docs/prompt-history.md, or
+- docs/PROMPT_HISTORY.md, or
 - prompts.md
 
 Should include representative prompts, not necessarily every prompt.
