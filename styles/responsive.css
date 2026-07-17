@@ -1,7 +1,29 @@
 /* Breakpoint rules are isolated for predictable mobile maintenance. */
 @media (max-width: 820px) {
+  /* Desktop is a fixed-height, no-scroll single-screen shell (body/.frame/
+     .content all set height + overflow:hidden so everything fits in one
+     viewport). Below this width the stacked single-column content routinely
+     exceeds phone viewport heights, and with no scroll enabled anywhere in
+     that chain it was fully unreachable - not just visually cramped, but
+     with scrollTop physically pinned to 0 even when forced. Swap the whole
+     chain to natural document flow + scroll instead of trying to keep
+     everything pinned to one screen. */
+  body {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .frame {
+    height: auto;
+    overflow: visible;
+  }
+
   .content {
     grid-template-columns: 1fr;
+    overflow: visible;
   }
 
   .wrap {
