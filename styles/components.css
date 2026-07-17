@@ -20,6 +20,10 @@ nav li {
   perspective: 1000px;
 }
 
+nav li:last-child {
+  margin-bottom: 0.35rem;
+}
+
 a.portal-link {
   display: block;
   text-decoration: none;
