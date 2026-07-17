@@ -13,7 +13,7 @@
  * service (python-service/main.py, /loot/roll). The tables below are shared
  * *definitions* so the client can render any item the service returns, and so
  * a degraded-mode fallback roll exists when the Python service is offline
- * (see ADR-003 in docs/DECISIONS.md). Keep these tables in sync with
+ * (see ADR-003 in docs/archive/DECISIONS.md). Keep these tables in sync with
  * python-service/loot_tables.py — that file is generated FROM this one via
  * scripts/sync-loot-tables.py... not yet; for now both files carry a header
  * comment pointing at each other.

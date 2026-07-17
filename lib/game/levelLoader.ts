@@ -106,7 +106,7 @@ function parseRoom(def: RoomDef): LoadedRoom {
       // '-' parses to T_PLATFORM (one-way: solid from above, passable from
       // below/through via holding down) - restored per explicit user
       // request. Was briefly converted to T_SOLID game-wide on 2026-07-16
-      // after three audits found no collision bug (see docs/SESSION_LOG.md);
+      // after three audits found no collision bug (see docs/archive/SESSION_LOG.md);
       // that removal is reverted here, all three audits' findings still
       // stand (the platform system itself was never the problem).
       else if (ch === "-") tile = T_PLATFORM;

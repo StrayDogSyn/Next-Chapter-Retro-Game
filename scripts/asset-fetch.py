@@ -17,7 +17,7 @@ WHY IT'S STRUCTURED THIS WAY
   see the FREESOUND SETUP section below to upgrade to OAuth2 if you want
   lossless originals later.
 - Everything downloaded gets logged to manifest.csv so you can cross-
-  reference against docs/CREDITS.md and flip status flags in one pass.
+  reference against docs/archive/CREDITS.md and flip status flags in one pass.
 
 SETUP
     pip install requests beautifulsoup4
@@ -273,7 +273,7 @@ def main() -> None:
         print(f"     {r['status']}: {r.get('filename') or r['note']}")
         time.sleep(REQUEST_DELAY_SECONDS)
 
-    # Write manifest for cross-referencing against docs/CREDITS.md
+    # Write manifest for cross-referencing against docs/archive/CREDITS.md
     with open(MANIFEST_PATH, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=["source", "page_url", "filename", "status", "note"])
         writer.writeheader()
@@ -282,7 +282,7 @@ def main() -> None:
     succeeded = sum(1 for r in results if r["status"] == "downloaded")
     print(f"\nDone. {succeeded}/{len(results)} assets downloaded.")
     print(f"Manifest written to: {MANIFEST_PATH.resolve()}")
-    print("Cross-reference this against docs/CREDITS.md and flip status flags to 🟡.")
+    print("Cross-reference this against docs/archive/CREDITS.md and flip status flags to 🟡.")
 
 
 if __name__ == "__main__":

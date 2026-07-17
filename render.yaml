@@ -4,7 +4,7 @@
 # ADR-009), ALLOWED_ORIGINS should be exactly the deployed origins in
 # production (no wildcard - see main.py's CORS setup, ADR-008).
 #
-# D3 is blocked until the leaked Neon credential (docs/SESSION_LOG.md,
+# D3 is blocked until the leaked Neon credential (docs/archive/SESSION_LOG.md,
 # 2026-07-11 security-cleanup entry) is rotated - do not deploy this
 # Blueprint with the old credential.
 services:

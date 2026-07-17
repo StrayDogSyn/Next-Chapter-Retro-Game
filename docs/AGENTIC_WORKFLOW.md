@@ -27,8 +27,8 @@
 <summary><strong>Click to expand: update checklist (do this after every pairing session)</strong></summary>
 
 1. Add a row to the [Session Log](#session-log) — date, tool, what you asked for, what you got.
-2. If the prompt is reusable or taught you something about prompting, add it to [docs/PROMPT_LIBRARY.md](PROMPT_LIBRARY.md).
-3. If the agent's output changed the architecture or you overrode it, log it in [docs/DECISIONS.md](DECISIONS.md).
+2. If the prompt is reusable or taught you something about prompting, add it to [docs/archive/PROMPT_LIBRARY.md](archive/PROMPT_LIBRARY.md).
+3. If the agent's output changed the architecture or you overrode it, log it in [docs/archive/DECISIONS.md](archive/DECISIONS.md).
 4. Update the [Human vs. Agent Contribution Map](#human-vs-agent-contribution-map) — don't let this go stale, it's the part reviewers will actually read closely.
 5. One line in [Quick Status](#quick-status) if the overall project state shifted.
 6. **Before trusting any agent's "done" summary, run `python scripts/project-status.py`.** It reads the actual filesystem and git state — no self-reporting involved — and appends a timestamped snapshot to `STATUS.txt`. This project hit multiple cases where an agent narrated completed work that the file tree didn't back up; this step exists specifically to catch that class of gap before it costs you a debugging cycle.
@@ -57,19 +57,19 @@
 
 | Date | Tool | Task | Human Role | Agent Role | Outcome | Notes |
 |---|---|---|---|---|---|---|
-| 2026-07-16 | Claude Code | Visual juice sprint: sprite-backed projectile/muzzle/impact FX, pickup icons, and an animated mech boss replacement | Supplied the "Visual Juice, FX Integration & Mech Replacement" mission prompt | Wired `fx_projectile`/`fx_muzzle`/`fx_explosion`/`fx_diewhirl`/`mech_gunner`/`pickupIcons` sheets through `prepare-assets.py` and `game.ts`; replaced the static WAR MECH with an animated boss and multi-frame death explosion; live-verified via a temporary window-exposed test hook after a seeded-room-shuffle navigation detour proved unreliable | ✅ merged | See [SESSION_LOG.md](SESSION_LOG.md) |
-| 2026-07-16 | Claude Code | One-way platform diagnostic sprint (audit) + boss werewolf scale fix at the source | Pushed back with a structured re-audit request, then supplied the original sprite source archive | Confirmed the platform system clean via an instrumented diagnostic trap; fixed werewolf scale flicker with `crop_to_content`/`normalize_anim_scale` at the asset-prep source instead of a draw-time compensation table | ✅ merged | See [SESSION_LOG.md](SESSION_LOG.md) |
-| 2026-07-16 | Claude Code | One-way platforms removed game-wide (deliberate design change, not a bug fix) | Directed removal despite three prior clean audits, after weighing agent pushback | Converted `-` tiles to solid stone, preserved the ability-gated `T_DOOR_DASH`/`T_DOOR_DOUBLEJUMP` platforms, verified zero reachability regressions across all 24 rooms | ✅ merged | See [SESSION_LOG.md](SESSION_LOG.md) |
-| 2026-07-15 | Claude Code | Entity-interaction sprint audit: 2 of 4 claimed bugs refuted, 1 real bug found, 1 gap confirmed | Supplied a 4-item bug report drafted from screenshots | Refuted solid-NPC and broken-platform-landing claims with live proof; root-caused flaky interact triggers to a React StrictMode zombie game-loop bug and fixed it; redesigned shrine/shopkeeper primitives to a sci-fi theme | ✅ merged | See [SESSION_LOG.md](SESSION_LOG.md) |
-| 2026-07-15 | Claude Code | Real inventory system: bag storage, sell/scrap economy, functional Bag UI | Reported the inventory menu was decorative with no backing data; chose bag capacity and sell/scrap-as-distinct-actions via AskUserQuestion | Built `bag`/`materials` state, sell/scrap/equip methods, save-data persistence, and a real Bag UI; caught and ruled out a test-harness false alarm before reporting | ✅ merged | See [SESSION_LOG.md](SESSION_LOG.md) |
+| 2026-07-16 | Claude Code | Visual juice sprint: sprite-backed projectile/muzzle/impact FX, pickup icons, and an animated mech boss replacement | Supplied the "Visual Juice, FX Integration & Mech Replacement" mission prompt | Wired `fx_projectile`/`fx_muzzle`/`fx_explosion`/`fx_diewhirl`/`mech_gunner`/`pickupIcons` sheets through `prepare-assets.py` and `game.ts`; replaced the static WAR MECH with an animated boss and multi-frame death explosion; live-verified via a temporary window-exposed test hook after a seeded-room-shuffle navigation detour proved unreliable | ✅ merged | See [SESSION_LOG.md](archive/SESSION_LOG.md) |
+| 2026-07-16 | Claude Code | One-way platform diagnostic sprint (audit) + boss werewolf scale fix at the source | Pushed back with a structured re-audit request, then supplied the original sprite source archive | Confirmed the platform system clean via an instrumented diagnostic trap; fixed werewolf scale flicker with `crop_to_content`/`normalize_anim_scale` at the asset-prep source instead of a draw-time compensation table | ✅ merged | See [SESSION_LOG.md](archive/SESSION_LOG.md) |
+| 2026-07-16 | Claude Code | One-way platforms removed game-wide (deliberate design change, not a bug fix) | Directed removal despite three prior clean audits, after weighing agent pushback | Converted `-` tiles to solid stone, preserved the ability-gated `T_DOOR_DASH`/`T_DOOR_DOUBLEJUMP` platforms, verified zero reachability regressions across all 24 rooms | ✅ merged | See [SESSION_LOG.md](archive/SESSION_LOG.md) |
+| 2026-07-15 | Claude Code | Entity-interaction sprint audit: 2 of 4 claimed bugs refuted, 1 real bug found, 1 gap confirmed | Supplied a 4-item bug report drafted from screenshots | Refuted solid-NPC and broken-platform-landing claims with live proof; root-caused flaky interact triggers to a React StrictMode zombie game-loop bug and fixed it; redesigned shrine/shopkeeper primitives to a sci-fi theme | ✅ merged | See [SESSION_LOG.md](archive/SESSION_LOG.md) |
+| 2026-07-15 | Claude Code | Real inventory system: bag storage, sell/scrap economy, functional Bag UI | Reported the inventory menu was decorative with no backing data; chose bag capacity and sell/scrap-as-distinct-actions via AskUserQuestion | Built `bag`/`materials` state, sell/scrap/equip methods, save-data persistence, and a real Bag UI; caught and ruled out a test-harness false alarm before reporting | ✅ merged | See [SESSION_LOG.md](archive/SESSION_LOG.md) |
 
-Full history: [docs/SESSION_LOG.md](SESSION_LOG.md) — keep this table above to the 3-5 most recent sessions, archive the rest there.
+Full history: [docs/archive/SESSION_LOG.md](archive/SESSION_LOG.md) — keep this table above to the 3-5 most recent sessions, archive the rest there.
 
 </details>
 
 ## Prompt Library
 
-A running collection of prompts that worked (and a few that didn't) — full detail lives in [docs/PROMPT_LIBRARY.md](PROMPT_LIBRARY.md).
+A running collection of prompts that worked (and a few that didn't) — full detail lives in [docs/archive/PROMPT_LIBRARY.md](archive/PROMPT_LIBRARY.md).
 
 <details>
 <summary><strong>Preview: top prompts by usefulness</strong></summary>
@@ -83,7 +83,7 @@ A running collection of prompts that worked (and a few that didn't) — full det
 
 ## Decisions & Rationale
 
-Architecture Decision Records (ADRs) — every time the agent's suggestion was accepted, modified, or rejected, it's logged with reasoning in [docs/DECISIONS.md](DECISIONS.md).
+Architecture Decision Records (ADRs) — every time the agent's suggestion was accepted, modified, or rejected, it's logged with reasoning in [docs/archive/DECISIONS.md](archive/DECISIONS.md).
 
 <details>
 <summary><strong>Preview: latest decisions</strong></summary>
@@ -133,15 +133,15 @@ This is the honesty section. Bootcamp reviewers care about this more than the co
 <summary><strong>Click to expand — what worked, what didn't</strong></summary>
 
 - **What worked:** Splitting sprite/SFX sourcing from asset-download automation into two distinct sessions kept scope manageable. Using a scraper script rather than manual downloads made the licensing/attribution tracking systematic instead of ad hoc.
-- **What didn't:** Across two separate coding-agent sessions (Windsurf, then VS Copilot), both narrated task completion — "moved files," "created docs/CREDITS.md," "regenerated the manifest" — that didn't match the actual file tree or file contents afterward. In one case an agent's own script-fix summary was pasted back verbatim in a later turn as if it were a fresh run, with identical output, suggesting the fix had never actually been applied.
-- **What also didn't:** Stale tracking tables (`docs/BUGS_IMPROVEMENT_GUIDE.md`) kept generating prompts that assumed features were missing when code already fixed them. A senior code review surfaced additional unverified claims (seed-entry UI, offline loot-source behavior) that had drifted from the code.
+- **What didn't:** Across two separate coding-agent sessions (Windsurf, then VS Copilot), both narrated task completion — "moved files," "created docs/archive/CREDITS.md," "regenerated the manifest" — that didn't match the actual file tree or file contents afterward. In one case an agent's own script-fix summary was pasted back verbatim in a later turn as if it were a fresh run, with identical output, suggesting the fix had never actually been applied.
+- **What also didn't:** Stale tracking tables (`docs/archive/BUGS_IMPROVEMENT_GUIDE.md`) kept generating prompts that assumed features were missing when code already fixed them. A senior code review surfaced additional unverified claims (seed-entry UI, offline loot-source behavior) that had drifted from the code.
 - **What I'd prompt differently next time:** Build a ground-truth verification step in from the start rather than bolting it on after multiple rounds of mismatched claims. `scripts/project-status.py` now exists for exactly this — it reads the filesystem/git state directly instead of relying on any agent's self-report, and every pairing session should run it before accepting a "done." For documentation sessions, cross-check every asserted UI/behavior claim against the current source before writing it down.
 
 </details>
 
 ## Project Post-Mortem
 
-> Every claim below is cross-checked against [SESSION_LOG.md](SESSION_LOG.md) rather than narrated from memory — the same ground-truth discipline the rest of this doc holds itself to (see [Retro & Learnings](#retro--learnings) on why that check matters).
+> Every claim below is cross-checked against [SESSION_LOG.md](archive/SESSION_LOG.md) rather than narrated from memory — the same ground-truth discipline the rest of this doc holds itself to (see [Retro & Learnings](#retro--learnings) on why that check matters).
 
 ### 1. Agentic Workflow & Architecture Strategy
 
@@ -151,7 +151,7 @@ Development used a multi-agent workflow across seven tools, split by role rather
 - **Gemini, Perplexity, and Comet Assistant (Browser)** handled prompt drafting, web search for open-source art/audio assets, and lightweight in-browser verification — work that didn't need a full implementation agent's context budget.
 - **Devin Cloud** took on supplementary background/investigation tasks outside the main implementation loop.
 
-**Documentation as source of truth:** `docs/MASTER_BUILD_SPEC.md`, this file, and `docs/SESSION_LOG.md` were kept current throughout rather than reconstructed at submission time, specifically to keep long agent sessions grounded and prevent regressions from an agent re-deriving context incorrectly.
+**Documentation as source of truth:** `docs/MASTER_BUILD_SPEC.md`, this file, and `docs/archive/SESSION_LOG.md` were kept current throughout rather than reconstructed at submission time, specifically to keep long agent sessions grounded and prevent regressions from an agent re-deriving context incorrectly.
 
 **Test-driven execution:** no agent output was accepted on narration alone. Every sprint closed with `npm test`, `npx tsc --noEmit`, and `python scripts/project-status.py` — the last one reads actual filesystem/git state rather than any agent's self-report, which is exactly what caught the false-completion pattern documented in [Retro & Learnings](#retro--learnings).
 
@@ -169,7 +169,7 @@ Development used a multi-agent workflow across seven tools, split by role rather
 
 ### 4. Open-Source Asset Sourcing & Pipeline Integration
 
-- **Sourcing:** replacing placeholder shapes and mismatched "ratchet" sprites meant sourcing permissively-licensed art from sites like OpenGameArt — tracked with attribution in `docs/CREDITS.md` and `assets/manifest.csv`.
+- **Sourcing:** replacing placeholder shapes and mismatched "ratchet" sprites meant sourcing permissively-licensed art from sites like OpenGameArt — tracked with attribution in `docs/archive/CREDITS.md` and `assets/manifest.csv`.
 - **Automated asset packing:** raw downloaded sheets never fit an engine's exact geometry out of the box, so `scripts/prepare-assets.py` parses, crops, scale-normalizes, and packs raw source art into production sheets. Every new pipeline section opens its source image and hard-fails with a measured-exact-size error if dimensions drift, so a bad crop offset fails loudly instead of shipping silently. The FX/mech-boss sheets (`fx_projectile`, `fx_muzzle`, `fx_explosion`, `fx_diewhirl`, `mech_gunner`, `pickupIcons`) were added this way, each crop region measured directly from the source pixels rather than trusted off a sheet's printed labels.
 - **Unified metadata:** the script writes every sheet's cell size and animation frame layout into one `public/sprites/spritemeta.json`, which the TypeScript engine reads at runtime — so a new animated entity (like the mech boss's idle/attack rows, or the multi-frame boss-death explosion) is wired by adding data, not by hardcoding pixel offsets into the renderer.
 
@@ -177,11 +177,11 @@ Development used a multi-agent workflow across seven tools, split by role rather
 
 | Doc | Purpose |
 |---|---|
-| [SESSION_LOG.md](SESSION_LOG.md) | Full chronological pairing session history |
-| [PROMPT_LIBRARY.md](PROMPT_LIBRARY.md) | Reusable prompts + what made them effective |
-| [DECISIONS.md](DECISIONS.md) | ADR-style record of architecture decisions |
+| [SESSION_LOG.md](archive/SESSION_LOG.md) | Full chronological pairing session history |
+| [PROMPT_LIBRARY.md](archive/PROMPT_LIBRARY.md) | Reusable prompts + what made them effective |
+| [DECISIONS.md](archive/DECISIONS.md) | ADR-style record of architecture decisions |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | System design and the Python-service rationale |
-| [CREDITS.md](CREDITS.md) | Third-party sprite/audio sourcing, licenses, and attribution status |
-| [WORKFLOW.md](WORKFLOW.md) | Project workflow, documentation structure, and agent collaboration guidelines |
+| [CREDITS.md](archive/CREDITS.md) | Third-party sprite/audio sourcing, licenses, and attribution status |
+| [WORKFLOW.md](archive/WORKFLOW.md) | Project workflow, documentation structure, and agent collaboration guidelines |
 | [archive/historical/README.md](archive/historical/README.md) | Archived/deprecated documentation index |
 | [archive/historical/legacy-imports/status-root-snapshot-2026-07-16.txt](archive/historical/legacy-imports/status-root-snapshot-2026-07-16.txt) | Most recent archived root status snapshot captured during documentation cleanup |

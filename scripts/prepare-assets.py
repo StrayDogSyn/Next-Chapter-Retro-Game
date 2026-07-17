@@ -635,7 +635,7 @@ def main() -> None:
         "howl": pick("Howl", "*.png", 4, 6),
     }
     werewolf_rows = {name: [crop_to_content(f) for f in frames] for name, frames in werewolf_rows.items()}
-    # Target chosen empirically (see docs/SESSION_LOG.md): large enough for a
+    # Target chosen empirically (see docs/archive/SESSION_LOG.md): large enough for a
     # crisp downscale to the in-game draw size, small enough that the sheet
     # (and its widest poses - run/attack's stride/swing reach) stays a
     # reasonable file size rather than the ~9000x3600px a full-raw-resolution

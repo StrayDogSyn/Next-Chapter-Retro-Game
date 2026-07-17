@@ -6,7 +6,7 @@ A retro-inspired full-stack rogue-like platformer built as a Next Chapter admiss
 
 - Live demo: https://straydogsyn.github.io/Next-Chapter-Retro-Game/
 - Prompt history file: `prompt-history.md` (repo root)
-- AI workflow evidence: `docs/AGENTIC_WORKFLOW.md`, `docs/SESSION_LOG.md`
+- AI workflow evidence: `docs/AGENTIC_WORKFLOW.md`, `docs/archive/SESSION_LOG.md`
 - Build command: `npm run build` (generates `/out/index.html` for static export)
 
 <div align="center">
@@ -47,7 +47,7 @@ Play the live build on GitHub Pages:
 
 https://straydogsyn.github.io/Next-Chapter-Retro-Game/
 
-For active testing scope and known limitations, see `docs/BETA_TESTING.md`.
+For active testing scope and known limitations, see `docs/archive/BETA_TESTING.md`.
 
 ## Problem
 
@@ -119,7 +119,7 @@ Scope discipline was intentional: prioritize the smallest complete demonstration
 <details>
 <summary><b>Click to expand planned enhancements</b></summary>
 
-- **Coherent single biome**: unify tiles, backdrops, and enemies under one consistent art set — currently mixed across source sheets (see `docs/BUGS_IMPROVEMENT_GUIDE.md` AST-016)
+- **Coherent single biome**: unify tiles, backdrops, and enemies under one consistent art set — currently mixed across source sheets (see `docs/archive/BUGS_IMPROVEMENT_GUIDE.md` AST-016)
 - **Zone-specific backdrops**: distinct backgrounds per zone instead of one shared background family (AST-018)
 - **Level-cleared tracking**: persist which rooms have already been looted so revisiting a cleared room doesn't imply infinite re-farming (open item in `docs/ARCHITECTURE.md`)
 - **Equipment HUD polish**: stronger highlight/swap feedback when gear changes (UI-002)
@@ -167,7 +167,7 @@ This project deliberately used a range of AI tools rather than defaulting to one
 <details>
 <summary><b>Click to expand the full tool-by-tool breakdown</b></summary>
 
-**Primary implementation agents** (hands-on coding, debugging, and verification-gated feature work — extensively logged in `docs/SESSION_LOG.md` / `docs/AGENTIC_WORKFLOW.md`):
+**Primary implementation agents** (hands-on coding, debugging, and verification-gated feature work — extensively logged in `docs/archive/SESSION_LOG.md` / `docs/AGENTIC_WORKFLOW.md`):
 
 - Claude Code
 - GitHub Copilot / VS Code CoPilot
@@ -189,9 +189,9 @@ Comprehensive AI collaboration evidence — including a full post-mortem on work
 
 - `docs/AGENTIC_WORKFLOW.md` (see the [Project Post-Mortem](docs/AGENTIC_WORKFLOW.md#project-post-mortem) section)
 - `docs/ITERATION_SPRINTS_ENGINEERING_PROCESS.md`
-- `docs/SESSION_LOG.md`
-- `docs/PROMPT_LIBRARY.md`
-- `docs/DECISIONS.md`
+- `docs/archive/SESSION_LOG.md`
+- `docs/archive/PROMPT_LIBRARY.md`
+- `docs/archive/DECISIONS.md`
 - `prompt-history.md` (submission-ready condensed prompt sample)
 
 ## Running the Project

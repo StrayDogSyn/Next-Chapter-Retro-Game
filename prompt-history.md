@@ -7,9 +7,9 @@ Use this as the quick version for admissions review; the full history remains in
 For comprehensive history, session-by-session evidence, and architecture decisions, see the `docs/` folder:
 
 - `docs/AGENTIC_WORKFLOW.md`
-- `docs/SESSION_LOG.md`
-- `docs/PROMPT_LIBRARY.md`
-- `docs/DECISIONS.md`
+- `docs/archive/SESSION_LOG.md`
+- `docs/archive/PROMPT_LIBRARY.md`
+- `docs/archive/DECISIONS.md`
 
 ---
 
@@ -123,4 +123,4 @@ The following selections highlight key interactions with Claude, GitHub Copilot,
 
 - Prompts shown here are intentionally condensed for readability.
 - Full prompt variants and outcomes are documented in the linked `docs/` files.
-- Verification artifacts referenced by these prompts are captured in `docs/SESSION_LOG.md` and `docs/BUGS_IMPROVEMENT_GUIDE.md`.
+- Verification artifacts referenced by these prompts are captured in `docs/archive/SESSION_LOG.md` and `docs/archive/BUGS_IMPROVEMENT_GUIDE.md`.

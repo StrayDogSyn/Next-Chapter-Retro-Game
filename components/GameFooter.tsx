@@ -6,7 +6,7 @@ type GameFooterProps = {
   snapshot: HudSnapshot | null;
 };
 
-// Version stamp for bug reports (docs/BETA_TESTING.md asks testers for it).
+// Version stamp for bug reports (docs/archive/BETA_TESTING.md asks testers for it).
 // Unset in local dev - "dev" is a clearer footer than a blank chip.
 const BUILD_SHA = (process.env.NEXT_PUBLIC_BUILD_SHA ?? "dev").slice(0, 7);
 
