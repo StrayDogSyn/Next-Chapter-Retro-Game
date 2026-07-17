@@ -33,7 +33,15 @@
   overflow: hidden;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  height: calc(100vh - 132px - 1.1rem);
+  /* .wrap is already flex:1 inside body's flex column, so it's exactly
+     "100vh minus whatever the footer actually renders at" with no guessing.
+     A hardcoded height: calc(100vh - 132px - 1.1rem) here duplicated that
+     but with a magic number for the footer's assumed height - real footer
+     height drifts a few px across browsers/devices (font metrics, toolbar
+     chrome affecting 100vh), which is exactly what was truncating content
+     on some Chromebook/MacBook viewports. Filling .wrap's real height
+     instead tracks the actual footer position on any device. */
+  height: 100%;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -89,7 +97,14 @@ h1 {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
   gap: 1rem;
-  align-items: start;
+  /* align-items: start (the grid default override) let grid items size to
+     their own natural content height instead of stretching to fill .content
+     - which meant .main-panel/nav/nav ul never had a real height constraint
+     to overflow against internally, so a too-tall link list just overflowed
+     .content itself and got hard-clipped by its overflow:hidden instead of
+     scrolling in nav ul as intended. stretch gives .main-panel a real height
+     to pass down the flex chain. */
+  align-items: stretch;
   flex: 1;
   min-height: 0;
   overflow: hidden;

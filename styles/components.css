@@ -17,6 +17,14 @@ nav ul {
   gap: 0.55rem;
   height: 100%;
   justify-content: space-between;
+  /* Six cards' natural height exceeds .frame's available space on plenty of
+     ordinary laptop viewports (measured: still clipped at 1280x900, not
+     just short/mobile screens), and .content above is overflow:hidden by
+     design. Scrolling the list itself keeps every link reachable without
+     touching that outer no-scroll shell - invisible when everything already
+     fits, a real scrollbar only when it doesn't. */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 nav li {
