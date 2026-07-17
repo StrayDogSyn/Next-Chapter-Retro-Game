@@ -17,7 +17,7 @@ A full-stack retro platformer built for admissions review with a custom Canvas r
 
 <div align="center">
 
-[![Do you want to play a game? Click here to play.](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=22&duration=3000&pause=1000&color=39FF14&background=000000&center=true&vCenter=true&width=600&height=70&lines=DO+YOU+WANT+TO+PLAY+A+GAME%3F;CLICK+HERE+TO+PLAY)](index.html)
+[![Do you want to play a game? Click here to play.](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=22&duration=3000&pause=1000&color=39FF14&background=000000&center=true&vCenter=true&width=600&height=70&lines=DO+YOU+WANT+TO+PLAY+A+GAME%3F;CLICK+HERE+TO+PLAY)](https://straydogsyn.github.io/Next-Chapter-Retro-Game/portal/)
 
 </div>
 

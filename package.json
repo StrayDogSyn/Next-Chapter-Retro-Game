@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "clean": "rimraf .next out",
+    "prebuild": "node scripts/copy-portal-assets.mjs",
     "build": "npm run clean && next build",
     "preview": "node scripts/preview-export.mjs",
     "start": "next start",

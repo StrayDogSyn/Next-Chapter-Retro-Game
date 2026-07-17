@@ -12,6 +12,10 @@ node_modules/
 /.next/
 /out/
 
+# regenerated every build by scripts/copy-portal-assets.mjs (prebuild hook);
+# repo-root index.html/styles/ stay the single source of truth
+/public/portal/
+
 # production
 /build
 
