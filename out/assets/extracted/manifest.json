@@ -1,0 +1,2692 @@
+{
+  "generatedAt": "2026-07-13T04:54:17.170193+00:00",
+  "note": "Paths are relative to public/. Prefix with BASE_PATH at runtime.",
+  "packs": {
+    "100-cc0-sfx": {
+      "images": [],
+      "audio": [
+        "assets/extracted/100-cc0-sfx/bell_01.ogg",
+        "assets/extracted/100-cc0-sfx/bell_02.ogg",
+        "assets/extracted/100-cc0-sfx/bell_03.ogg",
+        "assets/extracted/100-cc0-sfx/dishes_01.ogg",
+        "assets/extracted/100-cc0-sfx/dishes_02.ogg",
+        "assets/extracted/100-cc0-sfx/dishes_03.ogg",
+        "assets/extracted/100-cc0-sfx/dishes_04.ogg",
+        "assets/extracted/100-cc0-sfx/door_01.ogg",
+        "assets/extracted/100-cc0-sfx/door_02.ogg",
+        "assets/extracted/100-cc0-sfx/door_close_01.ogg",
+        "assets/extracted/100-cc0-sfx/door_close_02.ogg",
+        "assets/extracted/100-cc0-sfx/door_close_03.ogg",
+        "assets/extracted/100-cc0-sfx/door_close_04.ogg",
+        "assets/extracted/100-cc0-sfx/door_open.ogg",
+        "assets/extracted/100-cc0-sfx/explosion.ogg",
+        "assets/extracted/100-cc0-sfx/glass_01.ogg",
+        "assets/extracted/100-cc0-sfx/glass_02.ogg",
+        "assets/extracted/100-cc0-sfx/glass_03.ogg",
+        "assets/extracted/100-cc0-sfx/glass_04.ogg",
+        "assets/extracted/100-cc0-sfx/glass_05.ogg",
+        "assets/extracted/100-cc0-sfx/gong_01.ogg",
+        "assets/extracted/100-cc0-sfx/gong_02.ogg",
+        "assets/extracted/100-cc0-sfx/hit_01.ogg",
+        "assets/extracted/100-cc0-sfx/hit_02.ogg",
+        "assets/extracted/100-cc0-sfx/hit_03.ogg",
+        "assets/extracted/100-cc0-sfx/hit_04.ogg",
+        "assets/extracted/100-cc0-sfx/key_open_01.ogg",
+        "assets/extracted/100-cc0-sfx/key_open_02.ogg",
+        "assets/extracted/100-cc0-sfx/machine_01.ogg",
+        "assets/extracted/100-cc0-sfx/machine_02.ogg",
+        "assets/extracted/100-cc0-sfx/machine_03.ogg",
+        "assets/extracted/100-cc0-sfx/metal_01.ogg",
+        "assets/extracted/100-cc0-sfx/metal_02.ogg",
+        "assets/extracted/100-cc0-sfx/metal_03.ogg",
+        "assets/extracted/100-cc0-sfx/metal_04.ogg",
+        "assets/extracted/100-cc0-sfx/metal_05.ogg",
+        "assets/extracted/100-cc0-sfx/metal_06.ogg",
+        "assets/extracted/100-cc0-sfx/metal_07.ogg",
+        "assets/extracted/100-cc0-sfx/metal_08.ogg",
+        "assets/extracted/100-cc0-sfx/metal_09.ogg",
+        "assets/extracted/100-cc0-sfx/metal_10.ogg",
+        "assets/extracted/100-cc0-sfx/metal_11.ogg",
+        "assets/extracted/100-cc0-sfx/metal_12.ogg",
+        "assets/extracted/100-cc0-sfx/microwave_door_close.ogg",
+        "assets/extracted/100-cc0-sfx/microwave_door_open.ogg",
+        "assets/extracted/100-cc0-sfx/noise_01.ogg",
+        "assets/extracted/100-cc0-sfx/noise_02.ogg",
+        "assets/extracted/100-cc0-sfx/other_01.ogg",
+        "assets/extracted/100-cc0-sfx/other_02.ogg",
+        "assets/extracted/100-cc0-sfx/other_03.ogg",
+        "assets/extracted/100-cc0-sfx/other_04.ogg",
+        "assets/extracted/100-cc0-sfx/other_05.ogg",
+        "assets/extracted/100-cc0-sfx/other_06.ogg",
+        "assets/extracted/100-cc0-sfx/other_07.ogg",
+        "assets/extracted/100-cc0-sfx/paper_01.ogg",
+        "assets/extracted/100-cc0-sfx/paper_02.ogg",
+        "assets/extracted/100-cc0-sfx/paper_03.ogg",
+        "assets/extracted/100-cc0-sfx/paper_04.ogg",
+        "assets/extracted/100-cc0-sfx/plop_01.ogg",
+        "assets/extracted/100-cc0-sfx/plop_02.ogg",
+        "assets/extracted/100-cc0-sfx/pot_01.ogg",
+        "assets/extracted/100-cc0-sfx/pot_02.ogg",
+        "assets/extracted/100-cc0-sfx/shot_01.ogg",
+        "assets/extracted/100-cc0-sfx/shot_02.ogg",
+        "assets/extracted/100-cc0-sfx/slam_01.ogg",
+        "assets/extracted/100-cc0-sfx/slam_02.ogg",
+        "assets/extracted/100-cc0-sfx/slam_03.ogg",
+        "assets/extracted/100-cc0-sfx/slam_04.ogg",
+        "assets/extracted/100-cc0-sfx/slam_05.ogg",
+        "assets/extracted/100-cc0-sfx/slam_06.ogg",
+        "assets/extracted/100-cc0-sfx/slam_07.ogg",
+        "assets/extracted/100-cc0-sfx/splash_01.ogg",
+        "assets/extracted/100-cc0-sfx/splash_02.ogg",
+        "assets/extracted/100-cc0-sfx/spring_01.ogg",
+        "assets/extracted/100-cc0-sfx/spring_02.ogg",
+        "assets/extracted/100-cc0-sfx/spring_03.ogg",
+        "assets/extracted/100-cc0-sfx/spring_04.ogg",
+        "assets/extracted/100-cc0-sfx/spring_05.ogg",
+        "assets/extracted/100-cc0-sfx/spring_06.ogg",
+        "assets/extracted/100-cc0-sfx/spring_07.ogg",
+        "assets/extracted/100-cc0-sfx/spring_08.ogg",
+        "assets/extracted/100-cc0-sfx/spring_09.ogg",
+        "assets/extracted/100-cc0-sfx/switch_01.ogg",
+        "assets/extracted/100-cc0-sfx/switch_02.ogg",
+        "assets/extracted/100-cc0-sfx/toilet_01.ogg",
+        "assets/extracted/100-cc0-sfx/toilet_02.ogg",
+        "assets/extracted/100-cc0-sfx/tools_01.ogg",
+        "assets/extracted/100-cc0-sfx/tools_02.ogg",
+        "assets/extracted/100-cc0-sfx/tools_03.ogg",
+        "assets/extracted/100-cc0-sfx/tools_04.ogg",
+        "assets/extracted/100-cc0-sfx/tools_05.ogg",
+        "assets/extracted/100-cc0-sfx/weird_01.ogg",
+        "assets/extracted/100-cc0-sfx/weird_02.ogg",
+        "assets/extracted/100-cc0-sfx/weird_03.ogg",
+        "assets/extracted/100-cc0-sfx/weird_04.ogg",
+        "assets/extracted/100-cc0-sfx/weird_05.ogg",
+        "assets/extracted/100-cc0-sfx/wooded_box_open.ogg",
+        "assets/extracted/100-cc0-sfx/wooden_01.ogg",
+        "assets/extracted/100-cc0-sfx/wooden_02.ogg",
+        "assets/extracted/100-cc0-sfx/wooden_03.ogg"
+      ],
+      "data": [],
+      "other": []
+    },
+    "24x32-characters-with-faces-big-pack": {
+      "images": [
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Fighter-F-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Fighter-F-02.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Fighter-M-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Fighter-M-02.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Healer-F-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Healer-M-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Mage-F-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Mage-M-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Ranger-F-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Ranger-M-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Monsters/Flower-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Monsters/GrassSpirit-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Monsters/Mermaid_01.bmp",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Monsters/Mushroom-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Monsters/Poprigunchik_01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Monsters/Seed-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Monsters/Shrump-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Aristocrate-F-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Aristocrate-F-02.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Aristocrate-F-03.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Bard-M-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Clown_01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Cultist-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Dancer-F-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/King_01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Mask-M-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/NPC_F-(Amanda).png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Pirate-F-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Prince-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Princess-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Snow-M-01.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-F-001.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-F-002.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-F-003.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-F-004.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-F-005.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-F-006.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-M-001.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-M-002.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-M-003.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-M-004.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-M-005.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-M-006.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-M-007.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-M-008.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-M-009.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Child-F-001.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Child-F-002.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Child-M-001.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Child-M-002.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Old-F-001.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Old-M-001.png",
+        "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Old-M-002.png"
+      ],
+      "audio": [],
+      "data": [],
+      "other": []
+    },
+    "8-bit-sound-effect-pack": {
+      "images": [],
+      "audio": [
+        "assets/extracted/8-bit-sound-effect-pack/ahhh.wav",
+        "assets/extracted/8-bit-sound-effect-pack/birdchirp.wav",
+        "assets/extracted/8-bit-sound-effect-pack/birdchirp2.wav",
+        "assets/extracted/8-bit-sound-effect-pack/birdchirp3.wav",
+        "assets/extracted/8-bit-sound-effect-pack/birdchirp4.wav",
+        "assets/extracted/8-bit-sound-effect-pack/birdchirp5.wav",
+        "assets/extracted/8-bit-sound-effect-pack/blast.wav",
+        "assets/extracted/8-bit-sound-effect-pack/blastoff.wav",
+        "assets/extracted/8-bit-sound-effect-pack/blunk.wav",
+        "assets/extracted/8-bit-sound-effect-pack/bonus.wav",
+        "assets/extracted/8-bit-sound-effect-pack/bounce.wav",
+        "assets/extracted/8-bit-sound-effect-pack/bubbles.wav",
+        "assets/extracted/8-bit-sound-effect-pack/bwah.wav",
+        "assets/extracted/8-bit-sound-effect-pack/collect1.wav",
+        "assets/extracted/8-bit-sound-effect-pack/collect2.wav",
+        "assets/extracted/8-bit-sound-effect-pack/collect3.wav",
+        "assets/extracted/8-bit-sound-effect-pack/collect4.wav",
+        "assets/extracted/8-bit-sound-effect-pack/collect5.wav",
+        "assets/extracted/8-bit-sound-effect-pack/compute.wav",
+        "assets/extracted/8-bit-sound-effect-pack/computeron.wav",
+        "assets/extracted/8-bit-sound-effect-pack/echosplosion.wav",
+        "assets/extracted/8-bit-sound-effect-pack/explodify.wav",
+        "assets/extracted/8-bit-sound-effect-pack/explodify2.wav",
+        "assets/extracted/8-bit-sound-effect-pack/explodify3.wav",
+        "assets/extracted/8-bit-sound-effect-pack/explodify4.wav",
+        "assets/extracted/8-bit-sound-effect-pack/explodify5.wav",
+        "assets/extracted/8-bit-sound-effect-pack/fail.wav",
+        "assets/extracted/8-bit-sound-effect-pack/FF_punch.wav",
+        "assets/extracted/8-bit-sound-effect-pack/flump.wav",
+        "assets/extracted/8-bit-sound-effect-pack/hit1.wav",
+        "assets/extracted/8-bit-sound-effect-pack/hit2.wav",
+        "assets/extracted/8-bit-sound-effect-pack/hit3.wav",
+        "assets/extracted/8-bit-sound-effect-pack/hop.wav",
+        "assets/extracted/8-bit-sound-effect-pack/jump.wav",
+        "assets/extracted/8-bit-sound-effect-pack/laser.wav",
+        "assets/extracted/8-bit-sound-effect-pack/laser2.wav",
+        "assets/extracted/8-bit-sound-effect-pack/laser3.wav",
+        "assets/extracted/8-bit-sound-effect-pack/laser4.wav",
+        "assets/extracted/8-bit-sound-effect-pack/move.wav",
+        "assets/extracted/8-bit-sound-effect-pack/oceanwave1.wav",
+        "assets/extracted/8-bit-sound-effect-pack/oceanwave2.wav",
+        "assets/extracted/8-bit-sound-effect-pack/oceanwave3.wav",
+        "assets/extracted/8-bit-sound-effect-pack/oceanwave4.wav",
+        "assets/extracted/8-bit-sound-effect-pack/oceanwave5.wav",
+        "assets/extracted/8-bit-sound-effect-pack/offbalance.wav",
+        "assets/extracted/8-bit-sound-effect-pack/ouch.wav",
+        "assets/extracted/8-bit-sound-effect-pack/plop.wav",
+        "assets/extracted/8-bit-sound-effect-pack/Powerup.wav",
+        "assets/extracted/8-bit-sound-effect-pack/Powerup2.wav",
+        "assets/extracted/8-bit-sound-effect-pack/punch.wav",
+        "assets/extracted/8-bit-sound-effect-pack/r2d2.wav",
+        "assets/extracted/8-bit-sound-effect-pack/reflect.wav",
+        "assets/extracted/8-bit-sound-effect-pack/slap.wav",
+        "assets/extracted/8-bit-sound-effect-pack/spinning_toss.wav",
+        "assets/extracted/8-bit-sound-effect-pack/splash.wav",
+        "assets/extracted/8-bit-sound-effect-pack/spring1.wav",
+        "assets/extracted/8-bit-sound-effect-pack/spring2.wav",
+        "assets/extracted/8-bit-sound-effect-pack/spring3.wav",
+        "assets/extracted/8-bit-sound-effect-pack/spring4.wav",
+        "assets/extracted/8-bit-sound-effect-pack/struggle.wav",
+        "assets/extracted/8-bit-sound-effect-pack/telephone.wav",
+        "assets/extracted/8-bit-sound-effect-pack/tinyexplode.wav",
+        "assets/extracted/8-bit-sound-effect-pack/tinywarble.wav",
+        "assets/extracted/8-bit-sound-effect-pack/transform.wav",
+        "assets/extracted/8-bit-sound-effect-pack/transform2.wav",
+        "assets/extracted/8-bit-sound-effect-pack/whimper.wav",
+        "assets/extracted/8-bit-sound-effect-pack/whistle.wav",
+        "assets/extracted/8-bit-sound-effect-pack/whistle2.wav",
+        "assets/extracted/8-bit-sound-effect-pack/whistle3.wav",
+        "assets/extracted/8-bit-sound-effect-pack/whistle_cab.wav",
+        "assets/extracted/8-bit-sound-effect-pack/whistle_wolf.wav",
+        "assets/extracted/8-bit-sound-effect-pack/wobbledown.wav",
+        "assets/extracted/8-bit-sound-effect-pack/wobbledown2.wav",
+        "assets/extracted/8-bit-sound-effect-pack/wobbleup.wav",
+        "assets/extracted/8-bit-sound-effect-pack/wobbleup2.wav"
+      ],
+      "data": [],
+      "other": []
+    },
+    "beast-boss-darksaber": {
+      "images": [
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0001.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0002.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0003.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0004.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0005.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0006.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0007.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0008.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0009.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0010.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0011.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0012.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0013.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0014.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0015.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0016.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0017.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0018.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0019.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0020.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0021.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0022.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0023.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0024.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0025.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0026.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0027.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0028.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0029.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0030.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0031.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0032.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0033.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0034.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0035.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0036.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0037.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0038.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0039.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0040.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0041.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0042.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0043.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0044.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0045.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0046.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0047.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0048.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0049.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0050.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0051.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0052.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0053.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0054.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0055.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0056.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0057.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0058.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0059.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0060.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0061.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0062.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0063.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0064.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0065.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0066.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0067.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0068.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0069.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0070.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0071.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0072.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0073.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0074.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0075.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0076.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0077.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0001.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0002.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0003.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0004.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0005.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0006.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0007.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0008.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0009.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0010.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0011.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0012.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0013.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0014.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0015.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0016.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0017.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0018.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0019.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0020.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0021.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0022.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0023.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0024.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0025.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0026.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0027.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0028.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0029.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0030.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0031.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0032.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0033.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0034.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0035.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0036.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0037.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0038.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0039.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0040.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0041.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0042.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0043.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0044.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0045.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0046.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0047.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0048.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0049.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0050.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0051.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0052.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0053.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0054.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0055.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0056.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0057.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0058.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0059.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0060.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0061.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0062.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0063.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0064.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0065.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0066.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0067.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0068.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0069.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0070.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0071.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0072.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0073.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0074.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0075.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0076.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0077.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0078.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0079.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0080.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0081.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0082.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0083.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0084.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0085.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0086.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0087.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0088.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0089.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0090.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0091.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0092.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0093.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0094.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0095.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0096.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0097.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0098.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0099.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0100.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0101.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0001.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0002.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0003.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0004.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0005.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0006.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0007.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0008.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0009.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0010.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0011.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0012.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0013.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0014.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0015.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0016.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0017.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0018.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0019.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0020.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0021.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0022.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0023.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0024.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0025.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0026.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0001.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0002.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0003.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0004.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0005.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0006.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0007.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0008.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0009.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0010.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0011.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0012.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0013.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0014.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0015.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0016.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0017.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0018.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0019.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0020.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0001.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0002.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0003.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0004.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0005.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0006.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0007.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0008.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0009.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0010.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0011.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0012.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0013.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0014.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0015.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0016.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0017.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0018.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0019.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0020.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0021.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0022.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0023.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0024.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0025.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0026.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0027.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0028.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0029.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0030.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0031.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0032.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0033.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0034.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0035.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0036.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0037.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0038.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0039.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0040.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0041.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0042.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0043.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0044.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0045.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0046.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0047.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0048.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0049.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0050.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0051.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0052.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0053.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0054.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0055.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0056.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0057.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0058.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0059.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0060.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0061.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0062.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0063.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0064.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0065.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0066.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0067.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0068.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0069.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0070.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0071.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0072.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0073.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0074.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0075.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0076.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0077.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0078.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0079.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0080.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0081.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0082.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0083.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0084.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0085.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0086.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0087.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0088.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0089.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0090.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0091.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0092.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0093.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0094.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0095.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0096.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0097.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0098.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0099.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0100.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0001.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0002.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0003.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0004.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0005.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0006.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0007.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0008.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0009.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0010.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0011.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0012.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0013.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0014.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0015.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0016.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0017.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0001.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0002.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0003.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0004.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0005.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0006.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0007.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0008.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0009.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0010.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0011.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0012.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0013.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0014.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0015.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0016.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0017.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0018.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0019.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0020.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0021.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0022.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0023.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0024.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0025.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0026.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0027.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0028.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0029.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0030.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0031.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0032.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0033.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0034.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0035.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0036.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0037.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0038.png",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0039.png",
+        "assets/extracted/beast-boss-darksaber/MindChamber_logo.png"
+      ],
+      "audio": [],
+      "data": [
+        "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/repeat the last 2 frames  in a loop, for the howl..txt",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/idle/the same animation repeats from frame 50, but with a shake.txt",
+        "assets/extracted/beast-boss-darksaber/DarkSaber/run/Loop the run from frame 5 to 17.txt"
+      ],
+      "other": [
+        "assets/extracted/beast-boss-darksaber/werewolf_sounds.zip"
+      ]
+    },
+    "demon-flower-monster-sprite-sheet": {
+      "images": [
+        "assets/extracted/demon-flower-monster-sprite-sheet/mon4_attack.gif",
+        "assets/extracted/demon-flower-monster-sprite-sheet/mon4_attack2.gif",
+        "assets/extracted/demon-flower-monster-sprite-sheet/mon4_attack2_shot.gif",
+        "assets/extracted/demon-flower-monster-sprite-sheet/mon4_ball.gif",
+        "assets/extracted/demon-flower-monster-sprite-sheet/mon4_die.gif",
+        "assets/extracted/demon-flower-monster-sprite-sheet/mon4_idle.gif",
+        "assets/extracted/demon-flower-monster-sprite-sheet/mon4_jump.gif",
+        "assets/extracted/demon-flower-monster-sprite-sheet/mon4_sprite_base.png",
+        "assets/extracted/demon-flower-monster-sprite-sheet/mon4_sprite_base2.jpg"
+      ],
+      "audio": [],
+      "data": [],
+      "other": []
+    },
+    "goblin-sprite": {
+      "images": [
+        "assets/extracted/goblin-sprite/goblins.png"
+      ],
+      "audio": [],
+      "data": [
+        "assets/extracted/goblin-sprite/-READ-LER ANTES-.txt"
+      ],
+      "other": []
+    },
+    "living-tissue-background": {
+      "images": [
+        "assets/extracted/living-tissue-background/living-tissue-background/living-tissue-background-preview.png",
+        "assets/extracted/living-tissue-background/living-tissue-background/tile-background.png"
+      ],
+      "audio": [],
+      "data": [
+        "assets/extracted/living-tissue-background/living-tissue-background/public-license.txt"
+      ],
+      "other": []
+    },
+    "lpc-imp": {
+      "images": [
+        "assets/extracted/lpc-imp/LPC imp/attack - pitchfork shield.png",
+        "assets/extracted/lpc-imp/LPC imp/attack - pitchfork.png",
+        "assets/extracted/lpc-imp/LPC imp/attack - sword shield.png",
+        "assets/extracted/lpc-imp/LPC imp/attack - sword.png",
+        "assets/extracted/lpc-imp/LPC imp/attack - vanilla.png",
+        "assets/extracted/lpc-imp/LPC imp/walk - pitchfork shield.png",
+        "assets/extracted/lpc-imp/LPC imp/walk - pitchfork.png",
+        "assets/extracted/lpc-imp/LPC imp/walk - sword shield.png",
+        "assets/extracted/lpc-imp/LPC imp/walk - sword.png",
+        "assets/extracted/lpc-imp/LPC imp/walk - vanilla.png"
+      ],
+      "audio": [],
+      "data": [],
+      "other": []
+    },
+    "mountain-at-dusk-background": {
+      "images": [
+        "assets/extracted/mountain-at-dusk-background/parallax_mountain_pack/layers/parallax-mountain-bg.png",
+        "assets/extracted/mountain-at-dusk-background/parallax_mountain_pack/layers/parallax-mountain-foreground-trees.png",
+        "assets/extracted/mountain-at-dusk-background/parallax_mountain_pack/layers/parallax-mountain-montain-far.png",
+        "assets/extracted/mountain-at-dusk-background/parallax_mountain_pack/layers/parallax-mountain-mountains.png",
+        "assets/extracted/mountain-at-dusk-background/parallax_mountain_pack/layers/parallax-mountain-trees.png"
+      ],
+      "audio": [],
+      "data": [
+        "assets/extracted/mountain-at-dusk-background/parallax_mountain_pack/license.txt"
+      ],
+      "other": [
+        "assets/extracted/mountain-at-dusk-background/parallax_mountain_pack/parallax-mountain.psd"
+      ]
+    },
+    "nes-shooter-music-5-tracks-3-jingles": {
+      "images": [],
+      "audio": [],
+      "data": [],
+      "other": [
+        "assets/extracted/nes-shooter-music-5-tracks-3-jingles/FTMs/Boss.ftm",
+        "assets/extracted/nes-shooter-music-5-tracks-3-jingles/FTMs/IntroJingle.ftm",
+        "assets/extracted/nes-shooter-music-5-tracks-3-jingles/FTMs/Map.ftm",
+        "assets/extracted/nes-shooter-music-5-tracks-3-jingles/FTMs/Mars.ftm",
+        "assets/extracted/nes-shooter-music-5-tracks-3-jingles/FTMs/Mercury.ftm",
+        "assets/extracted/nes-shooter-music-5-tracks-3-jingles/FTMs/Venus.ftm",
+        "assets/extracted/nes-shooter-music-5-tracks-3-jingles/FTMs/WarpJingle.ftm",
+        "assets/extracted/nes-shooter-music-5-tracks-3-jingles/FTMs/WinJingle.ftm"
+      ]
+    }
+  },
+  "filesByStem": {
+    "bell_01": [
+      "assets/extracted/100-cc0-sfx/bell_01.ogg"
+    ],
+    "bell_02": [
+      "assets/extracted/100-cc0-sfx/bell_02.ogg"
+    ],
+    "bell_03": [
+      "assets/extracted/100-cc0-sfx/bell_03.ogg"
+    ],
+    "dishes_01": [
+      "assets/extracted/100-cc0-sfx/dishes_01.ogg"
+    ],
+    "dishes_02": [
+      "assets/extracted/100-cc0-sfx/dishes_02.ogg"
+    ],
+    "dishes_03": [
+      "assets/extracted/100-cc0-sfx/dishes_03.ogg"
+    ],
+    "dishes_04": [
+      "assets/extracted/100-cc0-sfx/dishes_04.ogg"
+    ],
+    "door_01": [
+      "assets/extracted/100-cc0-sfx/door_01.ogg"
+    ],
+    "door_02": [
+      "assets/extracted/100-cc0-sfx/door_02.ogg"
+    ],
+    "door_close_01": [
+      "assets/extracted/100-cc0-sfx/door_close_01.ogg"
+    ],
+    "door_close_02": [
+      "assets/extracted/100-cc0-sfx/door_close_02.ogg"
+    ],
+    "door_close_03": [
+      "assets/extracted/100-cc0-sfx/door_close_03.ogg"
+    ],
+    "door_close_04": [
+      "assets/extracted/100-cc0-sfx/door_close_04.ogg"
+    ],
+    "door_open": [
+      "assets/extracted/100-cc0-sfx/door_open.ogg"
+    ],
+    "explosion": [
+      "assets/extracted/100-cc0-sfx/explosion.ogg"
+    ],
+    "glass_01": [
+      "assets/extracted/100-cc0-sfx/glass_01.ogg"
+    ],
+    "glass_02": [
+      "assets/extracted/100-cc0-sfx/glass_02.ogg"
+    ],
+    "glass_03": [
+      "assets/extracted/100-cc0-sfx/glass_03.ogg"
+    ],
+    "glass_04": [
+      "assets/extracted/100-cc0-sfx/glass_04.ogg"
+    ],
+    "glass_05": [
+      "assets/extracted/100-cc0-sfx/glass_05.ogg"
+    ],
+    "gong_01": [
+      "assets/extracted/100-cc0-sfx/gong_01.ogg"
+    ],
+    "gong_02": [
+      "assets/extracted/100-cc0-sfx/gong_02.ogg"
+    ],
+    "hit_01": [
+      "assets/extracted/100-cc0-sfx/hit_01.ogg"
+    ],
+    "hit_02": [
+      "assets/extracted/100-cc0-sfx/hit_02.ogg"
+    ],
+    "hit_03": [
+      "assets/extracted/100-cc0-sfx/hit_03.ogg"
+    ],
+    "hit_04": [
+      "assets/extracted/100-cc0-sfx/hit_04.ogg"
+    ],
+    "key_open_01": [
+      "assets/extracted/100-cc0-sfx/key_open_01.ogg"
+    ],
+    "key_open_02": [
+      "assets/extracted/100-cc0-sfx/key_open_02.ogg"
+    ],
+    "machine_01": [
+      "assets/extracted/100-cc0-sfx/machine_01.ogg"
+    ],
+    "machine_02": [
+      "assets/extracted/100-cc0-sfx/machine_02.ogg"
+    ],
+    "machine_03": [
+      "assets/extracted/100-cc0-sfx/machine_03.ogg"
+    ],
+    "metal_01": [
+      "assets/extracted/100-cc0-sfx/metal_01.ogg"
+    ],
+    "metal_02": [
+      "assets/extracted/100-cc0-sfx/metal_02.ogg"
+    ],
+    "metal_03": [
+      "assets/extracted/100-cc0-sfx/metal_03.ogg"
+    ],
+    "metal_04": [
+      "assets/extracted/100-cc0-sfx/metal_04.ogg"
+    ],
+    "metal_05": [
+      "assets/extracted/100-cc0-sfx/metal_05.ogg"
+    ],
+    "metal_06": [
+      "assets/extracted/100-cc0-sfx/metal_06.ogg"
+    ],
+    "metal_07": [
+      "assets/extracted/100-cc0-sfx/metal_07.ogg"
+    ],
+    "metal_08": [
+      "assets/extracted/100-cc0-sfx/metal_08.ogg"
+    ],
+    "metal_09": [
+      "assets/extracted/100-cc0-sfx/metal_09.ogg"
+    ],
+    "metal_10": [
+      "assets/extracted/100-cc0-sfx/metal_10.ogg"
+    ],
+    "metal_11": [
+      "assets/extracted/100-cc0-sfx/metal_11.ogg"
+    ],
+    "metal_12": [
+      "assets/extracted/100-cc0-sfx/metal_12.ogg"
+    ],
+    "microwave_door_close": [
+      "assets/extracted/100-cc0-sfx/microwave_door_close.ogg"
+    ],
+    "microwave_door_open": [
+      "assets/extracted/100-cc0-sfx/microwave_door_open.ogg"
+    ],
+    "noise_01": [
+      "assets/extracted/100-cc0-sfx/noise_01.ogg"
+    ],
+    "noise_02": [
+      "assets/extracted/100-cc0-sfx/noise_02.ogg"
+    ],
+    "other_01": [
+      "assets/extracted/100-cc0-sfx/other_01.ogg"
+    ],
+    "other_02": [
+      "assets/extracted/100-cc0-sfx/other_02.ogg"
+    ],
+    "other_03": [
+      "assets/extracted/100-cc0-sfx/other_03.ogg"
+    ],
+    "other_04": [
+      "assets/extracted/100-cc0-sfx/other_04.ogg"
+    ],
+    "other_05": [
+      "assets/extracted/100-cc0-sfx/other_05.ogg"
+    ],
+    "other_06": [
+      "assets/extracted/100-cc0-sfx/other_06.ogg"
+    ],
+    "other_07": [
+      "assets/extracted/100-cc0-sfx/other_07.ogg"
+    ],
+    "paper_01": [
+      "assets/extracted/100-cc0-sfx/paper_01.ogg"
+    ],
+    "paper_02": [
+      "assets/extracted/100-cc0-sfx/paper_02.ogg"
+    ],
+    "paper_03": [
+      "assets/extracted/100-cc0-sfx/paper_03.ogg"
+    ],
+    "paper_04": [
+      "assets/extracted/100-cc0-sfx/paper_04.ogg"
+    ],
+    "plop_01": [
+      "assets/extracted/100-cc0-sfx/plop_01.ogg"
+    ],
+    "plop_02": [
+      "assets/extracted/100-cc0-sfx/plop_02.ogg"
+    ],
+    "pot_01": [
+      "assets/extracted/100-cc0-sfx/pot_01.ogg"
+    ],
+    "pot_02": [
+      "assets/extracted/100-cc0-sfx/pot_02.ogg"
+    ],
+    "shot_01": [
+      "assets/extracted/100-cc0-sfx/shot_01.ogg"
+    ],
+    "shot_02": [
+      "assets/extracted/100-cc0-sfx/shot_02.ogg"
+    ],
+    "slam_01": [
+      "assets/extracted/100-cc0-sfx/slam_01.ogg"
+    ],
+    "slam_02": [
+      "assets/extracted/100-cc0-sfx/slam_02.ogg"
+    ],
+    "slam_03": [
+      "assets/extracted/100-cc0-sfx/slam_03.ogg"
+    ],
+    "slam_04": [
+      "assets/extracted/100-cc0-sfx/slam_04.ogg"
+    ],
+    "slam_05": [
+      "assets/extracted/100-cc0-sfx/slam_05.ogg"
+    ],
+    "slam_06": [
+      "assets/extracted/100-cc0-sfx/slam_06.ogg"
+    ],
+    "slam_07": [
+      "assets/extracted/100-cc0-sfx/slam_07.ogg"
+    ],
+    "splash_01": [
+      "assets/extracted/100-cc0-sfx/splash_01.ogg"
+    ],
+    "splash_02": [
+      "assets/extracted/100-cc0-sfx/splash_02.ogg"
+    ],
+    "spring_01": [
+      "assets/extracted/100-cc0-sfx/spring_01.ogg"
+    ],
+    "spring_02": [
+      "assets/extracted/100-cc0-sfx/spring_02.ogg"
+    ],
+    "spring_03": [
+      "assets/extracted/100-cc0-sfx/spring_03.ogg"
+    ],
+    "spring_04": [
+      "assets/extracted/100-cc0-sfx/spring_04.ogg"
+    ],
+    "spring_05": [
+      "assets/extracted/100-cc0-sfx/spring_05.ogg"
+    ],
+    "spring_06": [
+      "assets/extracted/100-cc0-sfx/spring_06.ogg"
+    ],
+    "spring_07": [
+      "assets/extracted/100-cc0-sfx/spring_07.ogg"
+    ],
+    "spring_08": [
+      "assets/extracted/100-cc0-sfx/spring_08.ogg"
+    ],
+    "spring_09": [
+      "assets/extracted/100-cc0-sfx/spring_09.ogg"
+    ],
+    "switch_01": [
+      "assets/extracted/100-cc0-sfx/switch_01.ogg"
+    ],
+    "switch_02": [
+      "assets/extracted/100-cc0-sfx/switch_02.ogg"
+    ],
+    "toilet_01": [
+      "assets/extracted/100-cc0-sfx/toilet_01.ogg"
+    ],
+    "toilet_02": [
+      "assets/extracted/100-cc0-sfx/toilet_02.ogg"
+    ],
+    "tools_01": [
+      "assets/extracted/100-cc0-sfx/tools_01.ogg"
+    ],
+    "tools_02": [
+      "assets/extracted/100-cc0-sfx/tools_02.ogg"
+    ],
+    "tools_03": [
+      "assets/extracted/100-cc0-sfx/tools_03.ogg"
+    ],
+    "tools_04": [
+      "assets/extracted/100-cc0-sfx/tools_04.ogg"
+    ],
+    "tools_05": [
+      "assets/extracted/100-cc0-sfx/tools_05.ogg"
+    ],
+    "weird_01": [
+      "assets/extracted/100-cc0-sfx/weird_01.ogg"
+    ],
+    "weird_02": [
+      "assets/extracted/100-cc0-sfx/weird_02.ogg"
+    ],
+    "weird_03": [
+      "assets/extracted/100-cc0-sfx/weird_03.ogg"
+    ],
+    "weird_04": [
+      "assets/extracted/100-cc0-sfx/weird_04.ogg"
+    ],
+    "weird_05": [
+      "assets/extracted/100-cc0-sfx/weird_05.ogg"
+    ],
+    "wooded_box_open": [
+      "assets/extracted/100-cc0-sfx/wooded_box_open.ogg"
+    ],
+    "wooden_01": [
+      "assets/extracted/100-cc0-sfx/wooden_01.ogg"
+    ],
+    "wooden_02": [
+      "assets/extracted/100-cc0-sfx/wooden_02.ogg"
+    ],
+    "wooden_03": [
+      "assets/extracted/100-cc0-sfx/wooden_03.ogg"
+    ],
+    "fighter-f-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Fighter-F-01.png"
+    ],
+    "fighter-f-02": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Fighter-F-02.png"
+    ],
+    "fighter-m-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Fighter-M-01.png"
+    ],
+    "fighter-m-02": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Fighter-M-02.png"
+    ],
+    "healer-f-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Healer-F-01.png"
+    ],
+    "healer-m-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Healer-M-01.png"
+    ],
+    "mage-f-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Mage-F-01.png"
+    ],
+    "mage-m-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Mage-M-01.png"
+    ],
+    "ranger-f-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Ranger-F-01.png"
+    ],
+    "ranger-m-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Heroes/Ranger-M-01.png"
+    ],
+    "flower-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Monsters/Flower-01.png"
+    ],
+    "grassspirit-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Monsters/GrassSpirit-01.png"
+    ],
+    "mermaid_01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Monsters/Mermaid_01.bmp"
+    ],
+    "mushroom-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Monsters/Mushroom-01.png"
+    ],
+    "poprigunchik_01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Monsters/Poprigunchik_01.png"
+    ],
+    "seed-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Monsters/Seed-01.png"
+    ],
+    "shrump-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/Monsters/Shrump-01.png"
+    ],
+    "aristocrate-f-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Aristocrate-F-01.png"
+    ],
+    "aristocrate-f-02": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Aristocrate-F-02.png"
+    ],
+    "aristocrate-f-03": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Aristocrate-F-03.png"
+    ],
+    "bard-m-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Bard-M-01.png"
+    ],
+    "clown_01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Clown_01.png"
+    ],
+    "cultist-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Cultist-01.png"
+    ],
+    "dancer-f-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Dancer-F-01.png"
+    ],
+    "king_01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/King_01.png"
+    ],
+    "mask-m-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Mask-M-01.png"
+    ],
+    "npc_f-(amanda)": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/NPC_F-(Amanda).png"
+    ],
+    "pirate-f-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Pirate-F-01.png"
+    ],
+    "prince-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Prince-01.png"
+    ],
+    "princess-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Princess-01.png"
+    ],
+    "snow-m-01": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Snow-M-01.png"
+    ],
+    "townfolk-adult-f-001": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-F-001.png"
+    ],
+    "townfolk-adult-f-002": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-F-002.png"
+    ],
+    "townfolk-adult-f-003": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-F-003.png"
+    ],
+    "townfolk-adult-f-004": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-F-004.png"
+    ],
+    "townfolk-adult-f-005": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-F-005.png"
+    ],
+    "townfolk-adult-f-006": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-F-006.png"
+    ],
+    "townfolk-adult-m-001": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-M-001.png"
+    ],
+    "townfolk-adult-m-002": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-M-002.png"
+    ],
+    "townfolk-adult-m-003": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-M-003.png"
+    ],
+    "townfolk-adult-m-004": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-M-004.png"
+    ],
+    "townfolk-adult-m-005": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-M-005.png"
+    ],
+    "townfolk-adult-m-006": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-M-006.png"
+    ],
+    "townfolk-adult-m-007": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-M-007.png"
+    ],
+    "townfolk-adult-m-008": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-M-008.png"
+    ],
+    "townfolk-adult-m-009": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Adult-M-009.png"
+    ],
+    "townfolk-child-f-001": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Child-F-001.png"
+    ],
+    "townfolk-child-f-002": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Child-F-002.png"
+    ],
+    "townfolk-child-m-001": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Child-M-001.png"
+    ],
+    "townfolk-child-m-002": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Child-M-002.png"
+    ],
+    "townfolk-old-f-001": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Old-F-001.png"
+    ],
+    "townfolk-old-m-001": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Old-M-001.png"
+    ],
+    "townfolk-old-m-002": [
+      "assets/extracted/24x32-characters-with-faces-big-pack/24x32-characters-big-pack-by-Svetlana-Kushnariova/NPC/Townfolk-Old-M-002.png"
+    ],
+    "ahhh": [
+      "assets/extracted/8-bit-sound-effect-pack/ahhh.wav"
+    ],
+    "birdchirp": [
+      "assets/extracted/8-bit-sound-effect-pack/birdchirp.wav"
+    ],
+    "birdchirp2": [
+      "assets/extracted/8-bit-sound-effect-pack/birdchirp2.wav"
+    ],
+    "birdchirp3": [
+      "assets/extracted/8-bit-sound-effect-pack/birdchirp3.wav"
+    ],
+    "birdchirp4": [
+      "assets/extracted/8-bit-sound-effect-pack/birdchirp4.wav"
+    ],
+    "birdchirp5": [
+      "assets/extracted/8-bit-sound-effect-pack/birdchirp5.wav"
+    ],
+    "blast": [
+      "assets/extracted/8-bit-sound-effect-pack/blast.wav"
+    ],
+    "blastoff": [
+      "assets/extracted/8-bit-sound-effect-pack/blastoff.wav"
+    ],
+    "blunk": [
+      "assets/extracted/8-bit-sound-effect-pack/blunk.wav"
+    ],
+    "bonus": [
+      "assets/extracted/8-bit-sound-effect-pack/bonus.wav"
+    ],
+    "bounce": [
+      "assets/extracted/8-bit-sound-effect-pack/bounce.wav"
+    ],
+    "bubbles": [
+      "assets/extracted/8-bit-sound-effect-pack/bubbles.wav"
+    ],
+    "bwah": [
+      "assets/extracted/8-bit-sound-effect-pack/bwah.wav"
+    ],
+    "collect1": [
+      "assets/extracted/8-bit-sound-effect-pack/collect1.wav"
+    ],
+    "collect2": [
+      "assets/extracted/8-bit-sound-effect-pack/collect2.wav"
+    ],
+    "collect3": [
+      "assets/extracted/8-bit-sound-effect-pack/collect3.wav"
+    ],
+    "collect4": [
+      "assets/extracted/8-bit-sound-effect-pack/collect4.wav"
+    ],
+    "collect5": [
+      "assets/extracted/8-bit-sound-effect-pack/collect5.wav"
+    ],
+    "compute": [
+      "assets/extracted/8-bit-sound-effect-pack/compute.wav"
+    ],
+    "computeron": [
+      "assets/extracted/8-bit-sound-effect-pack/computeron.wav"
+    ],
+    "echosplosion": [
+      "assets/extracted/8-bit-sound-effect-pack/echosplosion.wav"
+    ],
+    "explodify": [
+      "assets/extracted/8-bit-sound-effect-pack/explodify.wav"
+    ],
+    "explodify2": [
+      "assets/extracted/8-bit-sound-effect-pack/explodify2.wav"
+    ],
+    "explodify3": [
+      "assets/extracted/8-bit-sound-effect-pack/explodify3.wav"
+    ],
+    "explodify4": [
+      "assets/extracted/8-bit-sound-effect-pack/explodify4.wav"
+    ],
+    "explodify5": [
+      "assets/extracted/8-bit-sound-effect-pack/explodify5.wav"
+    ],
+    "fail": [
+      "assets/extracted/8-bit-sound-effect-pack/fail.wav"
+    ],
+    "ff_punch": [
+      "assets/extracted/8-bit-sound-effect-pack/FF_punch.wav"
+    ],
+    "flump": [
+      "assets/extracted/8-bit-sound-effect-pack/flump.wav"
+    ],
+    "hit1": [
+      "assets/extracted/8-bit-sound-effect-pack/hit1.wav"
+    ],
+    "hit2": [
+      "assets/extracted/8-bit-sound-effect-pack/hit2.wav"
+    ],
+    "hit3": [
+      "assets/extracted/8-bit-sound-effect-pack/hit3.wav"
+    ],
+    "hop": [
+      "assets/extracted/8-bit-sound-effect-pack/hop.wav"
+    ],
+    "jump": [
+      "assets/extracted/8-bit-sound-effect-pack/jump.wav"
+    ],
+    "laser": [
+      "assets/extracted/8-bit-sound-effect-pack/laser.wav"
+    ],
+    "laser2": [
+      "assets/extracted/8-bit-sound-effect-pack/laser2.wav"
+    ],
+    "laser3": [
+      "assets/extracted/8-bit-sound-effect-pack/laser3.wav"
+    ],
+    "laser4": [
+      "assets/extracted/8-bit-sound-effect-pack/laser4.wav"
+    ],
+    "move": [
+      "assets/extracted/8-bit-sound-effect-pack/move.wav"
+    ],
+    "oceanwave1": [
+      "assets/extracted/8-bit-sound-effect-pack/oceanwave1.wav"
+    ],
+    "oceanwave2": [
+      "assets/extracted/8-bit-sound-effect-pack/oceanwave2.wav"
+    ],
+    "oceanwave3": [
+      "assets/extracted/8-bit-sound-effect-pack/oceanwave3.wav"
+    ],
+    "oceanwave4": [
+      "assets/extracted/8-bit-sound-effect-pack/oceanwave4.wav"
+    ],
+    "oceanwave5": [
+      "assets/extracted/8-bit-sound-effect-pack/oceanwave5.wav"
+    ],
+    "offbalance": [
+      "assets/extracted/8-bit-sound-effect-pack/offbalance.wav"
+    ],
+    "ouch": [
+      "assets/extracted/8-bit-sound-effect-pack/ouch.wav"
+    ],
+    "plop": [
+      "assets/extracted/8-bit-sound-effect-pack/plop.wav"
+    ],
+    "powerup": [
+      "assets/extracted/8-bit-sound-effect-pack/Powerup.wav"
+    ],
+    "powerup2": [
+      "assets/extracted/8-bit-sound-effect-pack/Powerup2.wav"
+    ],
+    "punch": [
+      "assets/extracted/8-bit-sound-effect-pack/punch.wav"
+    ],
+    "r2d2": [
+      "assets/extracted/8-bit-sound-effect-pack/r2d2.wav"
+    ],
+    "reflect": [
+      "assets/extracted/8-bit-sound-effect-pack/reflect.wav"
+    ],
+    "slap": [
+      "assets/extracted/8-bit-sound-effect-pack/slap.wav"
+    ],
+    "spinning_toss": [
+      "assets/extracted/8-bit-sound-effect-pack/spinning_toss.wav"
+    ],
+    "splash": [
+      "assets/extracted/8-bit-sound-effect-pack/splash.wav"
+    ],
+    "spring1": [
+      "assets/extracted/8-bit-sound-effect-pack/spring1.wav"
+    ],
+    "spring2": [
+      "assets/extracted/8-bit-sound-effect-pack/spring2.wav"
+    ],
+    "spring3": [
+      "assets/extracted/8-bit-sound-effect-pack/spring3.wav"
+    ],
+    "spring4": [
+      "assets/extracted/8-bit-sound-effect-pack/spring4.wav"
+    ],
+    "struggle": [
+      "assets/extracted/8-bit-sound-effect-pack/struggle.wav"
+    ],
+    "telephone": [
+      "assets/extracted/8-bit-sound-effect-pack/telephone.wav"
+    ],
+    "tinyexplode": [
+      "assets/extracted/8-bit-sound-effect-pack/tinyexplode.wav"
+    ],
+    "tinywarble": [
+      "assets/extracted/8-bit-sound-effect-pack/tinywarble.wav"
+    ],
+    "transform": [
+      "assets/extracted/8-bit-sound-effect-pack/transform.wav"
+    ],
+    "transform2": [
+      "assets/extracted/8-bit-sound-effect-pack/transform2.wav"
+    ],
+    "whimper": [
+      "assets/extracted/8-bit-sound-effect-pack/whimper.wav"
+    ],
+    "whistle": [
+      "assets/extracted/8-bit-sound-effect-pack/whistle.wav"
+    ],
+    "whistle2": [
+      "assets/extracted/8-bit-sound-effect-pack/whistle2.wav"
+    ],
+    "whistle3": [
+      "assets/extracted/8-bit-sound-effect-pack/whistle3.wav"
+    ],
+    "whistle_cab": [
+      "assets/extracted/8-bit-sound-effect-pack/whistle_cab.wav"
+    ],
+    "whistle_wolf": [
+      "assets/extracted/8-bit-sound-effect-pack/whistle_wolf.wav"
+    ],
+    "wobbledown": [
+      "assets/extracted/8-bit-sound-effect-pack/wobbledown.wav"
+    ],
+    "wobbledown2": [
+      "assets/extracted/8-bit-sound-effect-pack/wobbledown2.wav"
+    ],
+    "wobbleup": [
+      "assets/extracted/8-bit-sound-effect-pack/wobbleup.wav"
+    ],
+    "wobbleup2": [
+      "assets/extracted/8-bit-sound-effect-pack/wobbleup2.wav"
+    ],
+    "darksaber_attack0001": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0001.png"
+    ],
+    "darksaber_attack0002": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0002.png"
+    ],
+    "darksaber_attack0003": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0003.png"
+    ],
+    "darksaber_attack0004": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0004.png"
+    ],
+    "darksaber_attack0005": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0005.png"
+    ],
+    "darksaber_attack0006": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0006.png"
+    ],
+    "darksaber_attack0007": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0007.png"
+    ],
+    "darksaber_attack0008": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0008.png"
+    ],
+    "darksaber_attack0009": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0009.png"
+    ],
+    "darksaber_attack0010": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0010.png"
+    ],
+    "darksaber_attack0011": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0011.png"
+    ],
+    "darksaber_attack0012": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0012.png"
+    ],
+    "darksaber_attack0013": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0013.png"
+    ],
+    "darksaber_attack0014": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0014.png"
+    ],
+    "darksaber_attack0015": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0015.png"
+    ],
+    "darksaber_attack0016": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0016.png"
+    ],
+    "darksaber_attack0017": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0017.png"
+    ],
+    "darksaber_attack0018": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0018.png"
+    ],
+    "darksaber_attack0019": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0019.png"
+    ],
+    "darksaber_attack0020": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0020.png"
+    ],
+    "darksaber_attack0021": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0021.png"
+    ],
+    "darksaber_attack0022": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0022.png"
+    ],
+    "darksaber_attack0023": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0023.png"
+    ],
+    "darksaber_attack0024": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0024.png"
+    ],
+    "darksaber_attack0025": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0025.png"
+    ],
+    "darksaber_attack0026": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0026.png"
+    ],
+    "darksaber_attack0027": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0027.png"
+    ],
+    "darksaber_attack0028": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0028.png"
+    ],
+    "darksaber_attack0029": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0029.png"
+    ],
+    "darksaber_attack0030": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0030.png"
+    ],
+    "darksaber_attack0031": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0031.png"
+    ],
+    "darksaber_attack0032": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0032.png"
+    ],
+    "darksaber_attack0033": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0033.png"
+    ],
+    "darksaber_attack0034": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0034.png"
+    ],
+    "darksaber_attack0035": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0035.png"
+    ],
+    "darksaber_attack0036": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0036.png"
+    ],
+    "darksaber_attack0037": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0037.png"
+    ],
+    "darksaber_attack0038": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0038.png"
+    ],
+    "darksaber_attack0039": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0039.png"
+    ],
+    "darksaber_attack0040": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0040.png"
+    ],
+    "darksaber_attack0041": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0041.png"
+    ],
+    "darksaber_attack0042": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0042.png"
+    ],
+    "darksaber_attack0043": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0043.png"
+    ],
+    "darksaber_attack0044": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0044.png"
+    ],
+    "darksaber_attack0045": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0045.png"
+    ],
+    "darksaber_attack0046": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0046.png"
+    ],
+    "darksaber_attack0047": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0047.png"
+    ],
+    "darksaber_attack0048": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0048.png"
+    ],
+    "darksaber_attack0049": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0049.png"
+    ],
+    "darksaber_attack0050": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0050.png"
+    ],
+    "darksaber_attack0051": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0051.png"
+    ],
+    "darksaber_attack0052": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0052.png"
+    ],
+    "darksaber_attack0053": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0053.png"
+    ],
+    "darksaber_attack0054": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0054.png"
+    ],
+    "darksaber_attack0055": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0055.png"
+    ],
+    "darksaber_attack0056": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0056.png"
+    ],
+    "darksaber_attack0057": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0057.png"
+    ],
+    "darksaber_attack0058": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0058.png"
+    ],
+    "darksaber_attack0059": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0059.png"
+    ],
+    "darksaber_attack0060": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0060.png"
+    ],
+    "darksaber_attack0061": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0061.png"
+    ],
+    "darksaber_attack0062": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0062.png"
+    ],
+    "darksaber_attack0063": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0063.png"
+    ],
+    "darksaber_attack0064": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0064.png"
+    ],
+    "darksaber_attack0065": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0065.png"
+    ],
+    "darksaber_attack0066": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0066.png"
+    ],
+    "darksaber_attack0067": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0067.png"
+    ],
+    "darksaber_attack0068": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0068.png"
+    ],
+    "darksaber_attack0069": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0069.png"
+    ],
+    "darksaber_attack0070": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0070.png"
+    ],
+    "darksaber_attack0071": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0071.png"
+    ],
+    "darksaber_attack0072": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0072.png"
+    ],
+    "darksaber_attack0073": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0073.png"
+    ],
+    "darksaber_attack0074": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0074.png"
+    ],
+    "darksaber_attack0075": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0075.png"
+    ],
+    "darksaber_attack0076": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0076.png"
+    ],
+    "darksaber_attack0077": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/attack/darksaber_attack0077.png"
+    ],
+    "darksaber_death0001": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0001.png"
+    ],
+    "darksaber_death0002": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0002.png"
+    ],
+    "darksaber_death0003": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0003.png"
+    ],
+    "darksaber_death0004": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0004.png"
+    ],
+    "darksaber_death0005": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0005.png"
+    ],
+    "darksaber_death0006": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0006.png"
+    ],
+    "darksaber_death0007": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0007.png"
+    ],
+    "darksaber_death0008": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0008.png"
+    ],
+    "darksaber_death0009": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0009.png"
+    ],
+    "darksaber_death0010": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0010.png"
+    ],
+    "darksaber_death0011": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0011.png"
+    ],
+    "darksaber_death0012": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0012.png"
+    ],
+    "darksaber_death0013": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0013.png"
+    ],
+    "darksaber_death0014": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0014.png"
+    ],
+    "darksaber_death0015": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0015.png"
+    ],
+    "darksaber_death0016": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0016.png"
+    ],
+    "darksaber_death0017": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0017.png"
+    ],
+    "darksaber_death0018": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0018.png"
+    ],
+    "darksaber_death0019": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0019.png"
+    ],
+    "darksaber_death0020": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0020.png"
+    ],
+    "darksaber_death0021": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0021.png"
+    ],
+    "darksaber_death0022": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0022.png"
+    ],
+    "darksaber_death0023": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0023.png"
+    ],
+    "darksaber_death0024": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0024.png"
+    ],
+    "darksaber_death0025": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0025.png"
+    ],
+    "darksaber_death0026": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0026.png"
+    ],
+    "darksaber_death0027": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0027.png"
+    ],
+    "darksaber_death0028": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0028.png"
+    ],
+    "darksaber_death0029": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0029.png"
+    ],
+    "darksaber_death0030": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0030.png"
+    ],
+    "darksaber_death0031": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0031.png"
+    ],
+    "darksaber_death0032": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0032.png"
+    ],
+    "darksaber_death0033": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0033.png"
+    ],
+    "darksaber_death0034": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0034.png"
+    ],
+    "darksaber_death0035": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0035.png"
+    ],
+    "darksaber_death0036": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0036.png"
+    ],
+    "darksaber_death0037": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0037.png"
+    ],
+    "darksaber_death0038": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0038.png"
+    ],
+    "darksaber_death0039": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0039.png"
+    ],
+    "darksaber_death0040": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0040.png"
+    ],
+    "darksaber_death0041": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0041.png"
+    ],
+    "darksaber_death0042": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0042.png"
+    ],
+    "darksaber_death0043": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0043.png"
+    ],
+    "darksaber_death0044": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0044.png"
+    ],
+    "darksaber_death0045": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0045.png"
+    ],
+    "darksaber_death0046": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0046.png"
+    ],
+    "darksaber_death0047": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0047.png"
+    ],
+    "darksaber_death0048": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0048.png"
+    ],
+    "darksaber_death0049": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0049.png"
+    ],
+    "darksaber_death0050": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0050.png"
+    ],
+    "darksaber_death0051": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0051.png"
+    ],
+    "darksaber_death0052": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0052.png"
+    ],
+    "darksaber_death0053": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0053.png"
+    ],
+    "darksaber_death0054": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0054.png"
+    ],
+    "darksaber_death0055": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0055.png"
+    ],
+    "darksaber_death0056": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0056.png"
+    ],
+    "darksaber_death0057": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0057.png"
+    ],
+    "darksaber_death0058": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0058.png"
+    ],
+    "darksaber_death0059": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0059.png"
+    ],
+    "darksaber_death0060": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0060.png"
+    ],
+    "darksaber_death0061": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0061.png"
+    ],
+    "darksaber_death0062": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0062.png"
+    ],
+    "darksaber_death0063": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0063.png"
+    ],
+    "darksaber_death0064": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0064.png"
+    ],
+    "darksaber_death0065": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0065.png"
+    ],
+    "darksaber_death0066": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0066.png"
+    ],
+    "darksaber_death0067": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0067.png"
+    ],
+    "darksaber_death0068": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0068.png"
+    ],
+    "darksaber_death0069": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0069.png"
+    ],
+    "darksaber_death0070": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0070.png"
+    ],
+    "darksaber_death0071": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0071.png"
+    ],
+    "darksaber_death0072": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0072.png"
+    ],
+    "darksaber_death0073": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0073.png"
+    ],
+    "darksaber_death0074": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0074.png"
+    ],
+    "darksaber_death0075": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0075.png"
+    ],
+    "darksaber_death0076": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0076.png"
+    ],
+    "darksaber_death0077": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0077.png"
+    ],
+    "darksaber_death0078": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0078.png"
+    ],
+    "darksaber_death0079": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0079.png"
+    ],
+    "darksaber_death0080": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0080.png"
+    ],
+    "darksaber_death0081": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0081.png"
+    ],
+    "darksaber_death0082": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0082.png"
+    ],
+    "darksaber_death0083": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0083.png"
+    ],
+    "darksaber_death0084": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0084.png"
+    ],
+    "darksaber_death0085": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0085.png"
+    ],
+    "darksaber_death0086": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0086.png"
+    ],
+    "darksaber_death0087": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0087.png"
+    ],
+    "darksaber_death0088": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0088.png"
+    ],
+    "darksaber_death0089": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0089.png"
+    ],
+    "darksaber_death0090": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0090.png"
+    ],
+    "darksaber_death0091": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0091.png"
+    ],
+    "darksaber_death0092": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0092.png"
+    ],
+    "darksaber_death0093": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0093.png"
+    ],
+    "darksaber_death0094": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0094.png"
+    ],
+    "darksaber_death0095": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0095.png"
+    ],
+    "darksaber_death0096": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0096.png"
+    ],
+    "darksaber_death0097": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0097.png"
+    ],
+    "darksaber_death0098": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0098.png"
+    ],
+    "darksaber_death0099": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0099.png"
+    ],
+    "darksaber_death0100": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0100.png"
+    ],
+    "darksaber_death0101": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/death/darksaber_death0101.png"
+    ],
+    "darksaber_hit0001": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0001.png"
+    ],
+    "darksaber_hit0002": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0002.png"
+    ],
+    "darksaber_hit0003": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0003.png"
+    ],
+    "darksaber_hit0004": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0004.png"
+    ],
+    "darksaber_hit0005": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0005.png"
+    ],
+    "darksaber_hit0006": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0006.png"
+    ],
+    "darksaber_hit0007": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0007.png"
+    ],
+    "darksaber_hit0008": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0008.png"
+    ],
+    "darksaber_hit0009": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0009.png"
+    ],
+    "darksaber_hit0010": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0010.png"
+    ],
+    "darksaber_hit0011": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0011.png"
+    ],
+    "darksaber_hit0012": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0012.png"
+    ],
+    "darksaber_hit0013": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0013.png"
+    ],
+    "darksaber_hit0014": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0014.png"
+    ],
+    "darksaber_hit0015": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0015.png"
+    ],
+    "darksaber_hit0016": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0016.png"
+    ],
+    "darksaber_hit0017": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0017.png"
+    ],
+    "darksaber_hit0018": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0018.png"
+    ],
+    "darksaber_hit0019": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0019.png"
+    ],
+    "darksaber_hit0020": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0020.png"
+    ],
+    "darksaber_hit0021": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0021.png"
+    ],
+    "darksaber_hit0022": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0022.png"
+    ],
+    "darksaber_hit0023": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0023.png"
+    ],
+    "darksaber_hit0024": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0024.png"
+    ],
+    "darksaber_hit0025": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0025.png"
+    ],
+    "darksaber_hit0026": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Hit/darksaber_hit0026.png"
+    ],
+    "darksaber_howl0001": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0001.png"
+    ],
+    "darksaber_howl0002": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0002.png"
+    ],
+    "darksaber_howl0003": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0003.png"
+    ],
+    "darksaber_howl0004": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0004.png"
+    ],
+    "darksaber_howl0005": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0005.png"
+    ],
+    "darksaber_howl0006": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0006.png"
+    ],
+    "darksaber_howl0007": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0007.png"
+    ],
+    "darksaber_howl0008": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0008.png"
+    ],
+    "darksaber_howl0009": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0009.png"
+    ],
+    "darksaber_howl0010": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0010.png"
+    ],
+    "darksaber_howl0011": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0011.png"
+    ],
+    "darksaber_howl0012": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0012.png"
+    ],
+    "darksaber_howl0013": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0013.png"
+    ],
+    "darksaber_howl0014": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0014.png"
+    ],
+    "darksaber_howl0015": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0015.png"
+    ],
+    "darksaber_howl0016": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0016.png"
+    ],
+    "darksaber_howl0017": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0017.png"
+    ],
+    "darksaber_howl0018": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0018.png"
+    ],
+    "darksaber_howl0019": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0019.png"
+    ],
+    "darksaber_howl0020": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/darksaber_howl0020.png"
+    ],
+    "repeat the last 2 frames  in a loop, for the howl.": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/Howl/repeat the last 2 frames  in a loop, for the howl..txt"
+    ],
+    "darksaber_stand0001": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0001.png"
+    ],
+    "darksaber_stand0002": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0002.png"
+    ],
+    "darksaber_stand0003": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0003.png"
+    ],
+    "darksaber_stand0004": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0004.png"
+    ],
+    "darksaber_stand0005": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0005.png"
+    ],
+    "darksaber_stand0006": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0006.png"
+    ],
+    "darksaber_stand0007": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0007.png"
+    ],
+    "darksaber_stand0008": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0008.png"
+    ],
+    "darksaber_stand0009": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0009.png"
+    ],
+    "darksaber_stand0010": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0010.png"
+    ],
+    "darksaber_stand0011": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0011.png"
+    ],
+    "darksaber_stand0012": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0012.png"
+    ],
+    "darksaber_stand0013": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0013.png"
+    ],
+    "darksaber_stand0014": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0014.png"
+    ],
+    "darksaber_stand0015": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0015.png"
+    ],
+    "darksaber_stand0016": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0016.png"
+    ],
+    "darksaber_stand0017": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0017.png"
+    ],
+    "darksaber_stand0018": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0018.png"
+    ],
+    "darksaber_stand0019": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0019.png"
+    ],
+    "darksaber_stand0020": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0020.png"
+    ],
+    "darksaber_stand0021": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0021.png"
+    ],
+    "darksaber_stand0022": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0022.png"
+    ],
+    "darksaber_stand0023": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0023.png"
+    ],
+    "darksaber_stand0024": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0024.png"
+    ],
+    "darksaber_stand0025": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0025.png"
+    ],
+    "darksaber_stand0026": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0026.png"
+    ],
+    "darksaber_stand0027": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0027.png"
+    ],
+    "darksaber_stand0028": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0028.png"
+    ],
+    "darksaber_stand0029": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0029.png"
+    ],
+    "darksaber_stand0030": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0030.png"
+    ],
+    "darksaber_stand0031": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0031.png"
+    ],
+    "darksaber_stand0032": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0032.png"
+    ],
+    "darksaber_stand0033": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0033.png"
+    ],
+    "darksaber_stand0034": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0034.png"
+    ],
+    "darksaber_stand0035": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0035.png"
+    ],
+    "darksaber_stand0036": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0036.png"
+    ],
+    "darksaber_stand0037": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0037.png"
+    ],
+    "darksaber_stand0038": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0038.png"
+    ],
+    "darksaber_stand0039": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0039.png"
+    ],
+    "darksaber_stand0040": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0040.png"
+    ],
+    "darksaber_stand0041": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0041.png"
+    ],
+    "darksaber_stand0042": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0042.png"
+    ],
+    "darksaber_stand0043": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0043.png"
+    ],
+    "darksaber_stand0044": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0044.png"
+    ],
+    "darksaber_stand0045": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0045.png"
+    ],
+    "darksaber_stand0046": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0046.png"
+    ],
+    "darksaber_stand0047": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0047.png"
+    ],
+    "darksaber_stand0048": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0048.png"
+    ],
+    "darksaber_stand0049": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0049.png"
+    ],
+    "darksaber_stand0050": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0050.png"
+    ],
+    "darksaber_stand0051": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0051.png"
+    ],
+    "darksaber_stand0052": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0052.png"
+    ],
+    "darksaber_stand0053": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0053.png"
+    ],
+    "darksaber_stand0054": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0054.png"
+    ],
+    "darksaber_stand0055": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0055.png"
+    ],
+    "darksaber_stand0056": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0056.png"
+    ],
+    "darksaber_stand0057": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0057.png"
+    ],
+    "darksaber_stand0058": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0058.png"
+    ],
+    "darksaber_stand0059": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0059.png"
+    ],
+    "darksaber_stand0060": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0060.png"
+    ],
+    "darksaber_stand0061": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0061.png"
+    ],
+    "darksaber_stand0062": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0062.png"
+    ],
+    "darksaber_stand0063": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0063.png"
+    ],
+    "darksaber_stand0064": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0064.png"
+    ],
+    "darksaber_stand0065": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0065.png"
+    ],
+    "darksaber_stand0066": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0066.png"
+    ],
+    "darksaber_stand0067": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0067.png"
+    ],
+    "darksaber_stand0068": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0068.png"
+    ],
+    "darksaber_stand0069": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0069.png"
+    ],
+    "darksaber_stand0070": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0070.png"
+    ],
+    "darksaber_stand0071": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0071.png"
+    ],
+    "darksaber_stand0072": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0072.png"
+    ],
+    "darksaber_stand0073": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0073.png"
+    ],
+    "darksaber_stand0074": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0074.png"
+    ],
+    "darksaber_stand0075": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0075.png"
+    ],
+    "darksaber_stand0076": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0076.png"
+    ],
+    "darksaber_stand0077": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0077.png"
+    ],
+    "darksaber_stand0078": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0078.png"
+    ],
+    "darksaber_stand0079": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0079.png"
+    ],
+    "darksaber_stand0080": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0080.png"
+    ],
+    "darksaber_stand0081": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0081.png"
+    ],
+    "darksaber_stand0082": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0082.png"
+    ],
+    "darksaber_stand0083": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0083.png"
+    ],
+    "darksaber_stand0084": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0084.png"
+    ],
+    "darksaber_stand0085": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0085.png"
+    ],
+    "darksaber_stand0086": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0086.png"
+    ],
+    "darksaber_stand0087": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0087.png"
+    ],
+    "darksaber_stand0088": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0088.png"
+    ],
+    "darksaber_stand0089": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0089.png"
+    ],
+    "darksaber_stand0090": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0090.png"
+    ],
+    "darksaber_stand0091": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0091.png"
+    ],
+    "darksaber_stand0092": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0092.png"
+    ],
+    "darksaber_stand0093": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0093.png"
+    ],
+    "darksaber_stand0094": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0094.png"
+    ],
+    "darksaber_stand0095": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0095.png"
+    ],
+    "darksaber_stand0096": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0096.png"
+    ],
+    "darksaber_stand0097": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0097.png"
+    ],
+    "darksaber_stand0098": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0098.png"
+    ],
+    "darksaber_stand0099": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0099.png"
+    ],
+    "darksaber_stand0100": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/darksaber_stand0100.png"
+    ],
+    "the same animation repeats from frame 50, but with a shake": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/idle/the same animation repeats from frame 50, but with a shake.txt"
+    ],
+    "darksaber_run0001": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0001.png"
+    ],
+    "darksaber_run0002": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0002.png"
+    ],
+    "darksaber_run0003": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0003.png"
+    ],
+    "darksaber_run0004": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0004.png"
+    ],
+    "darksaber_run0005": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0005.png"
+    ],
+    "darksaber_run0006": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0006.png"
+    ],
+    "darksaber_run0007": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0007.png"
+    ],
+    "darksaber_run0008": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0008.png"
+    ],
+    "darksaber_run0009": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0009.png"
+    ],
+    "darksaber_run0010": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0010.png"
+    ],
+    "darksaber_run0011": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0011.png"
+    ],
+    "darksaber_run0012": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0012.png"
+    ],
+    "darksaber_run0013": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0013.png"
+    ],
+    "darksaber_run0014": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0014.png"
+    ],
+    "darksaber_run0015": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0015.png"
+    ],
+    "darksaber_run0016": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0016.png"
+    ],
+    "darksaber_run0017": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/run/darksaber_run0017.png"
+    ],
+    "loop the run from frame 5 to 17": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/run/Loop the run from frame 5 to 17.txt"
+    ],
+    "darksaber_walk0001": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0001.png"
+    ],
+    "darksaber_walk0002": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0002.png"
+    ],
+    "darksaber_walk0003": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0003.png"
+    ],
+    "darksaber_walk0004": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0004.png"
+    ],
+    "darksaber_walk0005": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0005.png"
+    ],
+    "darksaber_walk0006": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0006.png"
+    ],
+    "darksaber_walk0007": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0007.png"
+    ],
+    "darksaber_walk0008": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0008.png"
+    ],
+    "darksaber_walk0009": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0009.png"
+    ],
+    "darksaber_walk0010": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0010.png"
+    ],
+    "darksaber_walk0011": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0011.png"
+    ],
+    "darksaber_walk0012": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0012.png"
+    ],
+    "darksaber_walk0013": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0013.png"
+    ],
+    "darksaber_walk0014": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0014.png"
+    ],
+    "darksaber_walk0015": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0015.png"
+    ],
+    "darksaber_walk0016": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0016.png"
+    ],
+    "darksaber_walk0017": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0017.png"
+    ],
+    "darksaber_walk0018": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0018.png"
+    ],
+    "darksaber_walk0019": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0019.png"
+    ],
+    "darksaber_walk0020": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0020.png"
+    ],
+    "darksaber_walk0021": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0021.png"
+    ],
+    "darksaber_walk0022": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0022.png"
+    ],
+    "darksaber_walk0023": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0023.png"
+    ],
+    "darksaber_walk0024": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0024.png"
+    ],
+    "darksaber_walk0025": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0025.png"
+    ],
+    "darksaber_walk0026": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0026.png"
+    ],
+    "darksaber_walk0027": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0027.png"
+    ],
+    "darksaber_walk0028": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0028.png"
+    ],
+    "darksaber_walk0029": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0029.png"
+    ],
+    "darksaber_walk0030": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0030.png"
+    ],
+    "darksaber_walk0031": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0031.png"
+    ],
+    "darksaber_walk0032": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0032.png"
+    ],
+    "darksaber_walk0033": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0033.png"
+    ],
+    "darksaber_walk0034": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0034.png"
+    ],
+    "darksaber_walk0035": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0035.png"
+    ],
+    "darksaber_walk0036": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0036.png"
+    ],
+    "darksaber_walk0037": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0037.png"
+    ],
+    "darksaber_walk0038": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0038.png"
+    ],
+    "darksaber_walk0039": [
+      "assets/extracted/beast-boss-darksaber/DarkSaber/walk/darksaber_walk0039.png"
+    ],
+    "mindchamber_logo": [
+      "assets/extracted/beast-boss-darksaber/MindChamber_logo.png"
+    ],
+    "werewolf_sounds": [
+      "assets/extracted/beast-boss-darksaber/werewolf_sounds.zip"
+    ],
+    "mon4_attack": [
+      "assets/extracted/demon-flower-monster-sprite-sheet/mon4_attack.gif"
+    ],
+    "mon4_attack2": [
+      "assets/extracted/demon-flower-monster-sprite-sheet/mon4_attack2.gif"
+    ],
+    "mon4_attack2_shot": [
+      "assets/extracted/demon-flower-monster-sprite-sheet/mon4_attack2_shot.gif"
+    ],
+    "mon4_ball": [
+      "assets/extracted/demon-flower-monster-sprite-sheet/mon4_ball.gif"
+    ],
+    "mon4_die": [
+      "assets/extracted/demon-flower-monster-sprite-sheet/mon4_die.gif"
+    ],
+    "mon4_idle": [
+      "assets/extracted/demon-flower-monster-sprite-sheet/mon4_idle.gif"
+    ],
+    "mon4_jump": [
+      "assets/extracted/demon-flower-monster-sprite-sheet/mon4_jump.gif"
+    ],
+    "mon4_sprite_base": [
+      "assets/extracted/demon-flower-monster-sprite-sheet/mon4_sprite_base.png"
+    ],
+    "mon4_sprite_base2": [
+      "assets/extracted/demon-flower-monster-sprite-sheet/mon4_sprite_base2.jpg"
+    ],
+    "-read-ler antes-": [
+      "assets/extracted/goblin-sprite/-READ-LER ANTES-.txt"
+    ],
+    "goblins": [
+      "assets/extracted/goblin-sprite/goblins.png"
+    ],
+    "living-tissue-background-preview": [
+      "assets/extracted/living-tissue-background/living-tissue-background/living-tissue-background-preview.png"
+    ],
+    "public-license": [
+      "assets/extracted/living-tissue-background/living-tissue-background/public-license.txt"
+    ],
+    "tile-background": [
+      "assets/extracted/living-tissue-background/living-tissue-background/tile-background.png"
+    ],
+    "attack - pitchfork shield": [
+      "assets/extracted/lpc-imp/LPC imp/attack - pitchfork shield.png"
+    ],
+    "attack - pitchfork": [
+      "assets/extracted/lpc-imp/LPC imp/attack - pitchfork.png"
+    ],
+    "attack - sword shield": [
+      "assets/extracted/lpc-imp/LPC imp/attack - sword shield.png"
+    ],
+    "attack - sword": [
+      "assets/extracted/lpc-imp/LPC imp/attack - sword.png"
+    ],
+    "attack - vanilla": [
+      "assets/extracted/lpc-imp/LPC imp/attack - vanilla.png"
+    ],
+    "walk - pitchfork shield": [
+      "assets/extracted/lpc-imp/LPC imp/walk - pitchfork shield.png"
+    ],
+    "walk - pitchfork": [
+      "assets/extracted/lpc-imp/LPC imp/walk - pitchfork.png"
+    ],
+    "walk - sword shield": [
+      "assets/extracted/lpc-imp/LPC imp/walk - sword shield.png"
+    ],
+    "walk - sword": [
+      "assets/extracted/lpc-imp/LPC imp/walk - sword.png"
+    ],
+    "walk - vanilla": [
+      "assets/extracted/lpc-imp/LPC imp/walk - vanilla.png"
+    ],
+    "parallax-mountain-bg": [
+      "assets/extracted/mountain-at-dusk-background/parallax_mountain_pack/layers/parallax-mountain-bg.png"
+    ],
+    "parallax-mountain-foreground-trees": [
+      "assets/extracted/mountain-at-dusk-background/parallax_mountain_pack/layers/parallax-mountain-foreground-trees.png"
+    ],
+    "parallax-mountain-montain-far": [
+      "assets/extracted/mountain-at-dusk-background/parallax_mountain_pack/layers/parallax-mountain-montain-far.png"
+    ],
+    "parallax-mountain-mountains": [
+      "assets/extracted/mountain-at-dusk-background/parallax_mountain_pack/layers/parallax-mountain-mountains.png"
+    ],
+    "parallax-mountain-trees": [
+      "assets/extracted/mountain-at-dusk-background/parallax_mountain_pack/layers/parallax-mountain-trees.png"
+    ],
+    "license": [
+      "assets/extracted/mountain-at-dusk-background/parallax_mountain_pack/license.txt"
+    ],
+    "parallax-mountain": [
+      "assets/extracted/mountain-at-dusk-background/parallax_mountain_pack/parallax-mountain.psd"
+    ],
+    "boss": [
+      "assets/extracted/nes-shooter-music-5-tracks-3-jingles/FTMs/Boss.ftm"
+    ],
+    "introjingle": [
+      "assets/extracted/nes-shooter-music-5-tracks-3-jingles/FTMs/IntroJingle.ftm"
+    ],
+    "map": [
+      "assets/extracted/nes-shooter-music-5-tracks-3-jingles/FTMs/Map.ftm"
+    ],
+    "mars": [
+      "assets/extracted/nes-shooter-music-5-tracks-3-jingles/FTMs/Mars.ftm"
+    ],
+    "mercury": [
+      "assets/extracted/nes-shooter-music-5-tracks-3-jingles/FTMs/Mercury.ftm"
+    ],
+    "venus": [
+      "assets/extracted/nes-shooter-music-5-tracks-3-jingles/FTMs/Venus.ftm"
+    ],
+    "warpjingle": [
+      "assets/extracted/nes-shooter-music-5-tracks-3-jingles/FTMs/WarpJingle.ftm"
+    ],
+    "winjingle": [
+      "assets/extracted/nes-shooter-music-5-tracks-3-jingles/FTMs/WinJingle.ftm"
+    ]
+  }
+}

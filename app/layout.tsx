@@ -5,10 +5,15 @@ import { Press_Start_2P } from "next/font/google";
 
 const pressStart2P = Press_Start_2P({ weight: "400", subsets: ["latin"], variable: "--font-pixel" });
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
 export const metadata: Metadata = {
   title: "RetroVania | Rogue-like Platformer",
   description:
     "A retro rogue-like platformer where you dash, jump, and battle through a hostile pixel world.",
+  icons: {
+    icon: `${basePath}/assets/branding/favicon-straydog.png`,
+  },
 };
 
 export const viewport: Viewport = {

@@ -10,10 +10,12 @@ node_modules/
 
 # next.js
 /.next/
-/out/
 
 # production
 /build
+
+# NOTE: /out/ is intentionally NOT ignored because it is the static export
+# artifact used for manual GitHub Pages deployments.
 
 # misc
 .DS_Store
