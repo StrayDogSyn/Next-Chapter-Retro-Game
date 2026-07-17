@@ -9,12 +9,33 @@ A retro-inspired full-stack rogue-like platformer built as a Next Chapter admiss
 - AI workflow evidence: `docs/AGENTIC_WORKFLOW.md`, `docs/SESSION_LOG.md`
 - Build command: `npm run build` (generates `/out/index.html` for static export)
 
+<div align="center">
+
 ![Current gameplay](assets/img/screenshots/updated-working-model.png)
 
 ![Status](https://img.shields.io/badge/status-in--progress-yellow)
 ![Stack](https://img.shields.io/badge/stack-Next.js%2014%20%2B%20React%2018%20%2B%20TypeScript%205.9%20%2B%20FastAPI-blue)
 ![Tests](https://img.shields.io/badge/tests-vitest%204.1-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
+
+</div>
+
+## Table of Contents
+
+- [Project Name](#project-name)
+- [Live Demo](#live-demo)
+- [Problem](#problem)
+- [Value](#value)
+- [Project Plan](#project-plan)
+- [Features](#features)
+  - [Complete](#complete)
+  - [Next Up](#next-up)
+  - [Architecture Snapshot](#architecture-snapshot)
+- [Technologies Used](#technologies-used)
+- [AI Tools Used](#ai-tools-used)
+- [Running the Project](#running-the-project)
+
+---
 
 ## Project Name
 
@@ -64,6 +85,9 @@ Scope discipline was intentional: prioritize the smallest complete demonstration
 
 ### Complete
 
+<details>
+<summary><b>Click to expand the full completed-feature breakdown</b></summary>
+
 **Core gameplay**
 
 - Hand-rolled `requestAnimationFrame` game loop (no Phaser/Pixi)
@@ -88,7 +112,12 @@ Scope discipline was intentional: prioritize the smallest complete demonstration
 - Degraded-mode resilience when backend is unavailable
 - Public deployment model: static frontend + independent Python service
 
+</details>
+
 ### Next Up
+
+<details>
+<summary><b>Click to expand planned enhancements</b></summary>
 
 - **Coherent single biome**: unify tiles, backdrops, and enemies under one consistent art set — currently mixed across source sheets (see `docs/BUGS_IMPROVEMENT_GUIDE.md` AST-016)
 - **Zone-specific backdrops**: distinct backgrounds per zone instead of one shared background family (AST-018)
@@ -97,17 +126,28 @@ Scope discipline was intentional: prioritize the smallest complete demonstration
 - **Treasure micro-interactions**: richer pickup animation and currency visual variety (UX-006)
 - **Remaining asset ingestion**: wire the unprocessed archives under `./downloads` into the asset pipeline (AST-010)
 
-### Architecture snapshot
+</details>
+
+### Architecture Snapshot
+
+<details>
+<summary><b>Click to expand architecture diagram</b></summary>
+
+<div align="center">
 
 ```mermaid
-flowchart LR
-    A[Browser Canvas Runtime] -->|fetch| B[FastAPI Python Service]
-    B -->|JSON| A
+graph LR
+    A[Browser Canvas Runtime] -- "fetch" --> B[FastAPI Python Service]
+    B -- "JSON" --> A
     A --> C[Web Audio]
     A --> D[localStorage Fallback]
 ```
 
+</div>
+
 See `docs/ARCHITECTURE.md` for full detail.
+
+</details>
 
 ## Technologies Used
 
@@ -124,6 +164,9 @@ See `docs/ARCHITECTURE.md` for full detail.
 
 This project deliberately used a range of AI tools rather than defaulting to one. Each tool has different strengths, weaknesses, and context/token budgets, and matching the tool to the task — implementation vs. research vs. asset sourcing vs. in-browser verification — kept token usage efficient and avoided asking any single model to do work it wasn't well-suited for.
 
+<details>
+<summary><b>Click to expand the full tool-by-tool breakdown</b></summary>
+
 **Primary implementation agents** (hands-on coding, debugging, and verification-gated feature work — extensively logged in `docs/SESSION_LOG.md` / `docs/AGENTIC_WORKFLOW.md`):
 
 - Claude Code
@@ -139,6 +182,8 @@ This project deliberately used a range of AI tools rather than defaulting to one
 **Supplementary cloud agent:**
 
 - Devin Cloud — offloaded background/investigation tasks outside the main implementation loop.
+
+</details>
 
 Comprehensive AI collaboration evidence — including a full post-mortem on workflow strategy, debugging, and scope decisions — is documented in:
 
