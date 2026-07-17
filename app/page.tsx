@@ -23,7 +23,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="game-shell">
+    <main className={`game-shell${gameStarted ? " game-shell--runtime" : ""}`}>
       <section className={`game-panel${gameStarted ? " game-panel--runtime" : ""}`}>
         {!gameStarted ? (
           <StartMenu
