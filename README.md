@@ -188,6 +188,7 @@ This project deliberately used a range of AI tools rather than defaulting to one
 Comprehensive AI collaboration evidence — including a full post-mortem on workflow strategy, debugging, and scope decisions — is documented in:
 
 - `docs/AGENTIC_WORKFLOW.md` (see the [Project Post-Mortem](docs/AGENTIC_WORKFLOW.md#project-post-mortem) section)
+- `docs/ITERATION_SPRINTS_ENGINEERING_PROCESS.md`
 - `docs/SESSION_LOG.md`
 - `docs/PROMPT_LIBRARY.md`
 - `docs/DECISIONS.md`
