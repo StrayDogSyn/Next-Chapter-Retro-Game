@@ -225,9 +225,10 @@ Frontend defaults to `http://localhost:3000` and the Python service to `http://1
 
 ```bash
 npm run build
+npm run preview
 ```
 
-This generates the static export output used for deployment (`/out`, including generated `index.html`).
+`npm run build` generates the static export output used for deployment (`/out`, including generated `index.html`). Since `next.config.mjs` bakes the production `basePath` (`/Next-Chapter-Retro-Game`) into every asset URL, **do not open `out/index.html` directly** (via `file://`, VS Code Live Server, `npx serve out`, etc.) — every `_next/` asset will 404 and the page will look frozen, since the browser looks for assets under that subpath, not wherever `out/` happens to sit locally. `npm run preview` serves `/out` rooted at that same subpath (`http://localhost:4173/Next-Chapter-Retro-Game/`), matching what GitHub Pages actually serves.
 
 ### Project structure (high level)
 

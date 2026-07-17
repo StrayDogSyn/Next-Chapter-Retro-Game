@@ -6,6 +6,7 @@
     "dev": "next dev",
     "clean": "rimraf .next out",
     "build": "npm run clean && next build",
+    "preview": "node scripts/preview-export.mjs",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run"
