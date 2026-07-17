@@ -9,6 +9,10 @@
   justify-content: center;
 }
 
+.game-shell--runtime {
+  align-items: stretch;
+}
+
 .game-panel {
   width: 100%;
   height: 100dvh;
@@ -181,5 +185,35 @@
     padding: 0.6rem;
     height: 100dvh;
     min-height: 0;
+  }
+}
+
+@media (max-width: 900px) and (orientation: portrait) {
+  .game-shell--runtime {
+    justify-content: flex-start;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .game-panel--runtime {
+    height: auto;
+    min-height: 100dvh;
+  }
+
+  .game-runtime,
+  .game-runtime-canvas,
+  .game-canvas-shell {
+    flex: 0 0 auto;
+  }
+
+  .game-runtime-canvas {
+    overflow: visible;
+  }
+
+  #game-stage-viewport {
+    height: auto;
+    aspect-ratio: 640 / 352;
   }
 }
