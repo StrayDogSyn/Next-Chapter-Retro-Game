@@ -4,6 +4,7 @@
  * This is the exact shape mirrored server-side as run_state.save_data
  * (ADR-009) - keep client and any future server-side validation in sync.
  */
+import { clampNumber } from "./clamp";
 import type { UpgradeId, WeaponInstance } from "./items";
 
 export type GameFlags = {
@@ -36,11 +37,6 @@ export type SaveDataV1 = {
   visitedRooms: string[];
   shopAtkBonus: number;
 };
-
-function clampNumber(value: unknown, min: number, max: number, fallback: number): number {
-  if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
-  return Math.min(max, Math.max(min, value));
-}
 
 function cloneWeapon(weapon: WeaponInstance): WeaponInstance {
   return { ...weapon };

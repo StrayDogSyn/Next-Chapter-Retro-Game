@@ -38,6 +38,7 @@ import {
 import { fetchLootRoll } from "./loot-client";
 import { getOrCreatePlayerId } from "./player-identity";
 import { loadFromServer, registerPlayer, saveToServer } from "./save-client";
+import { clampNumber } from "./clamp";
 import { buildSaveData } from "./save-data";
 import {
   describeLoot,
@@ -3275,11 +3276,6 @@ function pointInRect(
   r: { x: number; y: number; w: number; h: number },
 ): boolean {
   return px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h;
-}
-
-function clampNumber(value: unknown, min: number, max: number, fallback: number): number {
-  if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
-  return Math.min(max, Math.max(min, value));
 }
 
 function isUpgradeId(value: string): value is UpgradeId {
