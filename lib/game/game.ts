@@ -981,11 +981,27 @@ export class Game {
   // ─────────────────────── update ───────────────────────
 
   private update(dt: number) {
+    this.updateInput();
+    if (this.updateOverlayMenus(dt)) return;
+
+    this.updateGlobalTimers(dt);
+    this.updateVisualEffects(dt);
+
+    if (this.updatePhase(dt)) return;
+
+    this.updateWorld(dt);
+    this.pushSnapshot(dt);
+  }
+
+  private updateInput() {
     this.input.update();
     this.applyTouchTacticalFrame();
+  }
+
+  private updateOverlayMenus(dt: number): boolean {
     if (this.externalMenuOpen) {
       this.pushSnapshot(dt);
-      return;
+      return true;
     }
     if (this.input.state.pressed.help || (this.helpOpen && this.input.state.pressed.pause)) {
       this.helpOpen = !this.helpOpen;
@@ -993,22 +1009,30 @@ export class Game {
     if (this.shopOpen) {
       this.updateShop();
       this.pushSnapshot(dt);
-      return;
+      return true;
     }
     if (this.helpOpen) {
       this.pushSnapshot(dt);
-      return;
+      return true;
     }
+    return false;
+  }
 
+  private updateGlobalTimers(dt: number) {
     this.animT += dt;
     if (this.messageT > 0) this.messageT -= dt;
     if (this.fadeT > 0) this.fadeT = Math.max(0, this.fadeT - dt / 0.5);
     if (this.equipFlashT > 0) this.equipFlashT -= dt;
     if (this.comboT > 0) this.comboT -= dt;
+  }
+
+  private updateVisualEffects(dt: number) {
     this.updateParticles(dt);
     this.updateRarityBursts(dt);
     this.updateSpriteFx(dt);
+  }
 
+  private updatePhase(dt: number): boolean {
     if (this.input.state.pressed.pause) {
       if (this.phase === "playing") {
         this.phase = "paused";
@@ -1023,7 +1047,7 @@ export class Game {
 
     if (this.phase === "paused") {
       this.pushSnapshot(dt);
-      return;
+      return true;
     }
 
     if (this.phase === "dead" || this.phase === "victory") {
@@ -1031,15 +1055,18 @@ export class Game {
         this.respawn();
       }
       this.pushSnapshot(dt);
-      return;
+      return true;
     }
 
+    return false;
+  }
+
+  private updateWorld(dt: number) {
     this.updatePlayer(dt);
     this.updateEnemies(dt);
     this.updateProjectiles(dt);
     this.updatePickups(dt);
     this.checkTransitions();
-    this.pushSnapshot(dt);
   }
 
   private updatePlayer(dt: number) {
