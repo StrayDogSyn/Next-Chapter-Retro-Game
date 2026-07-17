@@ -214,6 +214,7 @@
 
   #game-stage-viewport {
     height: auto;
+    /* Match the 640x352 gameplay viewport so mobile portrait keeps the full stage visible. */
     aspect-ratio: 640 / 352;
   }
 }
