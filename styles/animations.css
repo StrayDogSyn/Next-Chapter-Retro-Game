@@ -21,6 +21,37 @@
   }
 }
 
+/* WarGames-homage entry point: two phrases crossfade in a loop (6s cycle,
+   each line's 3s-offset delay keeps exactly one visible at a time) while an
+   independent, faster blink runs on each line's trailing cursor character -
+   separate animations on separate elements so the cursor keeps blinking
+   through the crossfade rather than fading with its parent line. */
+@keyframes terminal-crossfade {
+  0%,
+  5% {
+    opacity: 0;
+  }
+  10%,
+  40% {
+    opacity: 1;
+  }
+  45%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes terminal-cursor-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
 /* Motion safety override for accessibility-first experiences. */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -35,5 +66,15 @@
   .marine {
     animation: none;
     transform: translateX(0);
+  }
+
+  /* Crossfade frozen mid-transition would land both lines at some partial,
+     overlapping opacity - pin to one readable static phrase instead. */
+  .terminal-cta-line-1 {
+    opacity: 1;
+  }
+
+  .terminal-cta-line-2 {
+    opacity: 0;
   }
 }

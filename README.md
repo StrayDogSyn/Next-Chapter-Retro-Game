@@ -15,9 +15,49 @@ A full-stack retro platformer built for admissions review with a custom Canvas r
 
 ## Reviewer Entry Points
 
+<style>
+@keyframes readme-terminal-crossfade {
+  0%, 5% { opacity: 0; }
+  10%, 40% { opacity: 1; }
+  45%, 100% { opacity: 0; }
+}
+.readme-terminal {
+  display: inline-block;
+  position: relative;
+  min-width: 340px;
+  min-height: 1.4em;
+  padding: 0.9rem 1.4rem;
+  background: #000;
+  border: 1px solid #39ff14;
+  border-radius: 10px;
+  box-shadow: 0 0 18px rgba(57,255,20,0.25);
+}
+.readme-terminal span {
+  position: absolute;
+  left: 1.4rem;
+  top: 0.9rem;
+  white-space: nowrap;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  font-size: 1.05rem;
+  color: #39ff14;
+  text-shadow: 0 0 8px rgba(57,255,20,0.65);
+  opacity: 0;
+  animation: readme-terminal-crossfade 6s infinite;
+}
+.readme-terminal span:first-child { animation-delay: 0s; }
+.readme-terminal span:last-child { animation-delay: 3s; }
+</style>
+
 <div align="center">
 
-[<span style="color:#63ff63;font-family:'Courier New',monospace;font-weight:700;letter-spacing:0.08em;font-size:1.05rem;">Do You Want To Play A Game?</span>](index.html)
+<a href="index.html" class="readme-terminal">
+<span>DO YOU WANT TO PLAY A GAME?</span>
+<span>CLICK HERE TO PLAY</span>
+</a>
+
+<sub>Animates in renderers that allow embedded &lt;style&gt; blocks (e.g. VS Code preview); GitHub.com strips them and shows a static terminal box instead — the fully working version lives at <a href="index.html">index.html</a>.</sub>
 
 </div>
 
