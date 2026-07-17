@@ -15,10 +15,11 @@ A full-stack retro platformer built for admissions review with a custom Canvas r
 
 ## Reviewer Entry Points
 
-- Live submission entry (GitHub Pages index): https://straydogsyn.github.io/Next-Chapter-Retro-Game/
-- Repository submission portal source: [index.html](index.html)
-- Project source code: https://github.com/StrayDogSyn/Next-Chapter-Retro-Game
-- Prompt history (submission-ready): [docs/PROMPT_HISTORY.md](docs/PROMPT_HISTORY.md)
+<div align="center">
+
+[<span style="color:#63ff63;font-family:'Courier New',monospace;font-weight:700;letter-spacing:0.08em;font-size:1.05rem;">Do You Want To Play A Game?</span>](index.html)
+
+</div>
 
 ## Why This Project
 
@@ -37,6 +38,9 @@ Most portfolio projects demonstrate UI assembly. RetroVania demonstrates systems
 
 ## Architecture Snapshot
 
+<details>
+<summary><strong>Architecture Snapshot</strong></summary>
+
 ```mermaid
 graph LR
     A[Browser Canvas Runtime] -->|fetch| B[FastAPI Service]
@@ -47,9 +51,14 @@ graph LR
 
 Primary architecture documentation: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
+</details>
+
 ## Modern AI Ecosystem
 
 > **This project was not built by prompting a single chatbot.** It was orchestrated: seven tools, each assigned to the work it's structurally best at, with every claim of "done" checked against the actual filesystem and git state rather than an agent's own narration.
+
+<details>
+<summary><strong>What Is Agentic?</strong></summary>
 
 <div align="center">
 
@@ -61,6 +70,11 @@ Primary architecture documentation: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 A single chatbot session — even a long one — is a query-in, output-out loop with no memory of its own decisions and no way to hand work to a tool better suited for it. What this project actually ran looks like the bottom half of the diagram above: an orchestration layer routing work across specialized agents, each with its own tools, verification step, and feedback path back into the next prompt. `docs/AGENTIC_WORKFLOW.md` is the literal session-by-session record of that loop in practice.
 
+</details>
+
+<details>
+<summary><strong>Modern AI Ecosystem</strong></summary>
+
 <div align="center">
 
 <img src="assets/AI_Ecosystem.jpg" width="420" alt="Map of the modern AI ecosystem across LLMs, agent frameworks, RAG, and tooling categories">
@@ -70,6 +84,8 @@ A single chatbot session — even a long one — is a query-in, output-out loop 
 </div>
 
 Plotted against that landscape, this project's stack is a deliberately narrow slice: general-purpose LLM agents for implementation and reasoning, paired with browser-based research tools for sourcing and verification — not a vector database, not a custom agent framework, not an orchestration SDK. For a single-developer capstone on a fixed timeline, that scope was the point: five tools doing distinct jobs well beats one framework doing all of them adequately.
+
+</details>
 
 ### The Multi-Agent Stack
 
