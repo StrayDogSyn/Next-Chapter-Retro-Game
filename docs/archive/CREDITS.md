@@ -50,6 +50,19 @@ Ground truth inputs used for this list:
 | `assets/sounds/bulk/footstep_stone_fx_006_footstep_stone_r_wav.mp3` | `step.mp3` | https://freesound.org/s/390763/ | skipped-exists |
 | `public/assets/extracted/100-cc0-sfx/*` and `public/assets/extracted/8-bit-sound-effect-pack/*` (stem-matched via `resolveManifestAsset()`, ADR-015/016: `shrineChime`, `enemyHit`, `deathBat/Goblin/Imp/Flower/Wyrmwolf/Mech/Werewolf`, `menuOpenSfx`, `menuCloseSfx`, `purchase`, `collectCommon/Uncommon/Rare/Epic`, `doubleJumpGet`, `dashGet`) | https://opengameart.org/content/100-cc0-sfx and https://opengameart.org/content/8-bit-sound-effect-pack, both sub-packs of "CC0 Sound Effects Collection" by OwlishMedia — https://opengameart.org/content/cc0-sound-effects | **CC0** ("attribution not required," confirmed on the collection page) |
 
+## Documentation imagery (README, non-runtime)
+
+These images are not processed by `scripts/prepare-assets.py` and never ship in `public/`; they're referenced directly by `README.md`'s Modern AI Ecosystem section as third-party educational infographics, used for commentary/attribution purposes in this educational, open-source project. Unlike the sprite/audio rows above, none of these have a confirmed open license — they're credited to their visible creator and used on that basis, not claimed as CC-licensed.
+
+| File | Creator (as credited on image) | Used for | License |
+|---|---|---|---|
+| `assets/What_Is_Agentic.jpg` | GenAI.works | Contrasting basic chatbots/RPA/RAG against a true multi-agent protocol | Not confirmed — original source page not preserved; used for educational commentary with attribution |
+| `assets/AI_Ecosystem.jpg` | Rathnakumar Udayakumar (@rathanuday) | Mapping this project's tool stack against the broader AI tooling landscape | Not confirmed — original source page not preserved; used for educational commentary with attribution |
+| `assets/The_Best_AI_Tools_2026.jpg` | Anastasiia Shapovalova | Illustrating why category-leading tools were chosen over generalists | Not confirmed — original source page not preserved; used for educational commentary with attribution |
+| `assets/LLM_Triad.jpg` | Will McTighe (© mark visible on image) | Explaining LLM routing rationale (ChatGPT vs. Claude vs. Gemini) | **Explicitly copyrighted** by the creator — used for educational commentary/critique with attribution only; not a claim of license to redistribute |
+
+If any of these creators are identified and request removal or a different attribution format, replace or remove the corresponding image and this row rather than leaving a stale credit.
+
 ## Notes
 
 - This project currently trusts manifest-provided links and statuses; several image entries are marked `downloaded-unverified` in `manifest_bulk.csv`.

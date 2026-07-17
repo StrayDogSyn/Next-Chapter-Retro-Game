@@ -47,6 +47,74 @@ graph LR
 
 Primary architecture documentation: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
+## Modern AI Ecosystem
+
+> **This project was not built by prompting a single chatbot.** It was orchestrated: seven tools, each assigned to the work it's structurally best at, with every claim of "done" checked against the actual filesystem and git state rather than an agent's own narration.
+
+<div align="center">
+
+<img src="assets/What_Is_Agentic.jpg" width="420" alt="Diagram contrasting LLM chatbots, RPA, and RAG against a true agentic multi-agent protocol">
+
+<sub>Source: GenAI.works — full attribution in <a href="docs/archive/CREDITS.md">docs/archive/CREDITS.md</a></sub>
+
+</div>
+
+A single chatbot session — even a long one — is a query-in, output-out loop with no memory of its own decisions and no way to hand work to a tool better suited for it. What this project actually ran looks like the bottom half of the diagram above: an orchestration layer routing work across specialized agents, each with its own tools, verification step, and feedback path back into the next prompt. `docs/AGENTIC_WORKFLOW.md` is the literal session-by-session record of that loop in practice.
+
+<div align="center">
+
+<img src="assets/AI_Ecosystem.jpg" width="420" alt="Map of the modern AI ecosystem across LLMs, agent frameworks, RAG, and tooling categories">
+
+<sub>Source: Rathnakumar Udayakumar (@rathanuday) — full attribution in <a href="docs/archive/CREDITS.md">docs/archive/CREDITS.md</a></sub>
+
+</div>
+
+Plotted against that landscape, this project's stack is a deliberately narrow slice: general-purpose LLM agents for implementation and reasoning, paired with browser-based research tools for sourcing and verification — not a vector database, not a custom agent framework, not an orchestration SDK. For a single-developer capstone on a fixed timeline, that scope was the point: five tools doing distinct jobs well beats one framework doing all of them adequately.
+
+### The Multi-Agent Stack
+
+| Tool | Role |
+|---|---|
+| **Gemini Pro** | Lead architectural sounding board, prompt engineering, and workflow manager — drafted the mission-scoped prompts that structured each implementation sprint |
+| **Claude Code** | Deep implementation, state-machine logic, and React architectural overhauls — the primary hands-on agent for engine code, physics, and UI |
+| **Windsurf Cascade** | Broad multi-file logic integration, dependency auditing, and deterministic procedural generation rules |
+| **VS Code CoPilot** | Granular file-system patching, UI polishing, and strict rubric-compliance audits |
+| **Perplexity & Comet Web Browser** | Automated in-browser verification, open-source asset sourcing, and lightweight technical research |
+
+<sub>Devin Cloud also ran supplementary background/investigation tasks outside the main implementation loop — see `docs/AGENTIC_WORKFLOW.md` for the full seven-tool breakdown.</sub>
+
+<details>
+<summary><strong>Why category leaders, not generalists</strong></summary>
+
+<div align="center">
+
+<img src="assets/The_Best_AI_Tools_2026.jpg" width="380" alt="Pyramid ranking leading AI tools by category: general assistants, development, content, productivity, creativity, automation">
+
+<sub>Source: Anastasiia Shapovalova — full attribution in <a href="docs/archive/CREDITS.md">docs/archive/CREDITS.md</a></sub>
+
+</div>
+
+Every tool in the stack above sits at the top of a specific category rather than being a jack-of-all-trades pick: Claude for sustained implementation reasoning, Gemini for fast architectural iteration, Copilot for in-editor patching, Perplexity/Comet for research and browser verification. The alternative — one model asked to draft architecture, write state machines, audit dependencies, *and* verify its own output — is exactly the failure mode `docs/AGENTIC_WORKFLOW.md`'s Retro & Learnings section documents: agents narrating completed work that the file tree didn't back up.
+
+</details>
+
+<details>
+<summary><strong>Routing logic: why not a single model for everything</strong></summary>
+
+<div align="center">
+
+<img src="assets/LLM_Triad.jpg" width="380" alt="Comparison table of ChatGPT, Claude, and Gemini across writing, analysis, automation, and memory">
+
+<sub>Source: Will McTighe (© — used for educational commentary with attribution; full detail in <a href="docs/archive/CREDITS.md">docs/archive/CREDITS.md</a>)</sub>
+
+</div>
+
+This table compares the three leading general-purpose model families on exactly the axes that matter for routing a real engineering workflow: which one holds context longest, which stays consistent across a long back-and-forth, which is strongest at stress-testing a plan versus executing it. This project's own routing followed that same logic — Gemini for fast architectural back-and-forth, Claude for long, consistent implementation sessions — while deliberately staying out of the GPT family for the implementation loop; the roster in `docs/AGENTIC_WORKFLOW.md` reflects a two-model-family split (Anthropic + Google) plus purpose-built coding agents, not a three-way split across all of the above.
+
+</details>
+
+---
+
 ## Documentation Map
 
 - Workflow and engineering narrative: [docs/AGENTIC_WORKFLOW.md](docs/AGENTIC_WORKFLOW.md)
