@@ -1,3 +1,7 @@
+/**
+ * Thin rAF loop wrapper that provides delta-time updates and explicit
+ * lifecycle control for start/stop from React-mounted game surfaces.
+ */
 export class GameLoop {
   private animationFrameId: number | null = null;
   private previousTimestamp = 0;

@@ -18,6 +18,32 @@ type GameCanvasProps = {
   onGiveUp?: () => void;
 };
 
+type TouchUiMode = {
+  enabled: boolean;
+  visible: boolean;
+  ghosted: boolean;
+};
+
+// Touch-UI policy is centralized so preference changes remain predictable:
+// explicit ON always shows controls, AUTO yields to recent physical input,
+// and OFF disables touch ingestion entirely.
+function resolveTouchUiMode(input: {
+  touchCapable: boolean;
+  touchPreference: TouchControlsPreference;
+  touchSeen: boolean;
+  touchActive: boolean;
+  physicalActive: boolean;
+}): TouchUiMode {
+  const enabled = input.touchCapable && input.touchPreference !== "off";
+  const visible =
+    input.touchCapable &&
+    input.touchPreference !== "off" &&
+    (input.touchPreference === "on" ||
+      (input.touchPreference === "auto" && input.touchSeen && !input.physicalActive));
+  const ghosted = visible && (!input.touchActive || input.touchPreference === "auto");
+  return { enabled, visible, ghosted };
+}
+
 export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride, onGiveUp }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const gameRef = useRef<Game | null>(null);
@@ -120,14 +146,15 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride,
   useEffect(() => {
     const now = performance.now();
     const physicalActive = now - lastPhysicalInputAtRef.current < 1700;
-    const touchEnabled = touchCapable && touchPreference !== "off";
-    const visible =
-      touchCapable &&
-      touchPreference !== "off" &&
-      (touchPreference === "on" || (touchPreference === "auto" && touchSeen && !physicalActive));
-    const ghosted = visible && (!touchState.active || touchPreference === "auto");
-    touchInputRef.current?.setEnabled(touchEnabled);
-    touchInputRef.current?.setVisible(visible, ghosted);
+    const touchMode = resolveTouchUiMode({
+      touchCapable,
+      touchPreference,
+      touchSeen,
+      touchActive: touchState.active,
+      physicalActive,
+    });
+    touchInputRef.current?.setEnabled(touchMode.enabled);
+    touchInputRef.current?.setVisible(touchMode.visible, touchMode.ghosted);
   }, [touchCapable, touchPreference, touchSeen, touchState.active]);
 
   const handleFocus = () => {
@@ -297,6 +324,14 @@ export function GameCanvas({ onSnapshot, continueFromSave = false, seedOverride,
           onScrapBagItem={scrapBagItem}
           onSellEquipped={sellEquipped}
           onScrapEquipped={scrapEquipped}
+          onGiveUp={
+            onGiveUp
+              ? () => {
+                  setMenuOpen(false);
+                  onGiveUp();
+                }
+              : undefined
+          }
         />
       </div>
     </div>

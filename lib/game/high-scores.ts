@@ -21,6 +21,7 @@ export type PendingHighScore = {
   outcome: HighScoreOutcome;
 };
 
+// Versioned keys allow format migration without corrupting older clients.
 const STORAGE_KEY = "ncrg:highScores:v1";
 const PENDING_STORAGE_KEY = "ncrg:highScores:pending:v1";
 const MAX_ENTRIES = 3;
@@ -129,6 +130,8 @@ function savePending(entry: PendingHighScore | null) {
 }
 
 function compareEntries(a: HighScoreEntry, b: HighScoreEntry): number {
+  // Sort by score desc, then faster time, then most recent for deterministic
+  // tie-breaking in localStorage snapshots.
   if (b.score !== a.score) return b.score - a.score;
   if (a.timeSeconds !== b.timeSeconds) return a.timeSeconds - b.timeSeconds;
   return b.achievedAt - a.achievedAt;
@@ -208,6 +211,7 @@ export function queuePendingHighScore(input: {
   };
 
   const sorted = sortEntries(payload.entries);
+  // Candidate qualifies if board has room OR beats the current cutoff entry.
   const qualifies =
     sorted.length < MAX_ENTRIES || compareEntries(candidate, sorted[Math.min(sorted.length, MAX_ENTRIES) - 1]) < 0;
 

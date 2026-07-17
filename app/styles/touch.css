@@ -1,0 +1,171 @@
+.touch-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8;
+  opacity: 0.9;
+  transition: opacity 220ms ease;
+}
+
+.touch-overlay.is-ghosted {
+  opacity: 0.42;
+}
+
+.touch-joystick-base,
+.touch-action-button,
+.touch-hotbar-slot {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(199, 215, 233, 0.45);
+  color: rgba(236, 243, 250, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.24);
+}
+
+.touch-joystick-base {
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(148, 163, 184, 0.22), rgba(15, 23, 42, 0.2));
+}
+
+.touch-joystick-base.is-active {
+  border-color: rgba(255, 204, 102, 0.7);
+}
+
+.touch-joystick-knob {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 204, 102, 0.72), rgba(30, 41, 59, 0.88));
+  border: 1px solid rgba(255, 244, 206, 0.5);
+}
+
+.touch-action-button {
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(30, 50, 71, 0.44), rgba(15, 23, 42, 0.74));
+  font-size: clamp(0.76rem, 1.5vw, 0.92rem);
+  font-weight: 700;
+}
+
+.touch-action-button.is-pressed,
+.touch-hotbar-slot.is-pressed {
+  border-color: rgba(255, 204, 102, 0.9);
+  background: linear-gradient(180deg, rgba(112, 69, 24, 0.7), rgba(58, 35, 11, 0.84));
+}
+
+.touch-hotbar {
+  position: absolute;
+  left: 50%;
+  bottom: max(0.8rem, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.55rem;
+}
+
+.touch-hotbar-slot {
+  position: relative;
+  min-width: clamp(3rem, 10vw, 4.6rem);
+  min-height: 2.65rem;
+  padding: 0 0.8rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(180deg, rgba(30, 50, 71, 0.44), rgba(15, 23, 42, 0.74));
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.rotate-overlay {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(78vw, 26rem);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 204, 102, 0.45);
+  background: rgba(10, 17, 26, 0.86);
+  color: #f8e4b2;
+  padding: 0.65rem 0.85rem;
+  text-align: center;
+  display: grid;
+  gap: 0.2rem;
+  z-index: 12;
+  pointer-events: none;
+}
+
+@media (pointer: coarse) and (orientation: portrait) {
+  .game-shell {
+    padding: 0.25rem;
+  }
+
+  .game-panel--runtime {
+    padding: 0.35rem;
+    min-height: calc(100dvh - 0.5rem);
+  }
+
+  .game-header,
+  .game-footer {
+    font-size: 0.72rem;
+    padding: 0.38rem 0.45rem;
+  }
+}
+
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 700px) {
+  .game-runtime {
+    gap: 0.24rem;
+  }
+
+  .game-panel--runtime {
+    padding: 0.3rem;
+    min-height: calc(100dvh - 0.6rem);
+  }
+
+  .game-header,
+  .game-footer {
+    padding: 0.25rem 0.4rem;
+    font-size: 0.68rem;
+  }
+
+  .hud-line + .hud-line {
+    margin-top: 0.18rem;
+  }
+
+  .stage-toolbar {
+    margin: 0.22rem;
+    gap: 0.24rem;
+  }
+
+  .touch-pref-toolbar {
+    gap: 0.15rem;
+  }
+
+  .fullscreen-toggle {
+    padding: 0.16rem 0.35rem;
+    font-size: 0.68rem;
+  }
+
+  .controls-drawer {
+    padding: 0.22rem 0.32rem;
+  }
+
+  .controls-drawer-toggle {
+    padding: 0.12rem 0.32rem;
+    font-size: 0.68rem;
+  }
+
+  .controls-drawer-content {
+    margin-top: 0.28rem;
+    gap: 0.24rem;
+  }
+
+  .kbd-chip {
+    font-size: 0.66rem;
+    padding: 0.08rem 0.28rem;
+  }
+
+  .rotate-overlay {
+    width: min(86vw, 22rem);
+    padding: 0.45rem 0.65rem;
+    font-size: 0.8rem;
+  }
+}

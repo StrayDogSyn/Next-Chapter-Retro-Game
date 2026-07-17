@@ -1,0 +1,27 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  font-family: "Courier New", Courier, monospace;
+  color: var(--text);
+  background: radial-gradient(circle at top, #1f3145 0%, var(--bg) 70%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@keyframes equip-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 3px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 9px currentColor;
+  }
+}

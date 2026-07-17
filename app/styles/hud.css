@@ -1,0 +1,253 @@
+.hud-line {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.hud-line + .hud-line {
+  margin-top: 0.35rem;
+}
+
+.hud-chip {
+  background: rgba(12, 24, 38, 0.55);
+  border: 1px solid #3d5670;
+  border-radius: 3px;
+  padding: 0.1rem 0.35rem;
+}
+
+.hud-chip.coin {
+  color: #f7d46b;
+}
+
+.hud-chip.weapon {
+  font-weight: 700;
+  border-color: currentColor;
+  animation: equip-pulse 1.8s ease-in-out infinite;
+}
+
+.hud-label {
+  color: #99b8d6;
+  font-weight: 700;
+}
+
+.hud-label.boss {
+  color: #f49292;
+}
+
+.minimap {
+  flex-shrink: 0;
+}
+
+.minimap-cell {
+  background: #3d5670;
+  border-radius: 2px;
+}
+
+.minimap-cell.cleared {
+  background: #4a6b8a;
+}
+
+.minimap-cell.boss {
+  background: #8a3d4a;
+}
+
+.minimap-cell.current {
+  background: #ffcc66;
+  box-shadow: 0 0 4px #ffcc66;
+  animation: equip-pulse 1.4s ease-in-out infinite;
+}
+
+.game-footer .controls {
+  line-height: 1.35;
+}
+
+.game-footer .message {
+  min-height: 1.2rem;
+  color: #ffde8a;
+}
+
+.game-hud-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr auto;
+  padding: 0.5rem;
+}
+
+.hud-panel {
+  pointer-events: none;
+  background: rgba(10, 22, 36, 0.68);
+  border: 1px solid rgba(120, 157, 194, 0.55);
+  border-radius: 6px;
+  padding: 0.35rem 0.45rem;
+  backdrop-filter: blur(1px);
+}
+
+.hud-panel--vitals {
+  grid-column: 1;
+  grid-row: 1;
+  max-width: 230px;
+}
+
+.hud-panel--equipment {
+  grid-column: 1;
+  grid-row: 3;
+  align-self: end;
+  justify-self: start;
+  max-width: 300px;
+  display: flex;
+  gap: 0.4rem;
+}
+
+.hud-panel--intel {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  width: min(44vw, 260px);
+}
+
+.hud-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.hud-row--between {
+  justify-content: space-between;
+}
+
+.hud-bar-shell {
+  border: 1px solid #2f455d;
+  border-radius: 3px;
+  overflow: hidden;
+  background: rgba(2, 8, 16, 0.75);
+  height: 10px;
+  margin-top: 0.2rem;
+}
+
+.hud-bar-shell.shield {
+  height: 8px;
+}
+
+.hud-bar-shell.hp .hud-bar-fill {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.hud-bar-shell.shield .hud-bar-fill {
+  background: linear-gradient(90deg, #38bdf8, #60a5fa);
+}
+
+.hud-bar-shell.xp {
+  height: 5px;
+}
+
+.hud-bar-shell.xp .hud-bar-fill {
+  background: linear-gradient(90deg, #d4af37, #facc15);
+}
+
+.hud-bar-fill {
+  height: 100%;
+}
+
+.hud-sprite-bar {
+  display: block;
+  margin-top: 0.2rem;
+  image-rendering: pixelated;
+}
+
+.equip-chip {
+  border: 1px solid #47627d;
+  border-radius: 4px;
+  padding: 0.15rem 0.35rem;
+  background: rgba(5, 13, 22, 0.5);
+  font-size: 0.75rem;
+}
+
+.hud-minimap {
+  position: relative;
+  border: 1px solid #486581;
+  margin-left: auto;
+  margin-bottom: 0.3rem;
+}
+
+.hud-minimap-cell {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  background: #4b5563;
+}
+
+.hud-minimap-cell.cleared {
+  background: #64748b;
+}
+
+.hud-minimap-cell.current {
+  background: #facc15;
+}
+
+.hud-minimap-cell.boss {
+  background: #b91c1c;
+}
+
+.hud-feed {
+  min-height: 1.4rem;
+  color: #fde68a;
+  font-size: 0.73rem;
+}
+
+.hud-status-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  color: #9fb2c7;
+  white-space: nowrap;
+}
+
+.hud-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 4px rgba(74, 222, 128, 0.8);
+}
+
+.hud-status-chip.pending .hud-status-dot {
+  background: #6b7280;
+  box-shadow: none;
+}
+
+.hud-status-chip.offline .hud-status-dot {
+  background: #78716c;
+  box-shadow: none;
+}
+
+.hud-status-chip.offline {
+  color: #d6a35c;
+}
+
+.hud-actions {
+  display: flex;
+  gap: 0.35rem;
+  justify-content: flex-end;
+  pointer-events: auto;
+}
+
+.hud-actions button {
+  border: 1px solid #5f7f9f;
+  background: rgba(20, 38, 58, 0.95);
+  color: #dbeafe;
+  border-radius: 3px;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .hud-panel--intel {
+    width: min(55vw, 220px);
+  }
+}

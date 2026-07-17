@@ -2107,20 +2107,80 @@ export class Game {
 
   // ─────────────────────── transitions / respawn ───────────────────────
 
+  /**
+   * ensureExitClearance() (levelLoader.ts) carves each room's own exit
+   * clearance independently - centered on whatever that room's own
+   * chooseRow/chooseCol picks as closest to ITS middle, with zero
+   * cross-room coordination. checkTransitions() below carries the player's
+   * cross-axis coordinate (py for a left/right transition, px for an
+   * up/down one) unchanged into the destination room, on the assumption
+   * that the two connected rooms' independently-chosen clearances line up.
+   * They don't always - confirmed live (R19->R20 has zero row overlap
+   * between the two sides' carved clearances; R20->R21 has only 2 rows,
+   * less than the player's own height), which put the player inside solid
+   * ground on arrival with no way back out. Rather than try to make
+   * ensureExitClearance cross-room-aware (it only ever sees one room at a
+   * time), clamp the landing coordinate here, at the one place that
+   * actually knows both sides of the transition.
+   */
+  private clampToOpenSpan(roomId: string, axis: "col" | "row", edgeIndex: number, bodySize: number, coord: number): number {
+    const room = this.world.get(roomId);
+    if (!room) return coord;
+    const count = axis === "col" ? ROOM_W : ROOM_H;
+    const isOpen = (i: number) => {
+      const tile = axis === "col" ? room.tiles[edgeIndex * ROOM_W + i] : room.tiles[i * ROOM_W + edgeIndex];
+      return tile !== T_SOLID;
+    };
+    const spanTiles = Math.max(2, Math.ceil(bodySize / TILE) + 1);
+
+    const isFullyOpen = (start: number) => {
+      for (let i = 0; i < spanTiles; i++) if (!isOpen(start + i)) return false;
+      return true;
+    };
+
+    // Already lands somewhere fully open at the naive (carried-over)
+    // coordinate - don't perturb a transition that already works.
+    const naiveStart = Math.floor(coord / TILE);
+    if (isFullyOpen(naiveStart)) return coord;
+
+    // Otherwise find the fully-open run of `spanTiles` cells closest to the
+    // naive position and land in its center instead.
+    let bestStart = -1;
+    let bestDist = Infinity;
+    for (let start = 1; start <= count - 1 - spanTiles; start++) {
+      if (!isFullyOpen(start)) continue;
+      const dist = Math.abs(start - naiveStart);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestStart = start;
+      }
+    }
+    if (bestStart < 0) return coord; // no valid span found anywhere - leave as-is rather than guess
+    return (bestStart + spanTiles / 2) * TILE - bodySize / 2;
+  }
+
   private checkTransitions() {
     const exits = this.room().exits;
     if (this.px + this.pw < 0) {
-      if (exits.left) this.goToRoom(exits.left, { x: VIEW_W - this.pw - 2, y: this.py });
-      else this.px = 0;
+      if (exits.left) {
+        const y = this.clampToOpenSpan(exits.left, "row", ROOM_W - 1, this.ph, this.py);
+        this.goToRoom(exits.left, { x: VIEW_W - this.pw - 2, y });
+      } else this.px = 0;
     } else if (this.px > VIEW_W) {
-      if (exits.right) this.goToRoom(exits.right, { x: 2, y: this.py });
-      else this.px = VIEW_W - this.pw;
+      if (exits.right) {
+        const y = this.clampToOpenSpan(exits.right, "row", 0, this.ph, this.py);
+        this.goToRoom(exits.right, { x: 2, y });
+      } else this.px = VIEW_W - this.pw;
     } else if (this.py + this.ph < 0) {
-      if (exits.up) this.goToRoom(exits.up, { x: this.px, y: VIEW_H - this.ph - 2 });
-      else this.py = 0;
+      if (exits.up) {
+        const x = this.clampToOpenSpan(exits.up, "col", ROOM_H - 1, this.pw, this.px);
+        this.goToRoom(exits.up, { x, y: VIEW_H - this.ph - 2 });
+      } else this.py = 0;
     } else if (this.py > VIEW_H) {
-      if (exits.down) this.goToRoom(exits.down, { x: this.px, y: 2 });
-      else this.py = VIEW_H - this.ph;
+      if (exits.down) {
+        const x = this.clampToOpenSpan(exits.down, "col", 0, this.pw, this.px);
+        this.goToRoom(exits.down, { x, y: 2 });
+      } else this.py = VIEW_H - this.ph;
     }
   }
 

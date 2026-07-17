@@ -171,6 +171,15 @@ export const ROOMS: RoomDef[] = [
     // (ph=44px=2.75 tiles) can no longer fit through at all. Moving it up a
     // row instead was considered and rejected: row 11 has an 'f' spawn at
     // col24 that a shifted block would have overwritten.
+    // Static-spawn placement fix: that block's removal orphaned the row-11
+    // flower - it never got moved, and "flower" has zero runtime physics
+    // (see game.ts's flower case in updateEnemies(), which never touches
+    // enemy.x/enemy.y), so it just hung in the air with nothing below it
+    // ever since. Restored a small one-way platform at row12 (cols22-26,
+    // matching the deleted block's original span) instead of the old solid
+    // block - T_PLATFORM doesn't block upward movement through it, so this
+    // gives the flower its perch back without reintroducing the headroom
+    // chokepoint the block's removal was fixing in the first place.
     // Ability-gate restoration (ADR-028): gates the two coins the round-3
     // jump buff made trivially reachable (see ADR-027).
     // Spike placement fix: moved the row-18 spikes down to row 19, flush
@@ -189,7 +198,7 @@ export const ROOMS: RoomDef[] = [
       "#......................................#",
       "#..........c...........................#",
       "#........aaaaaa.........f..............#",
-      "#......................................#",
+      "#.....................-----............#",
       "#......................................#",
       "#......................................#",
       "#........----------------------........#",
@@ -266,8 +275,8 @@ export const ROOMS: RoomDef[] = [
       "#......................................#",
       "........................................",
       "#......................................#",
-      "#.........f.................f..........#",
       "#......................................#",
+      "#.........f.................f..........#",
       "########################################",
       "########################################",
     ],
@@ -349,6 +358,16 @@ export const ROOMS: RoomDef[] = [
     exits: { left: "R08", right: "R10", down: "R11" },
     // Ability-gate restoration (ADR-028): gates the coin and health pickup
     // the round-3 jump buff made trivially reachable (see ADR-027).
+    // Static-spawn placement fix: the flower was originally authored near
+    // the down-exit shaft (row18), but levelLoader's ensureExitClearance()
+    // auto-carves a 4-wide passage around every declared exit AFTER the
+    // ASCII map is parsed - for this room's "down" exit that carve lands on
+    // cols19-22, wider than the shaft the raw map alone shows (18-21). The
+    // flower's column was inside that final carved gap, so it hung over the
+    // pit with nothing beneath it. Moved to row19/col24, clear of the
+    // carved shaft, with support confirmed against the actual post-carve
+    // tiles (not just the authored map text - the two can differ near any
+    // room with a declared exit).
     map: [
       "########################################",
       "#......................................#",
@@ -368,8 +387,8 @@ export const ROOMS: RoomDef[] = [
       "#......................................#",
       "........................................",
       "........................................",
-      ".......b..........f............i........",
-      "........................................",
+      ".......b.......................i........",
+      "........................f...............",
       "##################....##################",
       "##################....##################",
     ],
@@ -502,8 +521,8 @@ export const ROOMS: RoomDef[] = [
       "#......................................#",
       "..........D.............................",
       "..........D.............................",
-      "..........D.....b............f..........",
-      "..........D..............S..............",
+      "..........D.....b.......................",
+      "..........D..............S...f..........",
       "########################################",
       "########################################",
     ],
@@ -534,8 +553,8 @@ export const ROOMS: RoomDef[] = [
       "#........----------------------........#",
       "........................................",
       "........................................",
-      ".....f.........i...........i.........f..",
-      "........................................",
+      "...............i...........i............",
+      ".....f...............................f..",
       "########################################",
       "########################################",
     ],
@@ -569,8 +588,8 @@ export const ROOMS: RoomDef[] = [
       "#....----------........................#",
       "........................................",
       "........................................",
-      "....f.......f................f......f...",
-      "....................^^..................",
+      "........................................",
+      "....f.......f.......^^.......f......f...",
       "########################################",
       "########################################",
     ],
@@ -713,6 +732,12 @@ export const ROOMS: RoomDef[] = [
     name: "Stormrest",
     zone: "sky",
     exits: { left: "R19", right: "R21" },
+    // Static-spawn placement fix: the flower was authored one row below the
+    // platform it was meant to perch on (row18, with the platform at
+    // row17) instead of one row above it - "flower" has zero runtime
+    // physics (game.ts's flower case never touches enemy.x/enemy.y), so it
+    // just hung below/beside the platform edge with nothing under it.
+    // Moved to row16, landing exactly on the row17 platform's surface.
     map: [
       "########################################",
       "#......................................#",
@@ -730,9 +755,9 @@ export const ROOMS: RoomDef[] = [
       "#.......................................",
       "#......................................#",
       "#......................................#",
-      "#..................A...................#",
+      "#..................A.f.................#",
       "...............--------.................",
-      "........b............f..........b.......",
+      "........b.......................b.......",
       "........................................",
       "########################################",
       "########################################",

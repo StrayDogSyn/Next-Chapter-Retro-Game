@@ -1,0 +1,48 @@
+/* Baseline element defaults and page backdrop treatment. */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-ui);
+  color: var(--ink);
+  background:
+    linear-gradient(to bottom, rgba(5, 10, 20, 0) 60%, rgba(0, 0, 0, 0.92) 90%, #000000 100%),
+    radial-gradient(circle at 15% 50%, rgba(20, 30, 55, 1), rgba(10, 15, 30, 1) 50%, rgba(5, 10, 20, 1)),
+    radial-gradient(900px 500px at 90% 15%, rgba(255, 207, 90, 0.08), transparent 55%);
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* CRT-style scanline and vignette overlays for retro atmosphere. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.02) 50%, transparent 50%),
+    linear-gradient(90deg, rgba(126, 224, 255, 0.03), rgba(255, 207, 90, 0.02), rgba(126, 224, 255, 0.03));
+  background-size: 100% 3px, 100% 100%;
+  opacity: 0.22;
+  mix-blend-mode: screen;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center, transparent 58%, rgba(0, 0, 0, 0.42) 100%);
+  opacity: 0.85;
+}

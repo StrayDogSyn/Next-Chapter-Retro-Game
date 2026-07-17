@@ -12,6 +12,7 @@ type Props = {
   onScrapBagItem: (index: number) => void;
   onSellEquipped: (slot: "primary" | "secondary") => void;
   onScrapEquipped: (slot: "primary" | "secondary") => void;
+  onGiveUp?: () => void;
 };
 
 type TabId = "inventory" | "character" | "world";
@@ -40,9 +41,17 @@ export function GameMenuModal({
   onScrapBagItem,
   onSellEquipped,
   onScrapEquipped,
+  onGiveUp,
 }: Props) {
   const [tab, setTab] = useState<TabId>("inventory");
   const [selection, setSelection] = useState<Selection>({ kind: "primary" });
+  const [confirmingQuit, setConfirmingQuit] = useState(false);
+
+  // Reset the confirmation prompt whenever the modal closes/reopens, so it
+  // never lingers open the next time the player checks the menu.
+  useEffect(() => {
+    if (!open) setConfirmingQuit(false);
+  }, [open]);
 
   // A sell/scrap can remove the exact bag index the player has selected
   // (or the whole bag can shrink out from under a stale index after a
@@ -78,7 +87,22 @@ export function GameMenuModal({
       <section className="game-menu-modal">
         <header className="menu-header">
           <div>Run Seed: {snapshot.seed}</div>
-          <button type="button" onClick={onClose}>close</button>
+          <div className="menu-header-actions">
+            {onGiveUp ? (
+              confirmingQuit ? (
+                <span className="quit-run-confirm">
+                  Abandon this run?
+                  <button type="button" onClick={() => onGiveUp()}>Yes, quit</button>
+                  <button type="button" onClick={() => setConfirmingQuit(false)}>Cancel</button>
+                </span>
+              ) : (
+                <button type="button" className="quit-run-button" onClick={() => setConfirmingQuit(true)}>
+                  Quit Run
+                </button>
+              )
+            ) : null}
+            <button type="button" onClick={onClose}>close</button>
+          </div>
         </header>
 
         <div className="menu-tabs" role="tablist" aria-label="Game menu tabs">

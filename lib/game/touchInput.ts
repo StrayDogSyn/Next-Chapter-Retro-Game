@@ -1,5 +1,13 @@
 import type { InputAction } from "./input";
 
+/**
+ * TouchInputManager translates raw pointer events into the same action model
+ * used by keyboard/gamepad input (`InputAction` + held/pressed semantics).
+ *
+ * Design goal: keep touch controls swappable at runtime while preserving a
+ * single gameplay ingestion path inside game.ts.
+ */
+
 export type TouchControlScheme = "virtualGamepad" | "tacticalTap";
 
 export type TouchActionButtonId = "jump" | "attack" | "dodge" | "interact" | "useItem" | "pause";
@@ -46,6 +54,7 @@ export type TouchRenderState = {
     engaged: boolean;
   };
   buttons: TouchRenderButton[];
+  // Tactical mode was retired; keep shape stable for overlay consumers.
   hotbar: [];
 };
 
@@ -180,6 +189,8 @@ export class TouchInputManager {
     if (this.target === target) return;
     this.unbind();
     this.target = target;
+    // Pointer events unify touch + pen across modern browsers; we keep
+    // listeners at the target level so capture can retain gesture ownership.
     target.addEventListener("pointerdown", this.boundPointerDown);
     target.addEventListener("pointermove", this.boundPointerMove);
     target.addEventListener("pointerup", this.boundPointerUp);
@@ -381,6 +392,8 @@ export class TouchInputManager {
   }
 
   private syncDerivedState() {
+    // If joystick touch is gone, movement intents must immediately clear so
+    // the player cannot drift from stale axis state.
     if (!Array.from(this.touches.values()).some((touch) => touch.role === "joystick")) {
       this.axisX = 0;
       this.axisY = 0;
@@ -433,6 +446,8 @@ export class TouchInputManager {
   private layout(): TouchLayout {
     const { width, height } = this.viewportRect;
     const shortSide = Math.min(width, height);
+    // Size controls from the short side so portrait and landscape keep
+    // similar physical tap targets across device classes.
     const buttonRadius = clamp(shortSide * 0.075, 30, 44);
     const joystickRadius = clamp(shortSide * 0.12, 48, 84);
     const marginX = clamp(width * 0.045, 18, 36);
@@ -474,6 +489,7 @@ export class TouchInputManager {
     if (!this.target || !(this.target as unknown as HTMLElement).setPointerCapture) return;
     const element = this.target as unknown as HTMLElement;
     try {
+      // Capture prevents a drag leaving the canvas from orphaning controls.
       element.setPointerCapture(event.pointerId);
     } catch {
       // Ignore capture failures from transient pointer states.

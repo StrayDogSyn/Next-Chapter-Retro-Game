@@ -1,0 +1,200 @@
+/* Reusable component styling for links, mascot panel, and floor strip. */
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+nav li {
+  perspective: 1000px;
+}
+
+a.portal-link {
+  display: block;
+  text-decoration: none;
+  color: var(--ink);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 0.8rem 0.9rem;
+  background: rgba(15, 23, 42, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+a.portal-link::before {
+  content: ">";
+  position: absolute;
+  left: 0.7rem;
+  top: 50%;
+  transform: translateY(-52%);
+  color: var(--accent-2);
+  opacity: 0.85;
+}
+
+a.portal-link .label,
+a.portal-link .meta {
+  padding-left: 1.1rem;
+}
+
+a.portal-link:hover,
+a.portal-link:focus-visible {
+  transform: translateY(-2px) rotateX(2deg);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 8px 32px 0 rgba(0, 0, 0, 0.3),
+    0 0 18px rgba(126, 224, 255, 0.12);
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+}
+
+.label {
+  display: block;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.meta {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+aside {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  background: rgba(15, 23, 42, 0.4);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+aside:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), 0 0 18px rgba(126, 224, 255, 0.12);
+}
+
+.aside-title {
+  margin: 0 0 0.55rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  font-family: var(--font-terminal);
+}
+
+.mascot-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  transition: transform 160ms ease, filter 160ms ease;
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(5, 10, 18, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+aside:hover .mascot-stack {
+  transform: translateY(-1px) scale(1.01);
+  filter: saturate(1.05);
+}
+
+.mascot {
+  display: block;
+  width: 100%;
+  max-height: 35vh;
+  height: auto;
+  margin: 0;
+  image-rendering: pixelated;
+  object-fit: contain;
+  transition: transform 160ms ease, filter 160ms ease;
+}
+
+aside:hover .mascot {
+  transform: translateY(-1px) rotate(-1deg);
+  filter: drop-shadow(0 0 12px rgba(126, 224, 255, 0.16));
+}
+
+.banner-logo {
+  display: block;
+  width: 100%;
+  max-height: 14vh;
+  height: auto;
+  object-fit: contain;
+  border: 0;
+  border-radius: 0;
+  background: rgba(5, 10, 18, 0.8);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+aside:hover .banner-logo {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.aside-note {
+  margin: 0.65rem 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-family: var(--font-ui);
+}
+
+footer.portal-floor {
+  position: relative;
+  border-top: 1px solid rgba(0, 0, 0, 0);
+  background-color: #000000;
+  min-height: 132px;
+  overflow: hidden;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+footer.portal-floor:hover {
+  border-top-color: rgba(0, 0, 0, 0);
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0);
+}
+
+.floor-label {
+  margin: 0;
+  padding: 0.45rem 0.8rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: var(--font-terminal);
+}
+
+.floor-track {
+  position: relative;
+  --floor-span: min(1240px, 96vw);
+  width: var(--floor-span);
+  height: 96px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.marine {
+  position: absolute;
+  left: 0;
+  bottom: 14px;
+  --marine-size: clamp(100px, 11vw, 128px);
+  width: var(--marine-size);
+  height: auto;
+  image-rendering: pixelated;
+  transform-origin: left center;
+  will-change: transform;
+  animation: walk-across 21s linear infinite;
+}

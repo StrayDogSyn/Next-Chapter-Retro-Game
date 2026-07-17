@@ -1,0 +1,13 @@
+/* Design tokens shared across the portal surface. */
+:root {
+  --bg-0: #070b12;
+  --bg-1: #0f1622;
+  --ink: #e8f1ff;
+  --muted: #9db3cf;
+  --accent: #ffcf5a;
+  --accent-2: #7ee0ff;
+  --line: #304962;
+  --floor: #22374e;
+  --font-ui: "Inter", sans-serif;
+  --font-terminal: "Fira Code", monospace;
+}

@@ -1,5 +1,8 @@
 import { assetUrl } from "./asset-url";
 
+// Runtime cache intentionally persists for the page lifetime to avoid
+// repeat network fetches during room transitions or sprite lookups.
+
 export type AssetManifest = {
   generatedAt: string;
   note: string;
@@ -17,6 +20,11 @@ export type AssetManifest = {
 
 let cachedManifest: AssetManifest | null | undefined;
 
+/**
+ * Fetches the generated asset manifest once.
+ * Returns null on network/parse failure so callers can gracefully fall back
+ * to hardcoded asset paths.
+ */
 export async function loadAssetManifest(): Promise<AssetManifest | null> {
   if (cachedManifest !== undefined) return cachedManifest;
 
@@ -34,6 +42,11 @@ export async function loadAssetManifest(): Promise<AssetManifest | null> {
   }
 }
 
+/**
+ * Resolves an asset stem to a concrete path.
+ * Preferred extensions allow callers to request audio/image format priority
+ * while still accepting any known match as a safe fallback.
+ */
 export function resolveManifestAsset(
   manifest: AssetManifest | null,
   stem: string,

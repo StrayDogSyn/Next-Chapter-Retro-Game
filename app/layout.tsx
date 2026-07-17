@@ -1,5 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./styles/tokens.css";
+import "./styles/base.css";
+import "./styles/layout.css";
+import "./styles/hud.css";
+import "./styles/menu.css";
+import "./styles/touch.css";
+import "./styles/start-screen.css";
 // eslint-disable-next-line @next/next/no-page-custom-font
 import { Press_Start_2P } from "next/font/google";
 

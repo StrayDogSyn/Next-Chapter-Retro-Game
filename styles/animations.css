@@ -1,0 +1,39 @@
+/* Named animations are separated to keep component files focused on static styling. */
+@keyframes walk-across {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  84% {
+    transform: translateX(calc(var(--floor-span) - var(--marine-size)));
+    opacity: 1;
+  }
+  90% {
+    opacity: 0;
+  }
+  91% {
+    transform: translateX(-140px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(-140px);
+    opacity: 0;
+  }
+}
+
+/* Motion safety override for accessibility-first experiences. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .marine {
+    animation: none;
+    transform: translateX(0);
+  }
+}
