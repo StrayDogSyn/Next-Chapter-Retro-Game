@@ -24,7 +24,36 @@ nav ul {
      touching that outer no-scroll shell - invisible when everything already
      fits, a real scrollbar only when it doesn't. */
   overflow-y: auto;
+  /* Setting only overflow-y is a known CSS trap: per spec, the other axis's
+     'visible' computes to 'auto' too once one axis is non-visible, so a
+     horizontal scrollbar could appear from sub-pixel rounding alone even
+     with nothing that actually overflows sideways. Pin it off explicitly. */
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  /* Replace the native OS scrollbar (thick, arrowed, themed by the browser/
+     OS rather than this page) with a slim themed one - Firefox via
+     scrollbar-width/-color, Chromium/Safari via the ::-webkit- rules below.
+     Both stay just as demand-driven as the plain overflow-y: auto above:
+     nothing renders unless nav ul actually overflows. */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(126, 224, 255, 0.35) transparent;
+}
+
+nav ul::-webkit-scrollbar {
+  width: 6px;
+}
+
+nav ul::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+nav ul::-webkit-scrollbar-thumb {
+  background-color: rgba(126, 224, 255, 0.35);
+  border-radius: 999px;
+}
+
+nav ul::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(126, 224, 255, 0.55);
 }
 
 nav li {
